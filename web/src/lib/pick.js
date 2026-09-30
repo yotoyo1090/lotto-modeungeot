@@ -67,8 +67,10 @@ export const SORTS = [
   ...['일', '이', '삼', '사', '오', '육'].map((label, k) => ({ key: `pos${k + 1}`, label })),
   { key: 'total', label: '총합' },
   { key: 'ac', label: 'AC값' },
-  { key: 'odd', label: '홀수 개수' },
-  { key: 'low', label: '저번호 개수' },
+  // Les noms des colonnes du tableau. La valeur reste le premier terme de la
+  // paire (홀 de « 홀 : 짝 », 저 de « 저 : 고 ») : le second s'en déduit.
+  { key: 'odd', label: '홀짝' },
+  { key: 'low', label: '저고' },
   { key: 'carried', label: '이월 개수' },
   { key: 'carriedSum', label: '이월합' },
   { key: 'headSum', label: '앞자리수합' },

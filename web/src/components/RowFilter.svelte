@@ -19,18 +19,39 @@
   }
   const drop = (id) => { conds = conds.filter((c) => c.id !== id) }
   const HINT = { sharing: '예 0.9', popularity: '예 1.0', won: '0~6' }
+
+  // 홀짝 · 저고 : sept valeurs possibles, qu'on lit « 3 : 3 » dans le
+  // tableau. Une liste plutôt qu'une case à chiffres — la valeur envoyée
+  // reste le premier terme (홀 ou 저).
+  const PAIRS = new Set(['odd', 'low'])
+  const pairs = Array.from({ length: 7 }, (_, k) => ({ value: k, label: `${k} : ${6 - k}` }))
+  // Changer de colonne efface les bornes : « 100 ~ 170 » du 총합 n'a pas de
+  // sens pour 홀짝.
+  const reset = (c) => { c.min = ''; c.max = '' }
 </script>
 
 <div class="rowfilter">
   <button class="add" onclick={add}>+ 결과 필터</button>
   {#each conds as c (c.id)}
     <span class="cond">
-      <select bind:value={c.key}>
+      <select bind:value={c.key} onchange={() => reset(c)}>
         {#each keys as k (k.key)}<option value={k.key}>{k.label}</option>{/each}
       </select>
-      <input type="number" step="any" placeholder={HINT[c.key] ?? '최소'} bind:value={c.min} />
-      ~
-      <input type="number" step="any" placeholder={HINT[c.key] ?? '최대'} bind:value={c.max} />
+      {#if PAIRS.has(c.key)}
+        <select bind:value={c.min} aria-label="최소">
+          <option value="">부터</option>
+          {#each pairs as p (p.value)}<option value={p.value}>{p.label}</option>{/each}
+        </select>
+        ~
+        <select bind:value={c.max} aria-label="최대">
+          <option value="">까지</option>
+          {#each pairs as p (p.value)}<option value={p.value}>{p.label}</option>{/each}
+        </select>
+      {:else}
+        <input type="number" step="any" placeholder={HINT[c.key] ?? '최소'} bind:value={c.min} />
+        ~
+        <input type="number" step="any" placeholder={HINT[c.key] ?? '최대'} bind:value={c.max} />
+      {/if}
       <em class="scope" class:local={local.includes(c.key)}
           title={local.includes(c.key) ? '뽑힌 조합에만 적용' : '통과한 조합 전체에 적용(다시 계산)'}>
         {local.includes(c.key) ? '뽑힌 것만' : '전체'}
