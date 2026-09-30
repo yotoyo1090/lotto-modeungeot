@@ -13,11 +13,13 @@
   import { lineStats, stack, temperatureShare, upcomingBoard } from '@core/board.js'
   import { MULTIPLES } from '@core/metrics.js'
   import { buildPool, EXCLUDABLE_SECTIONS, PRESETS, wire } from '@core/criteria.js'
-  import { NMAX } from '@core/draws.js'
+  import { HEAD, NMAX, TAIL } from '@core/draws.js'
   import { numberStats, tableListCellStats } from '@core/tablelist.js'
   import { sharing as shareOf } from '@core/sharing.js'
 
-  import { choices, describe, SUM_MAX, SUM_MIN } from '../lib/combinaison.js'
+  import {
+    bandLabel, bandValues, choices, coveredRows, describe, SUM_MAX, SUM_MIN,
+  } from '../lib/combinaison.js'
   import { isSkipped, search } from '../lib/generator.js'
   import { day, num, rang as fmt } from '../lib/format.js'
   import { auto as store, grids as gridStore } from '../lib/store.js'
@@ -73,6 +75,24 @@
   let cMult4 = $state([])
   let cMult5 = $state([])
 
+  // Les colonnes du tableau 조합 qui n'avaient pas de filtre. Les sommes se
+  // cochent par tranches de 10 (la valeur retenue est le début de tranche),
+  // les répétitions et les positions valeur par valeur.
+  let cCarrySum = $state([])
+  let cCarryPos = $state([])
+  let cPrimeSum = $state([])
+  let cCompSum = $state([])
+  let cM2Sum = $state([])
+  let cM3Sum = $state([])
+  let cM4Sum = $state([])
+  let cM5Sum = $state([])
+  let cHeadRep = $state([])
+  let cTailRep = $state([])
+  // 앞자리 / 끝자리 permis : ils ne passent pas par le moteur, ils retirent
+  // du vivier les numéros dont le chiffre n'est pas coché.
+  let cHeadDigits = $state([])
+  let cTailDigits = $state([])
+
   // 분배 — trois choix plutôt qu'une case par valeur : le modèle ne rend que
   // dix-huit indices distincts, et ce qu'on veut lire c'est « moins joué »,
   // pas « 0,857 ». Le détail reste en info-bulle sur chaque ligne du résultat.
@@ -120,7 +140,9 @@
     return seen
   })
 
-  const pool = $derived(buildPool({ preset: presetKey, add, remove, sections }))
+  const pool = $derived(buildPool({ preset: presetKey, add, remove, sections })
+    .filter((n) => (!cHeadDigits.length || cHeadDigits.includes(HEAD[n]))
+      && (!cTailDigits.length || cTailDigits.includes(TAIL[n]))))
   const poolSet = $derived(new Set(pool))
   // Un 고정수 hors du vivier rendrait la recherche impossible : on le retire
   // plutôt que de laisser le générateur lever une erreur à la figure.
@@ -209,6 +231,24 @@
     }
     const share = SHARING_CHOICES.find((c) => c.key === sharingPick)
     if (share.bounds) f.sharing = share.bounds
+
+    // Les colonnes ajoutées. Celles du 이월 n'ont de sens qu'avec un 회차
+    // précédent connu — sans lui elles sont ignorées, comme le 이월 개수.
+    if (previous && (cCarrySum.length || cCarryPos.length)) {
+      f.reference = previous
+      if (cCarrySum.length) f.carriedSum = { allow: bandValues(cCarrySum) }
+      if (cCarryPos.length) f.carriedPos = [...cCarryPos]
+    }
+    if (cPrimeSum.length) f.primeSum = { allow: bandValues(cPrimeSum) }
+    if (cCompSum.length) f.compositeSum = { allow: bandValues(cCompSum) }
+    const multSums = {}
+    if (cM2Sum.length) multSums[2] = { allow: bandValues(cM2Sum) }
+    if (cM3Sum.length) multSums[3] = { allow: bandValues(cM3Sum) }
+    if (cM4Sum.length) multSums[4] = { allow: bandValues(cM4Sum) }
+    if (cM5Sum.length) multSums[5] = { allow: bandValues(cM5Sum) }
+    if (Object.keys(multSums).length) f.multSums = multSums
+    if (cHeadRep.length) f.headRepeat = { allow: cHeadRep }
+    if (cTailRep.length) f.tailRepeat = { allow: cTailRep }
     return f
   })
 
@@ -264,6 +304,12 @@
     cMult4.length && '사의배수', cMult5.length && '오의배수',
     fixValid.length && `고정수 ${fixValid.length}개`,
     sharingPick !== 'all' && '분배',
+    cCarrySum.length && '이월합', cCarryPos.length && '이월 위치',
+    cPrimeSum.length && '소수합', cCompSum.length && '합성수합',
+    cM2Sum.length && '이의배수합', cM3Sum.length && '삼의배수합',
+    cM4Sum.length && '사의배수합', cM5Sum.length && '오의배수합',
+    cHeadRep.length && '앞쌍', cTailRep.length && '끝쌍',
+    cHeadDigits.length && '앞자리수', cTailDigits.length && '끝자리수',
   ].filter(Boolean))
 
   function reset() {
@@ -273,6 +319,9 @@
     cPrimes = []; cComposites = []; cMult2 = []; cMult3 = []
     cMult4 = []; cMult5 = []
     sharingPick = 'all'
+    cCarrySum = []; cCarryPos = []; cPrimeSum = []; cCompSum = []
+    cM2Sum = []; cM3Sum = []; cM4Sum = []; cM5Sum = []
+    cHeadRep = []; cTailRep = []; cHeadDigits = []; cTailDigits = []
   }
 
   // --- le carnet de recherches ------------------------------------------
@@ -298,6 +347,11 @@
     primes: [...cPrimes], composites: [...cComposites],
     mult2: [...cMult2], mult3: [...cMult3], mult4: [...cMult4], mult5: [...cMult5],
     sharing: sharingPick,
+    carrySum: [...cCarrySum], carryPos: [...cCarryPos],
+    primeSum: [...cPrimeSum], compositeSum: [...cCompSum],
+    mult2Sum: [...cM2Sum], mult3Sum: [...cM3Sum], mult4Sum: [...cM4Sum], mult5Sum: [...cM5Sum],
+    headRepeat: [...cHeadRep], tailRepeat: [...cTailRep],
+    headDigits: [...cHeadDigits], tailDigits: [...cTailDigits],
   })
 
   $effect(() => {
@@ -344,6 +398,19 @@
     cMult5 = [...(f.mult5 ?? [])]
     // Les enregistrements d'avant n'ont pas ce champ : ils retombent sur 전체.
     sharingPick = SHARING_CHOICES.some((c) => c.key === f.sharing) ? f.sharing : 'all'
+    // Les colonnes ajoutées : absentes des enregistrements plus anciens.
+    cCarrySum = [...(f.carrySum ?? [])]
+    cCarryPos = [...(f.carryPos ?? [])]
+    cPrimeSum = [...(f.primeSum ?? [])]
+    cCompSum = [...(f.compositeSum ?? [])]
+    cM2Sum = [...(f.mult2Sum ?? [])]
+    cM3Sum = [...(f.mult3Sum ?? [])]
+    cM4Sum = [...(f.mult4Sum ?? [])]
+    cM5Sum = [...(f.mult5Sum ?? [])]
+    cHeadRep = [...(f.headRepeat ?? [])]
+    cTailRep = [...(f.tailRepeat ?? [])]
+    cHeadDigits = [...(f.headDigits ?? [])]
+    cTailDigits = [...(f.tailDigits ?? [])]
     rang = entry.rang != null && entry.rang <= last ? entry.rang : null
     result = null
     status = 'idle'
@@ -697,7 +764,45 @@
     <CheckSet label="삼의배수숫자수" options={opts.mult3} bind:selected={cMult3} columns="tight" />
     <CheckSet label="사의배수숫자수" options={opts.mult4} bind:selected={cMult4} columns="tight" />
     <CheckSet label="오의배수숫자수" options={opts.mult5} bind:selected={cMult5} columns="tight" />
+
+    <!-- Les colonnes du tableau 조합 qui n'avaient pas encore de filtre.
+         Sommes : par tranches de 10. Positions et chiffres : plusieurs
+         valeurs par 회차, d'où `total` et `cover` passés à part. -->
+    <CheckSet label="전회차이월번합" gloss="이월 번호의 합 · 10단위"
+              options={opts.carriedSum} format={bandLabel} bind:selected={cCarrySum} />
+    <CheckSet label="전회차이월번위치" gloss="체크한 자리에서 온 이월만"
+              options={opts.carriedPos} format={(p) => (p === 7 ? '보너스' : `${p}번째`)}
+              total={opts.rows.carriedPos.length}
+              cover={coveredRows(opts.rows.carriedPos, cCarryPos)}
+              bind:selected={cCarryPos} />
+    <CheckSet label="앞자리수" gloss="체크한 앞자리 숫자의 번호만 사용"
+              options={opts.headDigit} total={draws.n}
+              cover={coveredRows(opts.rows.headDigit, cHeadDigits)}
+              bind:selected={cHeadDigits} columns="tight" />
+    <CheckSet label="앞쌍" gloss="같은 앞자리 최대 개수"
+              options={opts.headRepeat} bind:selected={cHeadRep} columns="tight" />
+    <CheckSet label="끝자리수" gloss="체크한 끝자리 숫자의 번호만 사용"
+              options={opts.tailDigit} total={draws.n}
+              cover={coveredRows(opts.rows.tailDigit, cTailDigits)}
+              bind:selected={cTailDigits} columns="tight" />
+    <CheckSet label="끝쌍" gloss="같은 끝자리 최대 개수"
+              options={opts.tailRepeat} bind:selected={cTailRep} columns="tight" />
+    <CheckSet label="소수합" gloss="10단위" options={opts.primeSum} format={bandLabel}
+              bind:selected={cPrimeSum} />
+    <CheckSet label="합성수합" gloss="10단위" options={opts.compositeSum} format={bandLabel}
+              bind:selected={cCompSum} />
+    <CheckSet label="이의배수합" gloss="10단위" options={opts.mult2Sum} format={bandLabel}
+              bind:selected={cM2Sum} />
+    <CheckSet label="삼의배수합" gloss="10단위" options={opts.mult3Sum} format={bandLabel}
+              bind:selected={cM3Sum} />
+    <CheckSet label="사의배수합" gloss="10단위" options={opts.mult4Sum} format={bandLabel}
+              bind:selected={cM4Sum} />
+    <CheckSet label="오의배수합" gloss="10단위" options={opts.mult5Sum} format={bandLabel}
+              bind:selected={cM5Sum} />
   </div>
+  {#if !previous && (cCarrySum.length || cCarryPos.length)}
+    <p class="note dim">「전회차이월번합」「전회차이월번위치」는 {fmt(target - 1)} 기록이 없어 적용되지 않습니다.</p>
+  {/if}
 
   <!-- 분배 — le seul filtre de cette page qui ne parle pas du tirage.
        Les douze au-dessus découpent l'espace des combinaisons ; celui-ci

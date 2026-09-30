@@ -52,6 +52,11 @@ export const CRITERIA = [
   // (un réel, comme 분배), et le nombre de numéros communs avec un tirage
   // donné (`hitReference`, en général les sept d'un 회차 passé).
   'popularity', 'hit',
+  // Ajoutés pour que chaque colonne du tableau 조합 ait son filtre :
+  // les sommes (이월 · 소수 · 합성수 · 배수), la position d'où vient
+  // chaque 이월, et la plus longue répétition d'un 앞자리 / 끝자리.
+  'carriedSum', 'carriedPos', 'primeSum', 'compositeSum', 'multSums',
+  'headRepeat', 'tailRepeat',
 ]
 
 export const LABELS = {
@@ -70,6 +75,13 @@ export const LABELS = {
   match: '대비',
   popularity: '수동 인기',
   hit: '당첨 개수',
+  carriedSum: '이월합',
+  carriedPos: '이월 위치',
+  primeSum: '소수합',
+  compositeSum: '합성수합',
+  multSums: '배수합',
+  headRepeat: '앞쌍',
+  tailRepeat: '끝쌍',
   count: '개수 조건',
 }
 
@@ -88,7 +100,14 @@ const S_INCLUDE = 10
 const S_MULT = 11        // 4 emplacements : 2, 3, 4, 5의배수
 const S_SECT = 15        // 5 emplacements : les cinq 구간
 const S_HIT = 20         // numéros communs avec `hitReference`
-const ACC = 21
+const S_CSUM = 21        // somme des numéros repris du tirage de référence
+const S_BAD = 22         // numéros repris d'une position refusée
+const S_PSUM = 23        // somme des 소수
+const S_CPSUM = 24       // somme des 합성수
+const S_MSUM = 25        // 4 emplacements : sommes des 2, 3, 4, 5의배수
+const S_HEADC = 29       // 10 emplacements : combien de numéros par 앞자리
+const S_TAILC = 39       // 10 emplacements : combien de numéros par 끝자리
+const ACC = 49
 
 /**
  * Cherche les grilles qui satisfont tous les critères.
@@ -169,7 +188,23 @@ export function generate(filters = {}, options = {}) {
 
   const {
     total, low, odd, primes, composites, headSum, tailSum, ac, sharing, match, popularity, hit,
+    carriedSum, carriedPos, primeSum, compositeSum, headRepeat, tailRepeat,
   } = spec
+
+  // Les nouveaux accumulateurs ne sont tenus que si leur critère est actif :
+  // une recherche qui ne les demande pas ne paie rien de plus qu'avant.
+  const activeMSum = []
+  spec.multSums.forEach((c, m) => { if (c) activeMSum.push([m, c]) })
+  // Les sommes ne font que croître en descendant : un préfixe qui dépasse
+  // déjà la borne haute ne donnera rien. [emplacement, critère, clé]
+  const caps = []
+  if (carriedSum !== null) caps.push([S_CSUM, carriedSum, 'carriedSum'])
+  if (primeSum !== null) caps.push([S_PSUM, primeSum, 'primeSum'])
+  if (compositeSum !== null) caps.push([S_CPSUM, compositeSum, 'compositeSum'])
+  for (const [m, c] of activeMSum) caps.push([S_MSUM + m, c, 'multSums'])
+  // Un seul drapeau pour tout le groupe : sans lui, la recherche la plus
+  // courante paierait sept tests de plus par feuille, soit ~10 % de temps.
+  const extra = caps.length > 0 || carriedPos !== null || headRepeat !== null || tailRepeat !== null
 
   function walk(depth, start) {
     // La dernière boucle porte à elle seule les 8,1 millions de feuilles,
@@ -240,6 +275,45 @@ export function generate(filters = {}, options = {}) {
       for (let s = 0; s < SECTIONS.length; s++) {
         acc[next + S_SECT + s] = acc[base + S_SECT + s] + (SECTION_OF[value] === s ? 1 : 0)
       }
+      if (extra) {
+      if (carriedSum !== null) {
+        acc[next + S_CSUM] = acc[base + S_CSUM] + (spec.referenceSet[value] ? value : 0)
+      }
+      if (carriedPos !== null) acc[next + S_BAD] = acc[base + S_BAD] + spec.badSet[value]
+      if (primeSum !== null) acc[next + S_PSUM] = acc[base + S_PSUM] + (IS_PRIME[value] ? value : 0)
+      if (compositeSum !== null) {
+        acc[next + S_CPSUM] = acc[base + S_CPSUM] + (IS_COMPOSITE[value] ? value : 0)
+      }
+      for (let k = 0; k < activeMSum.length; k++) {
+        const m = activeMSum[k][0]
+        acc[next + S_MSUM + m] = acc[base + S_MSUM + m] + (value % MULTIPLES[m] === 0 ? value : 0)
+      }
+      if (headRepeat !== null) {
+        for (let d = 0; d < 10; d++) acc[next + S_HEADC + d] = acc[base + S_HEADC + d]
+        acc[next + S_HEADC + HEAD[value]]++
+      }
+      if (tailRepeat !== null) {
+        for (let d = 0; d < 10; d++) acc[next + S_TAILC + d] = acc[base + S_TAILC + d]
+        acc[next + S_TAILC + TAIL[value]]++
+      }
+
+      // Élagage sur les sommes et les répétitions : elles ne redescendent
+      // jamais, donc un préfixe déjà au-dessus de la borne haute est perdu.
+      if (caps.length || headRepeat !== null || tailRepeat !== null) {
+        let over = null
+        for (let k = 0; k < caps.length; k++) {
+          if (acc[next + caps[k][0]] > caps[k][1].max) { over = caps[k][2]; break }
+        }
+        if (over === null && headRepeat !== null &&
+            acc[next + S_HEADC + HEAD[value]] > headRepeat.max) over = 'headRepeat'
+        if (over === null && tailRepeat !== null &&
+            acc[next + S_TAILC + TAIL[value]] > tailRepeat.max) over = 'tailRepeat'
+        if (over !== null) {
+          rejected.set(over, rejected.get(over) + choose(size - 1 - i, remaining - 1))
+          continue
+        }
+      }
+      }  // extra
 
       // Élagage sur les critères de comptage : un préfixe qui a déjà trop de
       // 저, ou trop peu de 소수 pour rattraper avec ce qu'il reste à tirer,
@@ -284,6 +358,8 @@ export function generate(filters = {}, options = {}) {
   counter(S_HIT, hit)
   for (const [m, c] of activeMult) counter(S_MULT + m, c)
   for (const [s, c] of activeSect) counter(S_SECT + s, c)
+  // 이월 위치 : aucun numéro repris d'une position refusée — un compte borné à 0.
+  if (carriedPos !== null) counters.push([S_BAD, 0, 0])
   const counted = counters.length > 0
 
   function leaf(base, start) {
@@ -300,6 +376,19 @@ export function generate(filters = {}, options = {}) {
     const bMatch = acc[base + S_MATCH]
     const bHit = acc[base + S_HIT]
     const bInclude = acc[base + S_INCLUDE]
+    const bCSum = acc[base + S_CSUM]
+    const bBad = acc[base + S_BAD]
+    const bPSum = acc[base + S_PSUM]
+    const bCPSum = acc[base + S_CPSUM]
+    // La plus longue répétition d'un 앞자리 / 끝자리 parmi les cinq premiers.
+    let bHeadMax = 0
+    let bTailMax = 0
+    if (headRepeat !== null) {
+      for (let d = 0; d < 10; d++) if (acc[base + S_HEADC + d] > bHeadMax) bHeadMax = acc[base + S_HEADC + d]
+    }
+    if (tailRepeat !== null) {
+      for (let d = 0; d < 10; d++) if (acc[base + S_TAILC + d] > bTailMax) bTailMax = acc[base + S_TAILC + d]
+    }
     const c0 = chosen[0], c1 = chosen[1], c2 = chosen[2]
     const c3 = chosen[3], c4 = chosen[4]
 
@@ -423,6 +512,46 @@ export function generate(filters = {}, options = {}) {
         const v = bHit + spec.hitSet[value]
         if (v < hit.min || v > hit.max || !hit.mask[v - hit.min]) { miss('hit'); continue }
       }
+      if (extra) {
+      if (carriedSum !== null) {
+        const v = bCSum + (spec.referenceSet[value] ? value : 0)
+        if (v < carriedSum.min || v > carriedSum.max || !carriedSum.mask[v - carriedSum.min]) { miss('carriedSum'); continue }
+      }
+      if (carriedPos !== null && bBad + spec.badSet[value] > 0) { miss('carriedPos'); continue }
+      if (primeSum !== null) {
+        const v = bPSum + (IS_PRIME[value] ? value : 0)
+        if (v < primeSum.min || v > primeSum.max || !primeSum.mask[v - primeSum.min]) { miss('primeSum'); continue }
+      }
+      if (compositeSum !== null) {
+        const v = bCPSum + (IS_COMPOSITE[value] ? value : 0)
+        if (v < compositeSum.min || v > compositeSum.max || !compositeSum.mask[v - compositeSum.min]) {
+          miss('compositeSum'); continue
+        }
+      }
+      if (activeMSum.length) {
+        let failed = false
+        for (let k = 0; k < activeMSum.length; k++) {
+          const [m, c] = activeMSum[k]
+          const v = acc[base + S_MSUM + m] + (value % MULTIPLES[m] === 0 ? value : 0)
+          if (v < c.min || v > c.max || !c.mask[v - c.min]) { failed = true; break }
+        }
+        if (failed) { miss('multSums'); continue }
+      }
+      if (headRepeat !== null) {
+        const own = acc[base + S_HEADC + HEAD[value]] + 1
+        const v = own > bHeadMax ? own : bHeadMax
+        if (v < headRepeat.min || v > headRepeat.max || !headRepeat.mask[v - headRepeat.min]) {
+          miss('headRepeat'); continue
+        }
+      }
+      if (tailRepeat !== null) {
+        const own = acc[base + S_TAILC + TAIL[value]] + 1
+        const v = own > bTailMax ? own : bTailMax
+        if (v < tailRepeat.min || v > tailRepeat.max || !tailRepeat.mask[v - tailRepeat.min]) {
+          miss('tailRepeat'); continue
+        }
+      }
+      }  // extra
 
       chosen[PICK - 1] = value
       emit()
@@ -488,6 +617,11 @@ export function matches(numbers, filters = {}) {
     },
     match: () => count((v) => spec.referenceSet[v] === 1),
     hit: () => count((v) => spec.hitSet[v] === 1),
+    carriedSum: () => sum((v) => (spec.referenceSet[v] ? v : 0)),
+    primeSum: () => sum((v) => (IS_PRIME[v] ? v : 0)),
+    compositeSum: () => sum((v) => (IS_COMPOSITE[v] ? v : 0)),
+    headRepeat: () => longestRun(row.map((v) => HEAD[v])),
+    tailRepeat: () => longestRun(row.map((v) => TAIL[v])),
   }
 
   for (const key of CRITERIA) {
@@ -519,6 +653,18 @@ export function matches(numbers, filters = {}) {
       if (v < spec.popularity.min || v > spec.popularity.max) return 'popularity'
       continue
     }
+    if (key === 'carriedPos') {
+      if (spec.carriedPos !== null && row.some((v) => spec.badSet[v] === 1)) return 'carriedPos'
+      continue
+    }
+    if (key === 'multSums') {
+      for (let m = 0; m < MULTIPLES.length; m++) {
+        const bounds = spec.multSums[m]
+        if (bounds === null) continue
+        if (!allows(bounds, sum((v) => (v % MULTIPLES[m] === 0 ? v : 0)))) return 'multSums'
+      }
+      continue
+    }
     const bounds = spec[key]
     if (bounds === null) continue
     if (!allows(bounds, tests[key]())) return key
@@ -538,9 +684,11 @@ export function toArrays({ grids, count }) {
 function normalize(filters) {
   const spec = {}
   for (const key of CRITERIA) {
-    if (key === 'multiples' || key === 'sections' || key === 'sharing' || key === 'popularity') continue
+    if (key === 'multiples' || key === 'sections' || key === 'sharing' || key === 'popularity' ||
+        key === 'multSums' || key === 'carriedPos') continue
     spec[key] = criterion(key, filters[key])
   }
+  spec.multSums = MULTIPLES.map((m) => criterion(`multSums.${m}`, filters.multSums?.[m]))
   spec.popularity = realBounds('popularity', filters.popularity)
 
   // 분배 n'est pas un compte de numéros mais un réel : pas de masque, pas
@@ -575,6 +723,25 @@ function normalize(filters) {
     for (const v of numbers('reference', filters.reference)) spec.referenceSet[v] = 1
   } else if (spec.match !== null) {
     throw new RangeError('`match`에는 기준 회차(`reference`)가 필요합니다')
+  } else if (spec.carriedSum !== null) {
+    throw new RangeError('`carriedSum`에는 기준 회차(`reference`)가 필요합니다')
+  }
+
+  // 이월 위치 : `reference` est lu **dans l'ordre donné** — 일..육 puis
+  // 보너스, positions 1 à 7 — et chaque numéro d'une position non cochée
+  // devient interdit. Les numéros hors de la référence ne sont pas concernés.
+  spec.carriedPos = null
+  spec.badSet = new Uint8Array(NMAX + 1)
+  if (filters.carriedPos !== null && filters.carriedPos !== undefined) {
+    if (!filters.reference) throw new RangeError('`carriedPos`에는 기준 회차(`reference`)가 필요합니다')
+    const allowed = new Set(filters.carriedPos)
+    for (const p of allowed) {
+      if (!Number.isInteger(p) || p < 1 || p > filters.reference.length) {
+        throw new RangeError(`carriedPos : 자리 ${p}은(는) 1..${filters.reference.length} 범위 밖입니다`)
+      }
+    }
+    filters.reference.forEach((v, k) => { if (!allowed.has(k + 1)) spec.badSet[v] = 1 })
+    spec.carriedPos = { allowed: [...allowed].sort((a, b) => a - b) }
   }
 
   // 당첨 개수 : même mécanique que `match`, avec son propre tirage de
@@ -624,6 +791,13 @@ const SECTION_OF = (() => {
 })()
 
 const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)
+
+/** Combien de fois revient le chiffre le plus fréquent — 앞쌍 / 끝쌍. */
+function longestRun(digits) {
+  const seen = new Map()
+  for (const d of digits) seen.set(d, (seen.get(d) ?? 0) + 1)
+  return Math.max(...seen.values())
+}
 
 function report(map) {
   return [...map].filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])

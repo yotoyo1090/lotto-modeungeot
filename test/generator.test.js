@@ -150,6 +150,17 @@ test('le parcours rapide et `matches` décrivent le même ensemble', async (t) =
       primes: [1, 3], multiples: { 2: [1, 4] }, sections: { 0: [0, 2] },
       include: [13], exclude: [40],
     }],
+    ['이월합', { reference: [5, 7, 13, 22, 31, 44, 18], carriedSum: [20, 60] }],
+    ['이월합 (cases)', { reference: [5, 7, 13, 22, 31, 44, 18], carriedSum: { allow: [0, 7, 31, 44] } }],
+    ['이월 위치', { reference: [5, 7, 13, 22, 31, 44, 18], carriedPos: [1, 2, 7] }],
+    ['소수합 · 합성수합', { primeSum: [10, 40], compositeSum: [40, 120] }],
+    ['배수합', { multSums: { 2: [30, 90], 5: [0, 40] } }],
+    ['앞쌍 · 끝쌍', { headRepeat: [2, 3], tailRepeat: [1, 1] }],
+    ['toutes les nouvelles colonnes', {
+      reference: [5, 7, 13, 22, 31, 44, 18], carriedSum: [0, 50], carriedPos: [1, 3, 4, 5, 6],
+      primeSum: [0, 60], compositeSum: [30, 200], multSums: { 3: [0, 60] },
+      headRepeat: [1, 2], tailRepeat: [1, 2], total: [90, 170],
+    }],
   ]
 
   for (const [name, filters] of suites) {
@@ -178,6 +189,10 @@ test('la comptabilité est exacte : retenues + écartées = espace', async (t) =
     ['당첨 개수 · 수동 인기', {
       hitReference: [3, 9, 17, 25, 33, 41, 44], hit: [3, 6], popularity: [0, 1.5],
     }],
+    ['sommes · répétitions · 이월 위치', {
+      reference: [3, 9, 17, 25, 33, 41, 44], carriedSum: [0, 40], carriedPos: [1, 2, 3],
+      primeSum: [0, 30], multSums: { 3: [0, 50] }, headRepeat: [1, 2], tailRepeat: [1, 1],
+    }],
   ]
   for (const [name, filters] of suites) {
     await t.test(name, () => {
@@ -203,6 +218,49 @@ test('당첨 개수 sur l\'espace entier : les comptes exacts de la loi', () => 
   assert.equal(at(6, 6), 7)
   assert.equal(at(4, 6), 25_410)
   assert.equal(at(0, 6), gen.TOTAL_COMBINATIONS)
+})
+
+test('les nouvelles colonnes contre un témoin écrit à la main', () => {
+  // Ni `generate` ni `matches` : les définitions de la ligne 조합, recopiées
+  // ici — sommes par famille, 이월 et sa position, plus longue répétition
+  // d'un 앞자리 / 끝자리.
+  const pool = range(1, 22)
+  const ref = [4, 9, 15, 20, 33, 40, 12]            // 일..육 puis 보너스
+  const run = (digits) => Math.max(...Object.values(
+    digits.reduce((m, d) => { m[d] = (m[d] ?? 0) + 1; return m }, {})))
+  const witness = (row) => {
+    const carried = row.filter((v) => ref.includes(v))
+    return {
+      carriedSum: carried.reduce((a, v) => a + v, 0),
+      badPos: carried.some((v) => ![1, 2, 7].includes(ref.indexOf(v) + 1)),
+      primeSum: row.filter((v) => IS_PRIME[v]).reduce((a, v) => a + v, 0),
+      compositeSum: row.filter((v) => IS_COMPOSITE[v]).reduce((a, v) => a + v, 0),
+      mult3Sum: row.filter((v) => v % 3 === 0).reduce((a, v) => a + v, 0),
+      headRepeat: run(row.map((v) => HEAD[v])),
+      tailRepeat: run(row.map((v) => TAIL[v])),
+    }
+  }
+  const cases = [
+    [{ reference: ref, carriedSum: [9, 30] }, (w) => w.carriedSum >= 9 && w.carriedSum <= 30],
+    [{ reference: ref, carriedPos: [1, 2, 7] }, (w) => !w.badPos],
+    [{ primeSum: { allow: [17, 18, 19, 20] } }, (w) => w.primeSum >= 17 && w.primeSum <= 20],
+    [{ compositeSum: [50, 70] }, (w) => w.compositeSum >= 50 && w.compositeSum <= 70],
+    [{ multSums: { 3: [20, 40] } }, (w) => w.mult3Sum >= 20 && w.mult3Sum <= 40],
+    [{ headRepeat: [3, 3] }, (w) => w.headRepeat === 3],
+    [{ tailRepeat: [2, 2] }, (w) => w.tailRepeat === 2],
+  ]
+  for (const [filters, ok] of cases) {
+    let expected = 0
+    for (const row of everyCombination(pool)) if (ok(witness(row))) expected++
+    const got = gen.generate({ ...filters, pool }, { limit: 0 }).kept
+    assert.equal(got, expected, JSON.stringify(filters))
+  }
+})
+
+test('les nouvelles colonnes demandent leur tirage de référence', () => {
+  assert.throws(() => gen.generate({ carriedSum: [0, 10] }), /reference/)
+  assert.throws(() => gen.generate({ carriedPos: [1] }), /reference/)
+  assert.throws(() => gen.generate({ reference: [1, 2, 3, 4, 5, 6, 7], carriedPos: [8] }), /자리 8/)
 })
 
 test('수동 인기 : des tranches disjointes recouvrent tout l\'espace', () => {

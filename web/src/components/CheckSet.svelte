@@ -16,6 +16,11 @@
     selected = $bindable([]),
     format = (v) => String(v),
     columns = 'auto',
+    // Pour les critères à plusieurs valeurs par 회차 (이월 위치, 앞자리…),
+    // la somme des effectifs n'est plus le nombre de tirages : l'écran passe
+    // alors le nombre de tirages (`total`) et la couverture calculée (`cover`).
+    total = null,
+    cover = null,
   } = $props()
 
   const chosen = $derived(new Set(selected))
@@ -23,13 +28,13 @@
 
   // Chaque 회차 a exactement une valeur par indicateur : la somme des
   // effectifs est donc le nombre de tirages, sans avoir à le passer.
-  const draws = $derived(options.reduce((a, o) => a + o.seen, 0))
+  const draws = $derived(total ?? options.reduce((a, o) => a + o.seen, 0))
   const pct = (n) => (draws ? (n / draws) * 100 : 0)
 
   // Le taux de couverture : quelle part du passé la sélection laisse
   // passer. C'est le seul chiffre qui dise si on vient de se restreindre
   // à une bande courante ou à une bizarrerie.
-  const covered = $derived(
+  const covered = $derived(cover ??
     options.filter((o) => chosen.has(o.value)).reduce((a, o) => a + o.seen, 0))
 
   function toggle(value) {

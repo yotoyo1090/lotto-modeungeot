@@ -30,7 +30,15 @@ export function choices(draws) {
     headSum: new Map(), tailSum: new Map(), carry: new Map(),
     primes: new Map(), composites: new Map(),
     mult2: new Map(), mult3: new Map(), mult4: new Map(), mult5: new Map(),
+    // Les colonnes ajoutées : sommes par tranche de 10, répétitions exactes.
+    carriedSum: new Map(), primeSum: new Map(), compositeSum: new Map(),
+    mult2Sum: new Map(), mult3Sum: new Map(), mult4Sum: new Map(), mult5Sum: new Map(),
+    headRepeat: new Map(), tailRepeat: new Map(),
+    // Plusieurs valeurs par 회차 : chaque case compte les 회차 qui la portent,
+    // et `rows` garde, 회차 par 회차, ce qu'il faut pour la couverture.
+    carriedPos: new Map(), headDigit: new Map(), tailDigit: new Map(),
   }
+  const rows = { carriedPos: [], headDigit: [], tailDigit: [] }
   const bump = (key, value) => tally[key].set(value, (tally[key].get(value) ?? 0) + 1)
 
   for (let i = 0; i < draws.n; i++) {
@@ -66,15 +74,38 @@ export function choices(draws) {
     bump('composites', composites)
     MULTIPLES.forEach((m, k) => bump(`mult${m}`, mult[k]))
 
+    const familySum = (ok) => { let s = 0; for (let k = 0; k < PICK; k++) if (ok(row[k])) s += row[k]; return s }
+    bump('primeSum', band(familySum((v) => IS_PRIME[v] === 1)))
+    bump('compositeSum', band(familySum((v) => IS_COMPOSITE[v] === 1)))
+    MULTIPLES.forEach((m) => bump(`mult${m}Sum`, band(familySum((v) => v % m === 0))))
+
+    const heads = [...row].map((v) => HEAD[v])
+    const tails = [...row].map((v) => TAIL[v])
+    bump('headRepeat', longestRun(heads))
+    bump('tailRepeat', longestRun(tails))
+    const headSet = [...new Set(heads)]
+    const tailSet = [...new Set(tails)]
+    for (const d of headSet) bump('headDigit', d)
+    for (const d of tailSet) bump('tailDigit', d)
+    rows.headDigit.push(headSet)
+    rows.tailDigit.push(tailSet)
+
     // 이월 : les six numéros retombés sur les SEPT du 회차 précédent, bonus
     // compris — c'est ainsi que l'ancien `oldwinner()` comptait.
     if (i > 0 && draws.rangs[i - 1] === draws.rangs[i] - 1) {
       const before = draws.sequenceAt(i - 1)
       let carried = 0
+      let carriedSum = 0
+      const positions = []
       for (let k = 0; k < PICK; k++) {
-        for (let j = 0; j < before.length; j++) if (row[k] === before[j]) carried++
+        for (let j = 0; j < before.length; j++) {
+          if (row[k] === before[j]) { carried++; carriedSum += row[k]; positions.push(j + 1) }
+        }
       }
       bump('carry', carried)
+      bump('carriedSum', band(carriedSum))
+      for (const p of new Set(positions)) bump('carriedPos', p)
+      rows.carriedPos.push(positions)
     }
   }
 
@@ -82,7 +113,36 @@ export function choices(draws) {
     .map(([value, seen]) => ({ value, seen }))
     .sort((a, b) => a.value - b.value)
 
-  return Object.fromEntries(Object.keys(tally).map((k) => [k, sorted(k)]))
+  const out = Object.fromEntries(Object.keys(tally).map((k) => [k, sorted(k)]))
+  out.rows = rows
+  return out
+}
+
+/** La tranche de 10 d'une somme : 0 (0–9), 10 (10–19)… */
+export const band = (sum) => Math.floor(sum / 10) * 10
+
+/** Les tranches cochées, dépliées en valeurs pour le moteur. */
+export const bandValues = (bands) => bands.flatMap((b) => Array.from({ length: 10 }, (_, k) => b + k))
+
+/** L'étiquette d'une tranche — « 20–29 ». */
+export const bandLabel = (b) => `${b}–${b + 9}`
+
+/** Combien de fois revient le chiffre le plus fréquent — 앞쌍 / 끝쌍. */
+export function longestRun(digits) {
+  const seen = new Map()
+  for (const d of digits) seen.set(d, (seen.get(d) ?? 0) + 1)
+  return Math.max(...seen.values())
+}
+
+/**
+ * Pour les critères à plusieurs valeurs par 회차 (이월 위치, 앞자리, 끝자리) :
+ * combien de 회차 passés auraient passé la sélection, c'est-à-dire n'ont
+ * **que** des valeurs cochées.
+ */
+export function coveredRows(list, selected) {
+  if (!selected.length) return list.length
+  const ok = new Set(selected)
+  return list.filter((values) => values.every((v) => ok.has(v))).length
 }
 
 /** Les bornes du menu 총합, comme dans l'ancien formulaire : 37 à 267. */
