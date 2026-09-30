@@ -9,6 +9,7 @@
   import { day, num, rang } from './lib/format.js'
   import Range from './components/Range.svelte'
   import Home from './views/Home.svelte'
+  import WinningDraws from './views/WinningDraws.svelte'
   import Flow from './views/Flow.svelte'
   import Places from './views/Places.svelte'
   import Filters from './views/Filters.svelte'
@@ -54,6 +55,15 @@
   // trois façons de faire la même chose.
   const TABS = [
     { key: 'home', label: '분석', gloss: '홈' },
+    {
+      key: 'wins',
+      label: '당첨번호',
+      gloss: '지난 당첨 조합, 조합 화면과 같은 표로',
+      children: [
+        { key: 'win1', label: '당첨번호 1등', gloss: '회차마다 여섯 번호' },
+        { key: 'win2', label: '당첨번호 2등', gloss: '다섯 번호 + 보너스, 회차마다 여섯 조합' },
+      ],
+    },
     { key: 'flow', label: '흐름 · 차뜨', gloss: '미출현 간격과 온도' },
     { key: 'places', label: '당첨 위치', gloss: '어느 번호가 어느 자리에 오나' },
     { key: 'filters', label: '필터', gloss: '여섯 지표, 세 가지 집단' },
@@ -153,7 +163,7 @@
   let tab = $state('home')
   // La sous-catégorie retenue par catégorie : revenir sur 조합 rouvre
   // l'écran qu'on y avait laissé, pas systématiquement le premier.
-  let sub = $state({ combi: 'general', pension: 'phome', tip: 'fixed', rnd: 'rfixed' })
+  let sub = $state({ wins: 'win1', combi: 'general', pension: 'phome', tip: 'fixed', rnd: 'rfixed' })
 
   const category = $derived(TABS.find((t) => t.key === tab) ?? null)
   const children = $derived(category?.children ?? null)
@@ -340,6 +350,10 @@
 
     {#if screen === 'home'}
       <Home draws={view} />
+    {:else if screen === 'win1'}
+      <WinningDraws draws={view} {all} rank={1} />
+    {:else if screen === 'win2'}
+      <WinningDraws draws={view} {all} rank={2} />
     {:else if screen === 'flow'}
       <Flow draws={view} base={all} />
 

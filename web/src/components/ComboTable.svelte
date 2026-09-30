@@ -21,6 +21,8 @@
 
   // `draw` : le tirage réel (6 numéros + 보너스) quand il existe — les
   // cellules de numéros qui y figurent sont marquées. Sans lui, rien ne change.
+  // Une ligne peut porter son propre tirage dans `_draw` (당첨번호 2등, où
+  // chaque ligne vient d'un 회차 différent) : il passe alors avant `draw`.
   // `checked` + `ontoggle` : une case par ligne, seulement si l'écran les
   // passe (일반조합). Sans eux — 수동조합 — le tableau ne change pas. La
   // ligne porte alors `_i` (sa position dans le résultat) et `_pos` (son
@@ -54,6 +56,9 @@
         {@const cells = toCells(r)}
         {@const sh = shareOf(cells)}
         {@const ticked = checked?.has(r._i) ?? false}
+        {@const own = r._draw ?? null}
+        {@const rowMain = own ? own.slice(0, 6) : main}
+        {@const rowBonus = own ? own[6] : bonus}
         <tr class:pickable={onpick !== null} class:on={picked === i || ticked}
             onclick={() => onpick?.(i)}>
           <td class="idx dim">
@@ -65,8 +70,8 @@
           </td>
           {#each cells as cell, k (k)}
             <td class:num={k >= 1 && k <= 7}
-                class:hit={k >= 1 && k <= 6 && main.includes(Number(cell))}
-                class:bonus={k >= 1 && k <= 6 && Number(cell) === bonus}>{cell || '·'}</td>
+                class:hit={k >= 1 && k <= 6 && !own && rowMain.includes(Number(cell))}
+                class:bonus={k >= 1 && k <= 6 && Number(cell) === rowBonus}>{cell || '·'}</td>
             {#if k === AFTER}
               {#if sh}
                 <td class="share" class:rare={sh.band === 'rare'}
