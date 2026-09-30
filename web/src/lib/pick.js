@@ -13,7 +13,7 @@
 // colonne demandée, et l'écran ne décrit que la page qu'il affiche.
 import { HEAD, IS_COMPOSITE, IS_PRIME, LOW_MAX, TAIL } from '@core/draws.js'
 import { acValue, MULTIPLES } from '@core/metrics.js'
-import { sharing } from '@core/sharing.js'
+import { popularityFrom, sharing, sharingFrom } from '@core/sharing.js'
 
 export const MODES = [
   { key: 'random', label: '무작위' },
@@ -93,6 +93,58 @@ export const SORTS = [
 ]
 
 export const FILTER_KEYS = SORTS.filter((s) => s.key !== 'none')
+
+// ── les listes du 결과 필터 ───────────────────────────────────────────────
+//
+// Chaque borne se choisit dans une liste — les valeurs que la colonne peut
+// réellement prendre, pas une case à chiffres.
+
+const span = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i)
+// La plus grande somme de six numéros d'une famille : les six plus grands.
+const topSix = (keep) => {
+  let s = 0
+  let n = 0
+  for (let v = 45; v >= 1 && n < 6; v--) if (keep(v)) { s += v; n++ }
+  return s
+}
+// 분배 et 수동 : trois facteurs à 3, 3 et 2 niveaux — dix-huit valeurs, pas
+// une de plus. On les énumère avec un représentant par niveau.
+const modelValues = (from) => {
+  const seen = new Set()
+  for (const runs of [0, 1, 3]) for (const small of [0, 1, 3]) for (const spread of [10, 30]) {
+    seen.add(from(runs, small, spread))
+  }
+  return [...seen].sort((a, b) => a - b)
+}
+
+/** Les bornes exactes de chaque colonne entière. */
+function valueRange(key) {
+  const pos = /^pos\d$/.test(key)
+  const mult = /^mult(\d)(Sum)?$/.exec(key)
+  if (pos) return [1, 45]
+  if (mult) return mult[2] ? [0, topSix((v) => v % Number(mult[1]) === 0)] : [0, 6]
+  switch (key) {
+    case 'total': return [21, 255]
+    case 'ac': return [0, 10]
+    case 'headSum': return [6, 39]          // six numéros de 앞자리 1 … 9, 8, 7, 6, 5, 4
+    case 'tailSum': return [2, 52]          // 10 20 30 40 1 11 … 9 19 29 39 8 18
+    case 'headRepeat': return [1, 6]
+    case 'tailRepeat': return [1, 5]        // cinq numéros au plus par 끝자리
+    case 'primeSum': return [0, topSix((v) => IS_PRIME[v] === 1)]
+    case 'compositeSum': return [0, topSix((v) => IS_COMPOSITE[v] === 1)]
+    case 'carriedSum': return [0, 255]
+    default: return [0, 6]                  // les comptes : 이월, 소수, 합성수, 당첨…
+  }
+}
+
+/** [{ value, label }] — ce que proposent les deux listes d'une condition. */
+export function optionsFor(key) {
+  if (key === 'odd' || key === 'low') return span(0, 6).map((k) => ({ value: k, label: `${k} : ${6 - k}` }))
+  if (key === 'sharing') return modelValues(sharingFrom).map((v) => ({ value: v, label: v.toFixed(3) }))
+  if (key === 'popularity') return modelValues(popularityFrom).map((v) => ({ value: v, label: `${v.toFixed(2)}×` }))
+  const [lo, hi] = valueRange(key)
+  return span(lo, hi).map((v) => ({ value: v, label: String(v) }))
+}
 
 /**
  * Une colonne, mesurée sur les six numéros — la même définition que les
