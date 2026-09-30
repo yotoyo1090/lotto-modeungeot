@@ -1,0 +1,3223 @@
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko">
+
+<script type="text/javascript">
+	var rsaModulus = '8b24f0af83be2ea0e66cfab0d06d4c5c9c6391fe3c17da3d55c569aad09a07fc7cd52c00b4d53bf488e847251b939e84748d5086413b9011c637ddc28ed6999b838b50815d9354f50b2b9f8b98d66bc41d0b68c67e15c8503dcbfefd0e4c6cab9306f993e66d1869f7f8c26e615b147b8620cca2415ed0815e05708591ee0a7276018f8af3e199cd5bb84a52e37aef194b0e136e609673417cfcfa3330891cdaff7efed2d9e507901a98292fc6a9c506545e9387222d8df786bbc99d48cf841c4120881d4c1608fedb399ee7051f421b890f07a2ba4c156502e354a179777930d1bbb6ee6c3715f972923019c218ff0bf2481801f8f0bee5958619f9e4b05331';
+	var publicExponent = '10001';
+	
+	const layoutsL = {
+	}
+	
+	history.replaceState({pageUri : window.location.pathname},"",window.location.pathname);
+</script>
+
+
+
+
+
+
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+
+	<title>동행복권</title>
+	
+	<!-- css + font + scss -->
+	
+	<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+	<link rel="stylesheet" type="text/css" crossorigin href="https://cdn.jsdelivr.net/gh/leetaewook/gmarket-sans-dynamic-subset/GmarketSans.css" />
+	
+    <link rel="stylesheet" href="/resources/swiper/swiper-bundle.css">
+    <link rel="stylesheet" href="/resources/css/common.css?v=20260806">	
+    <link rel="stylesheet" href="/resources/css/layout.css?v=20260615">
+    <link rel="stylesheet" href="/resources/css/main-layout.css?v=20260806">
+
+	
+    <link type="text/css" rel="stylesheet" href="/resources/jquery/jquery-ui.min.css">
+	<link type="text/css" rel="stylesheet" href="/resources/jquery/jquery-ui.theme.min.css">
+	<link type="text/css" rel="stylesheet" href="/resources/jquery/jquery-ui.structure.min.css">
+
+    <!-- js -->
+    <script type="text/javascript" src="/resources/jquery/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/resources/jquery/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/resources/swiper/swiper-bundle.js"></script>
+    <script type="text/javascript" src="/resources/js/common.js?v=20260806"></script>
+    
+    <!-- tracer js -->
+    <script type="text/javascript" src="/resources/js/tracer/tracerapi.js?v=202601201"></script>
+
+	<!-- common js -->
+    <script type="text/javascript" src="/common/cmmUtil.js?v=20260706" ></script>
+	<script type="text/javascript" src="/common/gmUtil.js?v=20260209" ></script>
+	<!-- alert,confirm js -->
+	<script type="text/javascript" src="/common/msgUtil.js?v=20260318" ></script>
+	<!-- attache Files -->
+	<script type="text/javascript" src="/common/fileUtil.js?20250829" ></script>
+	<!-- <script type="text/javascript" src="/common/xlsx.full.min.js" ></script> -->
+	
+	<script type="text/javascript" src="/common/rsa/jsbn.js"></script>
+	<script type="text/javascript" src="/common/rsa/prng4.js"></script>
+	<script type="text/javascript" src="/common/rsa/rng.js"></script>
+	<script type="text/javascript" src="/common/rsa/rsa.js"></script>
+
+	<script type="text/javascript" src="/resources/js/moment.min.js"></script>
+	
+	<link rel="shortcut icon" href="/resources/img/favicon.ico">
+	<link rel="icon" href="/resources/img/favicon.ico">
+	
+	
+	
+	  <script>
+	    const isLoggedIn = false;
+	  </script>
+	
+	
+	<script>
+		var isMypage = false;
+		var _index;
+	
+		function showRealPage() {
+			$("#waitPage").css("display","none");
+		};
+		
+		function showWaitPage(type) {
+			$("#waitPage").css("display","block");
+			$("#isWaitPage").css("display","none");
+			$("#isRejectPage").css("display","none");
+			$("isNotUse").css("display","none");
+			
+			if ( type == 'W' ) {
+				$("#isWaitPage").css("display","block");
+			} else if ( type == 'NE' ) {
+				$("#isNotUse").css("display","block");
+			} else if ( type == 'R' ) {
+				$("#isRejectPage").css("display","block");
+			}
+		};
+		
+		function checkInAPI(host) {
+			isMypage = false;
+			
+			var host="www.dhlottery.co.kr";
+			var port="443";
+			var pageUrl = window.location.pathname.substr(1);	// 현재 페이지 정보
+			var ip ='27.35.130.96';							// 클라이언트 IP
+			var loginId ='27.35.130.96';						// 클라이언트 IP 또는 로그인 ID
+			
+			if(pageUrl === undefined || pageUrl == null || pageUrl == "") {
+				pageUrl = 'main';
+			}
+					
+		
+			callTracerApiInput(host, ip, loginId, port, pageUrl, this);
+		}
+		
+		function checkOutAPI() {
+			var host="www.dhlottery.co.kr";
+			var port="443";
+			var pageUrl=window.location.pathname.substr(1);	// 현재 페이지 정보
+			var ip ='27.35.130.96';        				// 클라이언트 IP
+			var loginId ='27.35.130.96';   				// 클라이언트 IP 또는 로그인 ID
+			
+			if(pageUrl === undefined || pageUrl == null || pageUrl == "") {
+				pageUrl = 'main';
+			}
+		
+			callTracerApiOutput(host, ip, loginId, port, pageUrl, this);
+		}
+		
+		function callBackTracer() {
+			if(isMypage==true) {
+				
+				const opt = {isStatic : true};
+				var paramP = {
+		       		ltGdsCd : MyLotteryledgerM.list[_index].ltGdsCd,	
+		       		ltEpsd : MyLotteryledgerM.list[_index].ltEpsd,	
+		       		barcd : MyLotteryledgerM.list[_index].gmInfo,	
+		       		ntslOrdrNo : MyLotteryledgerM.list[_index].ntslOrdrNo,	
+		       		winResult : MyLotteryledgerM.list[_index].ltWnResult,	
+		       		srchStrDt : $("#srchStrDt").val().replaceAll("-",""),	
+		       		srchEndDt : $("#srchEndDt").val().replaceAll("-",""),	
+		        }
+				
+				cmmUtil.openLayerPopup("Lotto645TicketP", MyLotteryledgerM.path + "/lotto645Ticket", paramP, opt);
+			}
+		};
+		
+	</script>
+	
+	<script>
+		/* 타이틀 정보*/
+		document.addEventListener("DOMContentLoaded", function() {
+		  checkInAPI();
+			
+		  const breadCrumb = document.querySelector(".bread-crumb .nav-ul");
+		  if (!breadCrumb) return;
+
+		  const links = breadCrumb.querySelectorAll(".nav-li > .nav-a");
+		  const linkTexts = Array.from(links).slice(1).map(a => a.textContent.trim());
+
+		  const siteName = "동행복권";
+	
+		  const updateTitle = () => {
+			  const links = breadCrumb.querySelectorAll(".nav-li > .nav-a");
+			  const linkTexts = Array.from(links)
+			                         .slice(1)
+			                         .map(a => a.textContent.trim())
+			                         .filter(t => t !== ""); // 빈 값 제외
+			        
+			  if (linkTexts.length > 0) {
+				document.title = linkTexts.join(" > ") + " | " + siteName;
+			  }
+		  };
+	
+		  // #midNav 있으면, 내용 바뀔 때 타이틀 생성하도록 분기
+		  const targetNode = document.getElementById('midNav');
+		  if (targetNode) {
+		      const observer = new MutationObserver(() => {
+		          updateTitle();
+		      });
+		      observer.observe(targetNode, { childList: true, characterData: true, subtree: true });
+		  } else {
+			  updateTitle();
+		  }
+		});
+	</script>
+	
+	
+</head>
+
+<style>
+	#waitPage{
+		position:fixed;
+		width:100%;
+		height:100%;
+		z-index:9999;
+	}
+</style>
+
+<div id="waitPage" style="display:none">
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+<style>
+		html, body {padding: 0; margin: 0;}
+	/* body{font-family:"Open Sans", sans-serif;background-size:cover;} */
+		#waitBackground{position:absolute;background-color:rgba(0,0,0,0.4);width:100%;height:100%;}
+
+		.close-wait-btn{
+			position:absolute;
+			top:20px;
+			right:20px;
+			width:34px;
+			height:34px;
+			border:0;
+			border-radius:999px;
+			background:rgba(0,0,0,0.15);
+			color:#033074;
+			font-size:22px;
+			line-height:34px;
+			cursor:pointer;
+			z-index:9999;
+		}
+		.close-wait-btn:hover{ background:rgba(0,0,0,0.25); }
+		@media (max-width :420px) {
+			body{
+				background-position:50%;
+				
+			}
+			.login-containerT{
+				width:100%!important;
+			
+			}
+			.mobile-size {
+				width:90%!important;
+				margin: 0 auto;
+				
+			}
+			.text-center h3 {
+				margin-top: 52px!important;
+				font-size: 20px!important;
+			}
+			.hpanel {
+				margin-top: 20px!important;
+				padding: 16px 0 16px 0!important;	
+
+			}
+			.sub_text {
+				font-size:0.8em!important;			
+			}
+			#loading3 {
+				width:70%!important;
+			}
+			.main_logo {
+				top:28px!important;
+				left: 45px!important;
+			}
+			.main_logo img {
+				width: 110px!important;
+				height: auto!important;
+			}
+			
+
+			.close-wait-btn{
+			top:20px;
+			right:34px;
+			width:36px;
+			height:36px;
+			font-size:22px;
+			line-height:36px;
+			}
+
+		}
+		.login-containerT{max-width:100%;width:560px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99;}
+
+		.login-containerT, .row, .col-md-12, .hpanel{margin:0;padding:0;}
+		.panel-bodyT{text-align:center;padding:0px;border-radius:0;}
+		
+		#boxHeadLine{background:#4486d4;width:100%;height:4px;}
+		#wait_value{
+			color:#1e1e1e;
+			font-weight:bold;
+			font-size:1.2em;
+			margin: 0 0 20px 0;
+			
+		}
+		
+		#loading3{display:flex;width:50%;justify-content:space-between;margin:30px auto 49px;}
+	    #loading3>div{width:8px;height:40px;margin-right:7px;background-color:#033074;border-radius: 3px;
+	        -webkit-animation:strechdelay 1.5s ease-in-out infinite;
+	        animation:strechdelay 1.5s ease-in-out infinite;
+	    }
+	    #loading3 .line2{
+	        -webkit-animation-delay:-1.4s;
+	        animation-delay:-1.4s;
+	    } #loading3 .line3{
+	        -webkit-animation-delay:-1.3s;
+	        animation-delay:-1.3s;
+	    }#loading3 .line4{
+	        -webkit-animation-delay:-1.2s;
+	        animation-delay:-1.2s;
+	    }#loading3 .line5{
+	        -webkit-animation-delay:-1.1s;
+	        animation-delay:-1.1s;
+	    }#loading3 .line6{
+	        -webkit-animation-delay:-1.0s;
+	        animation-delay:-1.0s;
+	    }#loading3 .line7{
+	        -webkit-animation-delay:-0.9s;
+	        animation-delay:-0.9s;
+	    }#loading3 .line8{
+	        -webkit-animation-delay:-0.8s;
+	        animation-delay:-0.8s;
+	    }#loading3 .line9{
+	        -webkit-animation-delay:-0.7s;
+	        animation-delay:-0.7s;
+	    }#loading3 .line10{
+	        -webkit-animation-delay:-0.6s;
+	        animation-delay:-0.6s;
+	    }#loading3 .line11{
+	        -webkit-animation-delay:-0.5s;
+	        animation-delay:-0.5s;
+	    }#loading3 .line12{
+	        -webkit-animation-delay:-0.4s;
+	        animation-delay:-0.4s;
+	    }#loading3 .line13{
+	        -webkit-animation-delay:-0.3s;
+	        animation-delay:-0.3s;
+	    }#loading3 .line14{
+	        -webkit-animation-delay:-0.2s;
+	        animation-delay:-0.2s;
+	    }#loading3 .line15{
+	        -webkit-animation-delay:-0.1s;
+	        animation-delay:-0.1s;
+	    }#loading3 .line16{
+	        -webkit-animation-delay:-0.0s;
+	        animation-delay:-0.0s;
+	    }
+	    
+	    @keyframes strechdelay{
+	        0%,50%,100%{
+	            transform:scaleY(.7);
+	        }
+	        20%{
+	            transform:scaleY(1);
+	            background-color:#2d69c2;
+	        }
+	    }
+	
+	    @-webkit-keyframes strechdelay{
+	        0%,50%,100%{
+	            -webkit-transform:scaleY(.7);
+	        }
+	        20%{
+	            -webkit-transform:scaleY(1);
+	            background-color:#72a5f5;
+	        }
+	    }
+	</style>
+
+<script type="text/javascript">
+
+var pageUrl = window.location.pathname.substr(1);	// 현재 페이지 정보
+
+function hideWaitUI() {
+    showRealPage();
+	stopPlayAlert();  // 여기서 끔
+}
+
+function checkCntData() {
+    var host = this_host;
+    var ip =  this_ip;
+    var loginId = this_loginId;
+    var port = this_port;
+    var pageUrl = this_pageUrl;
+    var sendThis = this_sendThis
+
+    callTracerApiInputData(host, ip, loginId, port, pageUrl, sendThis);
+
+    var waitCnt = this_waitCnt;
+	
+    if ( waitCnt == "0" || waitCnt == "E") {
+      showRealPage();
+      callBackTracer();
+    } else {
+         var $el = $("#wait_value");
+         var waitCnt = this_waitCnt;
+	 if ( $.isNumeric(waitCnt) ) {
+	     $el.html("고객님의 대기열은 <span style=\"font-size:22px;color:red;font-weight:bold;\">"+comma(Math.floor(waitCnt))+"</span> 명입니다.");
+		 startPlayAlert();
+	} else {
+	  // alert("AAA"+opener.this_waitCnt+"AAA");
+
+	}
+    }
+
+}
+
+function startPlayAlert() {
+  if (typeof playAlert !== "undefined" && playAlert) return; // 이미 돌고있음
+  playAlert = setInterval(function() {
+    if (this_isWait == "T") checkCntData();
+  }, 1000);
+}
+
+function stopPlayAlert() {
+  if (typeof playAlert !== "undefined" && playAlert) {
+    clearInterval(playAlert);
+    playAlert = null;
+  }
+}
+
+$(document).ready(function() {
+    var $el = $("#wait_value");
+    $el.html("고객님의 대기열을 확인중입니다.");
+    //checkCntData();
+});
+
+
+function createCookie() {
+	var now = new Date();
+	  var time = now.getTime();
+	  var expireTime = time + 1000*36000;
+	  now.setTime(expireTime);
+	  var tempExp = 'Wed, 31 Oct 2020 08:50:17 GMT';
+	  document.cookie = 'SESSIONID=hjpark123;expires='+now.toGMTString()+';path=/';
+	  //console.log(document.cookie);
+}
+
+
+/* setInterval(function() {
+	window.location.href='login.do';
+		}, 20000); */
+
+function comma(num){
+    var len, point, str; 
+       
+    num = num + ""; 
+    point = num.length % 3 ;
+    len = num.length; 
+   
+    str = num.substring(0, point); 
+    while (point < len) { 
+        if (str != "") str += ","; 
+        str += num.substring(point, point + 3); 
+        point += 3; 
+    } 
+     
+    return str;
+}
+</script>
+
+</head>
+<body class="blank">
+
+<form id="listForm" method="POST" class="mt-repeater form-horizontal" action="">
+</form>
+<div class="login-containerT" style="">
+    <div class="row" id="isWaitPage" style="display:none">
+	<div class="mobile-size" style="border: 4px solid #033074;height:auto;overflow:hidden;">
+        <div class="col-md-12" style="height:auto;background:#fff;border: 8px solid #d0dcea;padding: 20px 0;">
+		
+		<!-- 닫기 버튼 추가 -->
+    	<button type="button" class="close-wait-btn" onclick="hideWaitUI()" aria-label="닫기">×</button>
+		
+		<div class="main_logo"style="position:absolute;left:24px;top:24px"> <img src="/resources/img/tracer/logo2.png" style="width:90px;height:auto;"> </div>
+        	<div class="text-center" style="padding-top:20px;"></div>
+            <div class="text-center m-b-md">
+                <h3 style="font-weight:bold;font-size:22px;color:#033074;margin-top:5px;letter-spacing: -0.04em;text-align: center;">서비스 접근 대기 중입니다. </h3>
+            </div>
+		<div id="loading3" style="margin-bottom:30px;">
+                                                <div class="line1"></div><div class="line2"></div><div class="line3"></div><div class="line4"></div>
+                                                <div class="line5"></div><div class="line6"></div><div class="line7"></div><div class="line8"></div>
+                                                <div class="line9"></div><div class="line10"></div><div class="line11"></div><div class="line12"></div>
+                                                <div class="line13"></div><div class="line14"></div><div class="line15"></div><div class="line16"></div>
+                                        </div>
+
+            <div class="hpanel" style="width:88%;margin: 0 auto;background:#d0dcea;padding: 14px 0 14px 0;margin-top:20px;">
+                <div class="panel-bodyT" style="border:none;">	
+				<div id="wait_value"></div>
+                    
+                   <div class="sub_text"style="letter-spacing: -0.04em;font-weight:600;font-size:0.8em;color:#1e1e1e;padding: 0 20px 0 20px;">현재 접속 사용자가 많아 대기중이며, <br> 잠시만 기다리시면 자동 접속됩니다.</div>	
+                </div>
+            </div>
+		<!-- <div style="text-align:right;padding:10px 10px 6px;font-size:10px;opacity:0.8;">TRACER - Copyright 2018-2020 WELLCONN Corp.</div> -->
+        </div>
+	</div>
+    </div>
+
+
+	<div class="row" id="isRejectPage" style="display:none">
+	<div class="mobile-size" style="border: 4px solid #033074;height:auto;overflow:hidden;">
+        <div class="col-md-12" style="height:auto;background:#fff;border: 8px solid #d0dcea;padding: 20px 0;">
+		<div class="main_logo"style="position:absolute;left:0px !important;right:0px !important;text-align:center;"> <img src="/resources/img/tracer/logo2.png" style="width:90px;height:auto;"> </div>
+        	<div class="text-center" style="padding-top:20px;"></div>
+            <div class="text-center m-b-md">
+                <h3 style="font-weight:bold;font-size:22px;color:#033074;margin-top:15px;letter-spacing: -0.04em;text-align: center;">서비스 접속이 차단 되었습니다. </h3>
+            </div>
+            <div class="hpanel" style="width:88%;margin: 0 auto;background:#d0dcea;padding: 16px 0 16px 0;margin-top:0px;">
+                <div class="panel-bodyT" style="border:none;">
+				<div id="wait_value2"></div>
+                   <div class="sub_text"style="letter-spacing: -0.04em;font-weight:600;font-size:1.0em;color:#1e1e1e;">현재 접속하신 아이피에서는<br> 접속이 불가능합니다.</div>
+                </div>
+            </div>
+		<!-- <div style="text-align:right;padding:16px 10px 6px;font-size:10px;opacity:0.8;">TRACER - Copyright 2018-2020  WELLCONN Corp.</div> -->
+        </div>
+	</div>
+    </div>
+
+	<div class="row" id="isNotUse" style="display:none">
+	<div class="mobile-size" style="border: 4px solid #033074;height:auto;overflow:hidden;">
+        <div class="col-md-12" style="height:auto;background:#fff;border: 8px solid #d0dcea;padding: 20px 0;">
+		<div class="main_logo"style="position:absolute;left:0px !important;right:0px !important;text-align:center;"> <img src="/resources/img/tracer/logo2.png" style="width:90px;height:auto;"> </div>
+        	<div class="text-center" style="padding-top:20px;"></div>
+            <div class="text-center m-b-md">
+                <h3 style="font-weight:bold;font-size:22px;color:#033074;margin-top:15px;letter-spacing: -0.04em;text-align: center;">서비스 접속이 불가합니다. </h3>
+            </div>
+            <div class="hpanel" style="width:88%;margin: 0 auto;background:#d0dcea;padding: 16px 0 16px 0;margin-top:0px;">
+                <div class="panel-bodyT" style="border:none;">
+				<div id="wait_value2"></div>
+                   <div class="sub_text"style="letter-spacing: -0.04em;font-weight:600;font-size:1.0em;color:#1e1e1e;">접속량이 많아 접속이 불가능합니다.<br> 잠시 후 다시 접속해주세요</div>
+                </div>
+            </div>
+		<!-- <div style="text-align:right;padding:16px 10px 6px;font-size:10px;opacity:0.8;">TRACER - Copyright 2018-2020  WELLCONN Corp.</div> -->
+        </div>
+	</div>
+    </div>
+
+
+</div>
+<div id="waitBackground"></div>
+</body>
+</html>
+</div>
+
+<body>
+		
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+	if($(".d-simplify-cont").length > 0) {
+		$(".btn-rec01").show();
+		$("#header").hide();
+	} 
+	
+	topL.fn_selectResource();
+	
+	cmmUtil.setLoadingOverlay();
+
+	//로그인 페이지 이동
+	$("#loginBtn").on('click', function(){
+		location.href="/login";
+	});
+	
+	//마이페이지 페이지 이동
+	$("#mypageBtn").on('click', function(){
+		location.href="/mypage/home";
+	});
+	
+	//이용안내 페이지 이동
+	$("#userguideBtn").on('click', function(){
+		location.href="/userGuide";
+	});
+
+	//행복공감봉사단 목록 페이지 이동
+	$("#happyListBtn").on('click', function(){
+		location.href="/hpns/happyList";
+	});
+
+	$("#lt645ImdtPrchs, #lt645Smgm").click(function(){//로또645
+		var strVal = $(this).attr("id");
+		if(strVal == "lt645ImdtPrchs"){
+			gmUtil.goGameClsf('LO40','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LO40','SMGM'); 
+		}
+	});
+	
+	$("#pt720ImdtPrchs, #pt720RsrvPrchs").click(function(){//연금복권720
+		var strVal = $(this).attr("id");
+		if(strVal == "pt720ImdtPrchs"){
+			gmUtil.goGameClsf('LP72','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LP72R','PRCHS'); 
+		}
+	});
+	
+	$("#mbGmImdtPrchs, #mbGmSmgm").click(function(){//메가빙고
+		var strVal = $(this).attr("id");
+		if(strVal == "mbGmImdtPrchs"){
+			gmUtil.goGameClsf('LD11','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LD11','SMGM'); 
+		}
+	});
+
+	$("#pbGmImdtPrchs, #pbGmSmgm").click(function(){//파워볼
+		var strVal = $(this).attr("id");
+		if(strVal == "pbGmImdtPrchs"){
+			gmUtil.goGameClsf('LD14','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LD14','SMGM'); 
+		}
+	});
+	
+	$("#skGmImdtPrchs, #skGmSmgm").click(function(){//스피드키노
+		var strVal = $(this).attr("id");
+		if(strVal == "skGmImdtPrchs"){
+			gmUtil.goGameClsf('LD10','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LD10','SMGM'); 
+		}
+	});	
+	
+	$("#tiGmImdtPrchs, #tiGmSmgm").click(function(){//트리플럭
+		var strVal = $(this).attr("id");
+		if(strVal == "tiGmImdtPrchs"){
+			gmUtil.goGameClsf('LI21','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LI21','SMGM'); 
+		}
+	});
+	
+	$("#thGmImdtPrchs, #thGmSmgm").click(function(){//트레져헌터
+		var strVal = $(this).attr("id");
+		if(strVal == "thGmImdtPrchs"){
+			gmUtil.goGameClsf('LI22','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LI22','SMGM'); 
+		}
+	});
+	
+	$("#djGmImdtPrchs, #djGmSmgm").click(function(){//더블잭마이더스
+		var strVal = $(this).attr("id");
+		if(strVal == "djGmImdtPrchs"){
+			gmUtil.goGameClsf('LD20','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LD20','SMGM'); 
+		}
+	});
+	
+	$("#cmGmImdtPrchs, #cmGmSmgm").click(function(){//캐치미
+		var strVal = $(this).attr("id");
+		if(strVal == "cmGmImdtPrchs"){
+			gmUtil.goGameClsf('LI23','PRCHS'); 
+		}else{
+			gmUtil.goGameClsf('LI23','SMGM'); 
+		}
+	});
+	
+	$(".mypage-tooltip").click(function() {
+		if($(".mypage-list-wrap").hasClass("open")) {
+			topL.fn_selectMypageTooltip();
+		}
+	})
+	
+	// 로그아웃
+	$("#logoutBtn").click(function(){
+		location.href = "/securityLogout.do";
+	});
+});
+
+const topL = {
+	fn_selectResource : function(){
+		const options = {
+			"method": "GET",
+			"async" : false
+		}
+		const { userId, expire } = JSON.parse(localStorage.getItem("pwdChgLate")) ?? {};
+		const pwdChgLate = expire > Date.now() ? userId : ""; 
+		
+		ajaxUtil.sendHttpJson({pwdChgLate}, "/sy/selectTopResource.do", options, function(code, msg, {data}){
+			if(isLoggedIn) {
+				var time = data.time
+				var cnt = setInterval(function(){
+					time--;
+		            if(time <= 0){
+						ajaxUtil.sendHttpJson({}, "/sy/selectSessionRemainTime.do", options, function(code, msg, {data}){
+							if(data.remainTime <= 0) {
+				                clearInterval(cnt);
+				                topL.fn_sessionInvalidate();
+							}else{
+								time = data.remainTime;
+							}
+						});
+		            }
+		        }, 1000);
+				
+				if(!cmmUtil.isEmpty("") && "" != 'JC20') {
+					// 비밀번호 경과일 90일 체크
+					const pswdChgDt = new Date(""); 
+					const now = new Date();
+					// 두 날짜 간의 차이를 밀리초 단위로 계산
+					const timeDifference = now - pswdChgDt;
+					// 밀리초를 일자로 변환
+					const dayDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+					
+					// 비밀번호 변경 confirm 노출 제외 경로 설정
+					const skipPaths = [
+					  '/mypage/userPswdInpt',
+					  '/mypage/pswdChg',			// 비밀번호 변경 인증화면
+					  '/mypage/pswdChgRsltNew'		// 비밀번호 변경 입력 화면
+					];
+					
+					const currentPath = window.location.pathname;
+					if (skipPaths.includes(currentPath)) { return; }
+
+					// 20250226 비밀번호 변경 수정 내용
+					// 버튼변경(다음에변경, 지금변경), 네이버 간편가입 계정 제외
+					if( dayDifference > 90 && data.pwdChgLateYn !== "Y" ){
+						const msgCd = null;
+						const opt = {isStatic : true};	// 백드롭 클릭 Close 방지
+						/* 20260319_서봉석_비밀번호 90일체크 로직 추가반영으로 제거				
+						$.confirm("비밀번호 변경 후 90일이 경과하였습니다.<br>비밀번호 변경을 하시기 바랍니다."
+									, topL.fn_chgPwdNow
+									, topL.fn_chgPwdLater
+									, "지금 변경하기"
+									, "다음에 변경하기"
+						)
+						*/
+					}
+				}
+				$("#pbGmSmgm, #skGmSmgm, #mbGmSmgm, #tiGmSmgm, #thGmSmgm, #djGmSmgm, #cmGmSmgm").parent().show();
+			} else {
+				$("#pbGmSmgm, #skGmSmgm, #mbGmSmgm, #tiGmSmgm, #thGmSmgm, #djGmSmgm, #cmGmSmgm").parent().hide();
+			}
+		});
+	},
+	fn_sessionInvalidate : function() {
+		const param = new Object();
+        const options = {
+            "method": "GET",
+            "async" : false
+        }
+		ajaxUtil.sendHttpJson(param, "/sy/sessionInvalidate.do", options, function(code, msg, {data}){
+			$.alert("자동로그아웃 안내 \n 로그인 후 약 30분 동안 서비스 이용이 없어 \n 자동 로그아웃 되었습니다.", function() {
+                location.href = "/login";
+            });
+		});
+	},
+	// 비밀번호 지금 변경하기
+	fn_chgPwdNow : function(){
+		location.href = "/mypage/userPswdInpt?trgtPage=/mypage/pswdChgResult";
+	},
+	// 비밀번호 다음에 변경하기 (30일 연장 쿠키저장) 
+	fn_chgPwdLater : function(){
+		const param = new Object();
+		const options = {
+			"method": "POST",
+			"async" : false
+		}
+		
+		ajaxUtil.sendHttpJson(param, "/sy/updatePswdChgLate.do", options, function(code, msg, {data}){
+				if(data?.userId) {
+					const { userId } = data;
+					localStorage.setItem("pwdChgLate", JSON.stringify({
+						userId,
+						expire: Date.now() + 30*24*60*60*1000, // 30일간 보이지 않도록 설정
+					}));	
+				}
+			}, function(){
+				$.alert("처리 중 오류가 발생했습니다.")
+			}
+		);
+	},
+	
+	fn_hasPartialKeyMatch : function(obj, partialKeyArr){
+		let matchValue = "";
+		for(let key in obj) {
+			if(obj.hasOwnProperty(key) && partialKeyArr.includes(key) ) {
+				matchValue = obj[key];
+			}
+		}
+		return matchValue;
+	},
+	fn_selectMypageTooltip : function(){
+		if(isLoggedIn) {
+			// 회원 예치금 조회
+			cmmUtil.getUserMndp(function(userMndp){
+				const pntDpstAmt = userMndp && userMndp.pntDpstAmt ? userMndp.pntDpstAmt||0 : 0;
+				const pntTkmnyAmt = userMndp && userMndp.pntTkmnyAmt ? userMndp.pntTkmnyAmt||0 : 0;
+				const ncsblDpstAmt = userMndp && userMndp.ncsblDpstAmt ? userMndp.ncsblDpstAmt||0 : 0;
+				const ncsblTkmnyAmt = userMndp && userMndp.ncsblTkmnyAmt ? userMndp.ncsblTkmnyAmt||0 : 0;
+				const csblDpstAmt = userMndp && userMndp.csblDpstAmt ? userMndp.csblDpstAmt||0 : 0;
+				const csblTkmnyAmt = userMndp && userMndp.csblTkmnyAmt ? userMndp.csblTkmnyAmt||0 : 0;
+				const totalAmt = (pntDpstAmt-pntTkmnyAmt)+(ncsblDpstAmt-ncsblTkmnyAmt)+(csblDpstAmt-csblTkmnyAmt);
+				$("#tooltipTotalAmt, #tooltipTotalSAmt").text(cmmUtil.addComma(totalAmt));	// 총 금액
+			});
+			
+			const param = {
+			}
+			const options = {
+				"method": "GET",
+				"async" : true
+			}
+			ajaxUtil.sendHttpJson(param, "/mypage/selectMypageTooltip.do", options, function(code, msg, {data}){
+				let ncfmLtCnt = 0;			// 미확인 복권 게임수
+				if(data) ncfmLtCnt = data.ncfmLtInfo.cnt||0;
+				$("#tooltipNcfmLtCnt, #tooltipNcfmLtSCnt").text(cmmUtil.addComma(ncfmLtCnt));
+				
+				let nrcvmtLramWnCnt = 0;	// 고액 미수령 당첨 게임수
+				if(data) nrcvmtLramWnCnt = data.nrcvmtLramWnCntList.length||0;
+				$("#tooltipNrcvmtLramWnCnt, #tooltipNrcvmtLramWnSCnt").text(cmmUtil.addComma(nrcvmtLramWnCnt));
+				
+// 				let cfmLtCnt = 0;			// 당첨 복권 게임수
+// 				if(data) cfmLtCnt = data.cfmLtCnt||0;
+// 				$("#tooltipCfmLtCnt, #tooltipCfmLtSCnt").text(cmmUtil.addComma(cfmLtCnt));
+				
+				// 셀프 구매 계획 - 구매 한도액 조회
+				const prchsLmtInfo = data.prchsLmtInfo || null;
+				let ymdChgPrchsLmtAmt = "미적용";
+				let wlyChgPrchsLmtAmt = "미적용";
+	            if(prchsLmtInfo.ymdChgPrchsLmtAmt > 0) {
+	            	ymdChgPrchsLmtAmt = cmmUtil.addComma(prchsLmtInfo.ymdPrchsAcmlAmt) + '원/' + cmmUtil.addComma(prchsLmtInfo.ymdChgPrchsLmtAmt)+'원';
+	            }
+	            if(prchsLmtInfo.wlyChgPrchsLmtAmt > 0) {
+	            	wlyChgPrchsLmtAmt = cmmUtil.addComma(prchsLmtInfo.wlyPrchsAcmlAmt) + '원/' + cmmUtil.addComma(prchsLmtInfo.wlyChgPrchsLmtAmt)+'원';
+	            }
+				$("#tooltipYmdPrchsAcmlAmt").text(cmmUtil.addComma(ymdChgPrchsLmtAmt));
+				$("#tooltipWlyPrchsAcmlAmt").text(cmmUtil.addComma(wlyChgPrchsLmtAmt));
+			});
+		}
+	}
+}
+</script>
+<!-- =====헤더 상단===== -->
+	<div class="skip__navi">
+        <h1 class="blind">스킵네비게이션</h1>
+        <ul>
+            <li><a href="#containerBox" class="skipLink">본문바로가기</a></li>
+            <li><a href="#gnb" class="skipLink type__pc">주메뉴바로가기</a></li>
+			<li><a href="#goGnb" class="skipLink type__mo">주메뉴바로가기</a></li>
+        </ul>
+    </div>
+	<!-- =========== header =========== -->
+	<header id="header" class="header">
+		<div class="h-wrap">
+			<div class="h-inbox">			   
+				<!-- ===== logo ===== -->
+				<div class="h-left-area">
+					<h1 id="d-logo" class="logo">
+						<a href="/main" onclick="sessionStorage.removeItem('scrollTarget')">
+							<span class="hidden">동행복권</span>
+						</a>
+					</h1>
+				</div>
+				<!-- //===== logo ===== -->
+				
+				<nav id="gnb" class="gnb-area" tabindex="0">
+					<div class="gnb-inbox">
+						<ul class="gnb">
+							<!-- ===== gnb 1depth 추첨식 복권 ===== -->
+							<li class="depth1-box">
+								<a href="/main#dong-lottery-temp" onclick="sessionStorage.setItem('scrollTarget','dong-lottery-temp')" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="1depth-tit">추첨식 복권</span>
+								</a>
+	
+								<!-- ===== gnb 2depth ===== -->
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox dense">
+										<!-- 로또6/45 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="lt645ImdtPrchs">
+												<div class="lottery-tit">
+													로또6/45
+												</div>
+												<button class="btn-buying1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/lt645/intro">
+														<span>로또6/45 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/lt645/result">
+														<span>추첨결과</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/lt645/stats">
+														<span>통계</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 연금복권720+ -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="pt720ImdtPrchs">
+												<div class="lottery-tit">
+													연금복권720+
+												</div>
+												<button class="btn-buying1 d-caption-txt1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="pt720RsrvPrchs" title="새창">
+														<span>예약구매</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/pt720/intro">
+														<span>연금복권720+ 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/pt720/result">
+														<span>추첨결과</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/pt720/wnrStry">
+														<span>당첨자 인터뷰</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/pt720/stats">
+														<span>통계</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 파워볼 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="pbGmImdtPrchs">
+												<div class="lottery-tit">
+													파워볼
+												</div>
+												<button class="btn-buying1 d-caption-txt1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="pbGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/pbGmInfo?stGmTypeCd=LD14">
+														<span>파워볼 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/PbWnNoInq">
+														<span>추첨결과</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 스피드키노 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="skGmImdtPrchs">
+												<div class="lottery-tit">
+													스피드키노
+												</div>
+												<button class="btn-buying1 d-caption-txt1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="skGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/skGmInfo?stGmTypeCd=LD10">
+														<span>스피드키노 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/SkWnNoInq">
+														<span>추첨결과</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 메가빙고 -->
+										<li class="depth2-detail-box no-line">
+											<div class="lottery-tit-box" id="mbGmImdtPrchs">
+												<div class="lottery-tit">
+													메가빙고
+												</div>
+												<button class="btn-buying1 d-caption-txt1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="mbGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/mbGmInfo?stGmTypeCd=LD11">
+														<span>메가빙고 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/srfllt/MbWnNoInq">
+														<span>추첨결과</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+								<!-- //===== gnb 2depth ===== -->
+							</li>
+							<!-- //===== gnb 1depth ===== -->
+							<!-- ===== gnb 1depth 즉석식 복권 ===== -->
+							<li class="depth1-box">
+								<a href="/main#dong-instant-temp" onclick="sessionStorage.setItem('scrollTarget','dong-instant-temp')" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="depth1-tit">즉석식 복권</span>
+								</a>
+
+								<!-- ===== gnb 2depth ===== -->								
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox">
+										<!-- 트리플럭 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="tiGmImdtPrchs">
+												<div class="lottery-tit">
+													트리플럭
+												</div>
+												<button class="btn-buying1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li"> 
+													<a href="#none" id="tiGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/tlGmInfo?stGmTypeCd=LI21">
+														<span>트리플럭 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI21">
+														<span>당첨내역</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 트레져헌터 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="thGmImdtPrchs">
+												<div class="lottery-tit">
+													트레져헌터
+												</div>
+												<button class="btn-buying1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="thGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/thGmInfo?stGmTypeCd=LI22">
+														<span>트레져헌터 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI22">
+														<span>당첨내역</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 더블잭마이더스 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="djGmImdtPrchs">
+												<div class="lottery-tit">
+													더블잭마이더스
+												</div>
+												<button class="btn-buying1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="djGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/djGmInfo?stGmTypeCd=LD20">
+														<span>더블잭마이더스 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LD20">
+														<span>당첨내역</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 캐치미 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box" id="cmGmImdtPrchs">
+												<div class="lottery-tit">
+													캐치미
+												</div>
+												<button class="btn-buying1" title="새창">
+													바로구매
+												</button>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="#none" id="cmGmSmgm" title="새창">
+														<span>샘플게임</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/cmGmInfo?stGmTypeCd=LI23">
+														<span>캐치미 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI23">
+														<span>당첨내역</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 스피또2000 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													스피또2000
+												</div>
+												<!-- <button class="btn-buying1">
+													바로구매
+												</button> -->
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/st/st20Intro">
+														<span>스피또2000 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/pblcnDsctn?stGmTypeCd=st2000">
+														<span>발행내역</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/wnrStry?stGmTypeCd=st2000">
+														<span>당첨자 이야기</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 스피또1000 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													스피또1000
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/st/st10Intro">
+														<span>스피또1000 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/pblcnDsctn?stGmTypeCd=st1000">
+														<span>발행내역</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/wnrStry?stGmTypeCd=st1000">
+														<span>당첨자 이야기</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 스피또500 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit" >
+													스피또500
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/st/st5Intro">
+														<span>스피또500 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/pblcnDsctn?stGmTypeCd=st500">
+														<span>발행내역</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/st/wnrStry?stGmTypeCd=st500">
+														<span>당첨자 이야기</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 공백 -->
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+									</ul>
+								</div>
+								<!-- //===== gnb 2depth ===== -->
+							</li>
+							<!-- //===== gnb 1depth ===== -->
+							<!-- ===== gnb 1depth 판매점 ===== -->
+							<li class="depth1-box">
+								<a href="/prchsplcsrch/home" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="depth1-tit">판매점</span>
+								</a>
+								<!-- ===== gnb 2depth ===== -->								
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox dense depth2-h200">
+										<!-- 구입처 검색 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/prchsplcsrch/home">복권 판매점 찾기</a>
+												</div>
+											</div>
+										</li>
+										<!-- 당첨 판매점 조회 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/wnprchsplcsrch/home">당첨 판매점 조회</a>
+												</div>
+											</div>
+										</li>
+										<!-- 신규판매점 모집안내 -->
+										<li class="depth2-detail-box">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/mailaply/shpMailInfmAply">신규 판매인 모집안내</a>
+												</div>
+											</div>
+										</li>
+										<!-- 공백 -->
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+									</ul>
+								</div>
+								<!-- //===== gnb 2depth ===== -->
+							</li>
+							<!-- //===== gnb 1depth ===== -->
+							<!-- ===== gnb 1depth 행복공감 ===== -->
+							<li class="depth1-box">
+								<a href="/hpns/counselView" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="depth1-tit">행복공감</span>
+								</a>
+
+								<!-- ===== gnb 2depth ===== -->								
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox">
+										<!-- 건전한 복권문화 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													건전한 복권문화
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/hpns/counselView">
+														<span>복권바로알기</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/sdnsBuyProgramView">
+														<span>건전구매 프로그램</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/sdnsCamPainView">
+														<span>건전화 캠페인</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/sdlyRpsbRgltView">
+														<span>건전화 책임규정</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/ltOvmPrvnView">
+														<span>복권 과몰입 예방법</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/ovmPrvnDscsnInfoView">
+														<span>중독예방 및 상담 안내</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 복권기금 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													복권기금
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/hpns/ltFdFdView">
+														<span>복권기금 소개</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/fdFdBlzActvView">
+														<span>기금사업 활동</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 행복공감 봉사단 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit" id="happyListBtn">
+													행복공감 봉사단
+												</div>
+											</div>
+										</li>
+										<!-- 홍보센터 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													홍보센터
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/hpns/fundListView">
+														<span>광고</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/mediapbrlListView">
+														<span>보도자료</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/hpns/noticeListView">
+														<span>공지사항</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+                                                    <a href="/hpns/happyPulsAplyView">
+                                                        <span>행복더하기 뉴스레터 신청</span>
+                                                    </a>
+                                                </li> 
+												<li class="depth2-li">
+													<a href="https://factcheck.dhlottery.co.kr" target="_blank" class="has-move-icon">
+														<span>복권의 오해와 진실</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="https://lottery-museum.co.kr/artifact_100_story/" target="_blank" class="has-move-icon">
+														<span>복권 역사 자료</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<!-- 이벤트 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+												<a href="/hpns/eventView">
+													이벤트
+												</a>	
+												</div>
+											</div>
+										</li>
+										<!-- 공백 -->
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+									</ul>
+								</div>
+								<!-- //===== gnb 2depth ===== -->
+							</li>
+							<!-- //===== gnb 1depth ===== -->
+							<!-- ===== gnb 1depth 고객센터===== -->
+							<li class="depth1-box">
+								<a href="/custCntrInfo/home" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="depth1-tit">고객센터</span>
+								</a>
+
+								<!-- ===== gnb 2depth ===== -->								
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox depth2-h200">
+										<!-- 고객센터 안내 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/custCntrInfo/home">고객센터 홈</a>
+												</div>
+											</div>
+										</li>
+										<!-- 자주묻는 질문 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/faq/home">자주 하는 질문</a>
+												</div>
+											</div>
+										</li>
+										<!-- 1:1 상담 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<a href="/customer/myDiscussionView"><div class="lottery-tit" >
+													1:1 상담
+												</div></a>
+											</div>
+										</li>
+										<!-- 미수령당첨금 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/nrcvmtwngs/home">미수령 당첨금</a>
+												</div>
+											</div>
+										</li>
+										<!-- 이용약관 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/trms/home">사이트 이용약관</a>
+												</div>
+											</div>
+										</li>
+										<!-- 사용자가이드 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/guide/wnrGuide">당첨자 가이드</a>
+												</div>
+											</div>
+										<!-- 	<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/guide/wnrGuide">
+														<span>당첨자 가이드</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="#">
+														<span>이용자 가이드</span>
+													</a>
+												</li>
+											</ul> -->
+										</li>
+										<!-- 개인정보처리방침 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/prvcplcy/home">개인정보처리방침</a>
+												</div>
+											</div>
+										</li>
+										<!-- 복권 및 복권기금법 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit btn-go">
+													<a href="https://law.go.kr/LSW/lsInfoP.do?lsId=009632&ancYnChk=0#0000" target="_blank">복권 및 복권기금법</a>
+												</div>
+											</div>
+										</li>
+										<!-- 동행클린센터 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit btn-go">
+													<a href="https://clean.dhlottery.co.kr" target="_blank">동행클린센터</a>
+												</div>
+											</div>
+										</li>
+										<!-- 판매 약관 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/saletrms/home">판매 약관</a>
+												</div>
+											</div>
+										</li>
+										<!-- 복권교환권 -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/buyingGuide/home">복권교환권</a>
+												</div>
+											</div>
+										</li>
+										<!-- 공백추가 -->
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>																			
+									</ul>
+								</div>
+								<!-- //===== gnb 2depth ===== -->							   
+							</li>
+							<!-- //===== gnb 1depth ===== -->
+							<!-- ===== gnb 1depth My===== -->
+							<li class="depth1-box">
+								<a href="/mypage/mylotteryledger" class="a-depth1" aria-haspopup="true" aria-expanded="false">
+									<span class="depth1-tit">MY</span>
+								</a>
+
+								<!-- ===== gnb 2depth ===== -->								
+								<div class="depth2-wrap" hidden>
+									<ul class="depth2-inbox">
+										<!-- My -->
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/mypage/home">MY 홈</a>
+												</div>
+											</div>
+											
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/mypage/mylotteryledger">구매/당첨 내역</a>
+												</div>
+											</div>
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/mypage/mylotteryMngView">나의 복권 번호 관리</a>
+												</div>
+											</div>
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit">
+													<a href="/mypage/rstvPrchsDsctnView">예약구매 내역</a>
+												</div>
+											</div>
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													예치금
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/mypage/mndpChrg">
+														<span>충전하기</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/mndpTkmnyAply">
+														<span>출금신청</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/mndpChrgList">
+														<span>예치금 사용내역</span>
+													</a>
+												</li>											
+											</ul>
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													건전구매 프로그램
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/mypage/camPainTestView">
+														<span>셀프 진단평가</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/camPainBuyLimitView">
+														<span>셀프 구매계획</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/camPainRccsView">
+														<span>셀프 휴식계획</span>
+													</a>
+												</li>
+											</ul>
+										</li>
+										<li class="depth2-detail-box inst">
+											<div class="lottery-tit-box">
+												<div class="lottery-tit no-cursor-tit">
+													개인정보
+												</div>
+											</div>
+											<ul class="depth2-detail">
+												<li class="depth2-li">
+													<a href="/mypage/userPswdInpt?trgtPage=/mypage/prvcChg">
+														<span>개인정보 변경</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/userPswdInpt?trgtPage=/mypage/pswdChgResult">
+														<span>비밀번호 변경</span>
+													</a>
+												</li>
+												<li class="depth2-li">
+													<a href="/mypage/userPswdInpt?trgtPage=/mypage/userWhdwl">
+														<span>회원탈퇴</span>
+													</a>
+												</li>
+											</ul>											
+										</li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+										<li class="depth2-detail-box"></li>
+									</ul>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</nav>
+
+				<div class="h-right-area">
+					<ul class="h-right-link">
+ 						<li class="h-right-li">
+							<a href="/userGuide" class="h-right-a" >
+								이용안내
+							</a>
+						</li>
+						<li class="h-right-li">
+						
+						
+							<a href="/login" class="h-right-a">
+								로그인
+							</a>
+						
+						</li>
+						<!-- 이제하 추가 및 수정// -->
+						
+						<!-- //이제하 추가 및 수정 -->
+						<li class="h-right-li">
+							<a href="/csgmBzmnInfo?tabNo=1" class="h-right-a">수탁사업자 소개</a>
+						</li>
+						<li class="h-right-li">
+							<a href="/aboutUs" class="h-right-a dh-info">About Us</a>
+						</li>
+					</ul>
+					<!-- <button class="btn-all-menu">
+						<span class="hidden">전체메뉴보기</span>
+					</button>  -->
+				</div>
+				
+				<div class="all-menu-box">
+					<div class="all-menu-inbox">
+					<!-- 가로 1440px -->
+						<ul class="all-menu-ul">
+							<li class="all-menu-depth1">
+								<a href="#" class="a-depth1">
+									<span class="depth1-tit">추첨식 복권</span>
+								</a>
+								<ul class="depth2-inbox dense">
+									<!-- 로또6/45 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												로또6/45
+											</div>
+											<button class="btn-buying1 d-caption-txt1" id="lt645ImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="/lt645/intro">
+													<span>로또6/45 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/lt645/result">
+													<span>추첨결과</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨자 이야기</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/lt645/stats">
+													<span>통계</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 연금복권720+ -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												연금복권720+
+											</div>
+											<button class="btn-buying1 d-caption-txt1" id="pt720ImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="pt720RsrvPrchs" title="새창">
+													<span>예약구매</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/pt720/intro">
+													<span>연금복권720+ 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/pt720/result">
+													<span>추첨결과</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/pt720/wnrStry">
+													<span>당첨자 인터뷰</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/pt720/stats">
+													<span>통계</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 파워볼 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												파워볼
+											</div>
+											<button class="btn-buying1 d-caption-txt1" id="pbGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="pbGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/pbGmInfo?stGmTypeCd=LD14">
+													<span>파워볼 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/PbWnNoInq">
+													<span>추첨결과</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 스피드키노 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												스피드키노
+											</div>
+											<button class="btn-buying1 d-caption-txt1" id="skGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="skGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/skGmInfo?stGmTypeCd=LD10">
+													<span>스피드키노 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/SkWnNoInq">
+													<span>추첨결과</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 메가빙고 -->
+									<li class="depth2-detail-box no-line">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												메가빙고
+											</div>
+											<button class="btn-buying1 d-caption-txt1" id="mbGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="mbGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/mbGmInfo?stGmTypeCd=LD11">
+													<span>메가빙고 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/srfllt/MbWnNoInq">
+													<span>추첨결과</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<li class="all-menu-depth1">
+								<a href="#" class="a-depth1">
+									<span class="depth1-tit">즉석식 복권</span>
+								</a>
+								<ul class="depth2-inbox">
+									<!-- 트리플럭 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												트리플럭
+											</div>
+											<button class="btn-buying1" id="tiGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="tiGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/inslt/isnt/tlGmInfo?stGmTypeCd=LI21">
+													<span>트리플럭 소개</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 트레져헌터 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												트레져헌터
+											</div>
+											<button class="btn-buying1" id="thGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="thGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/inslt/isnt/thGmInfo?stGmTypeCd=LI22">
+													<span>트레져헌터 소개</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 더블잭마이더스 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												더블잭마이더스
+											</div>
+											<button class="btn-buying1" id="djGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="djGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/inslt/isnt/djGmInfo?stGmTypeCd=LD20">
+													<span>더블잭마이더스 소개</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 캐치미 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												캐치미
+											</div>
+											<button class="btn-buying1" id="cmGmImdtPrchs" title="새창">
+												바로구매
+											</button>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#none" id="cmGmSmgm" title="새창">
+													<span>샘플게임</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/inslt/isnt/cmGmInfo?stGmTypeCd=LI23">
+													<span>캐치미 소개</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 스피또2000 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												스피또2000
+											</div>
+											<!-- <button class="btn-buying1 d-caption-txt1">
+												바로구매
+											</button> -->
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#">
+													<span>스피또2000 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨내역</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨자 이야기</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 스피또1000 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												스피또1000
+											</div>
+											<!-- <button class="btn-buying1 d-caption-txt1">
+												바로구매
+											</button> -->
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#">
+													<span>스피또1000 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨내역</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨자 이야기</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 스피또500 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												스피또500
+											</div>
+											<!-- <button class="btn-buying1 d-caption-txt1">
+												바로구매
+											</button> -->
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#">
+													<span>스피또500 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨내역</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>당첨자 이야기</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+
+								</ul>
+							</li>
+							<li class="all-menu-depth1">
+								<a href="#" class="a-depth1">
+									<span class="depth1-tit">판매점</span>
+								</a>
+								<ul class="depth2-inbox dense">
+									<!-- 구입처 검색 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												판매점 검색
+											</div>
+										</div>
+									</li>
+									<!-- 당첨 판매점 조회 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												당첨 판매점 조회
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="all-menu-depth1">
+								<a href="#" class="a-depth1">
+									<span class="depth1-tit">행복공감</span>
+								</a>
+								<ul class="depth2-inbox">
+									<!-- 건전한 복권문화 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												건전한 복권문화
+											</div>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#">
+													<span>복권바로알기</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>건전구매 프로그램</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>건전화 캠페인</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/hpns/sdlyRpsbRgltView">
+													<span>건전화 책임규정</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>복권 과몰입 예방법</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="/hpns/ovmPrvnDscsnInfoView">
+													<span>중독예방 및 상담 안내</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 복권기금 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												복권기금
+											</div>
+										</div>
+										<ul class="depth2-detail">
+											<li class="depth2-li">
+												<a href="#">
+													<span>복권기금 소개</span>
+												</a>
+											</li>
+											<li class="depth2-li">
+												<a href="#">
+													<span>기금사업 활동</span>
+												</a>
+											</li>
+										</ul>
+									</li>
+									<!-- 행복공감 봉사단 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												행복공감 봉사단
+											</div>
+										</div>
+									</li>
+									<!-- 이벤트 -->
+									<li class="depth2-detail-box">
+										<div class="lottery-tit-box">
+											<div class="lottery-tit">
+												이벤트
+											</div>
+										</div>
+									</li>
+
+								</ul>
+							</li>
+							<li class="all-menu-depth1">
+								<a href="#" class="a-depth1">
+									<span class="depth1-tit">고객센터</span>
+								</a>
+							</li>
+						</ul>
+
+					</div>
+				</div>
+				<div class="gnb-bg"></div>
+			</div>
+		</div>
+	</header>
+	<!-- 1024px부터 해당 헤더가 등장 -->
+	<header id="moHeader" class="mo-header">
+		<div class="mo-header-wrap">
+			<h1 class="logo">
+				<figure>
+					<a href="/main">
+						<img src="/resources/img/main_img/logo_dong.svg" alt="동행복권 로고">
+					</a>
+				</figure>
+			</h1>
+			<div class="h-btn-wrap">
+			    <button type="button" class="btn-rec01" style="display: none;">통합포탈 이동</button>
+ 			    <button class="btn-member" type="button" id="userguideBtn">
+					<img class="btn-guide" src="/resources/img/main_icon/icon-mo-guide.svg" alt="">
+					<p>이용안내</p>
+				</button>
+			    
+				
+				<button class="btn-member" type="button" id="loginBtn">
+					<!--
+						로그인 시 해당 아이콘으로 이미지 변경
+						<img class="btn-myPage" src="/resources/img/main_icon/icon-mo-logIn.svg">
+					-->
+					<!-- 하단 이미지는 로그아웃 된 화면 아이콘 -->
+					<img class="btn-logIn" src="/resources/img/main_icon/icon-mo-logIn.svg" alt="">
+					<p>로그인</p>
+				</button>
+				
+				<button class="ham" type="button" id="goGnb">
+					<img class="btn-ham" src="/resources/img/main_icon/icon-mo-hamMenu.svg" alt="">
+					<p>전체메뉴</p>
+				</button>
+			</div>
+		</div>
+	</header>
+	<!-- //=========== header =========== -->
+		
+<!DOCTYPE html>
+<!-- <style>
+    .footer {
+        position: fixed;; 
+        bottom: 0px;
+    }
+</style> -->
+
+<!-- ===== 본문 ===== -->
+<div class="container-wrap">
+	<div class="wrapContents">
+        <div class="inner">
+            <img src="/resources/img/images/img_error.png" class="img" alt="">
+            <div>
+                <p class="messageError">ERROR 404</p>
+                <p class="messageDescriptioin">페이지를 찾을 수 없습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+		
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<script type="text/javascript">
+	function goFacPop(){
+		window.open('http://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=8668700833', 'fac' , 'width=800, height=658, left=0, top=0, status=no, toolbar=no, menubar=no, location=no');
+	};
+	
+	$(document).ready(function() {
+		if((location.pathname == "/prchsplcsrch/home" || location.pathname == "/wnprchsplcsrch/home") && cmmUtil.isMobile()) {
+			$("#footer").hide();
+		}
+	});
+</script>
+<!-- =====바닥 상단===== -->
+<!-- =========== footer =========== -->
+	<footer id="footer" class="footer">
+		<div class="f-wrap">
+			<!-- inbox-left -->
+			<div class="f-inbox inbox01">
+				<!-- ===== logo ===== -->
+				<h1 id="d-logo" class="logo">
+					<a href="/main">
+						<img src="/resources/img/main_img/logo_dong.svg" alt="동행복권 로고">
+					</a>
+				</h1>
+				<!-- //===== logo ===== -->
+				<!-- ===== footer-gnb ===== -->
+				<nav id="f-gnb" class="f-gnb-area">
+					<ul class="f-gnb-box">
+						<li class="f-gnb-li">
+							<a class="f-gnb-a" href="/trms/home">
+								사이트 이용약관
+							</a>
+						</li>
+						<li class="f-gnb-li">
+							<a class="f-gnb-a" href="/prvcplcy/home">
+								개인정보처리방침
+							</a>
+						</li>
+						<li class="f-gnb-li">
+							<a class="f-gnb-a" href="https://law.go.kr/LSW/lsInfoP.do?lsiSeq=276115&ancYd=20251001&ancNo=21065&efYd=20260102&nwJoYnInfo=N&efGubun=Y&chrClsCd=010202&ancYnChk=0#0000" target="_blank">
+								복권 및 복권기금법
+							</a>
+						</li>
+						<li class="f-gnb-li">
+							<a class="f-gnb-a" href="https://clean.dhlottery.co.kr" target="_blank">
+								동행클린센터
+							</a>
+						</li>
+						<li class="f-gnb-li">
+							<a class="f-gnb-a" href="https://clean.dhlottery.co.kr/accusation/accusationInsert.do?acc_kind=A" target="_blank">
+								불법 사행행위 신고
+							</a>
+						</li>
+					</ul>
+				</nav>
+				<!-- //===== footer-gnb ===== -->
+				<!-- ===== company-info ===== -->
+				<ul class="f-info-box">
+					<li class="f-info-li">
+						수탁사업자 : (주)동행복권
+					</li>
+					<li class="f-info-li">
+						주소 : 06719 서울 서초구 남부순환로 2423 한원빌딩 4층
+					</li>
+					<li class="f-info-li">
+						고객문의 : 1588-6450
+					</li>
+					<li class="f-info-li">
+						FAX : 02-6933-3063
+					</li>
+					<li class="f-info-li">
+						대표자 : 홍덕기
+					</li>
+					<li class="f-info-li">
+						사업자등록번호 : 866-87-00833 
+					</li>
+					<li class="f-info-li">
+						통신판매사업자번호 : 제2018 - 서울서초 - 2075호
+					</li>
+					<li class="f-info-li">
+						<a class="f-info-a bsnss-info" href="javascript:goFacPop()">
+							사업자정보확인
+						</a>
+					</li>
+				</ul>
+				<!-- //===== company-info ===== -->
+				<!-- ===== copyright ===== -->
+				<div class="f-copyright">
+					<p class="f-copy-p">본 홈페이지는 게시된 이메일 주소가 자동 수집되는 것을 거부하며, <span class="mo-br"></span>이를 위반 시 정보통신망법에 의해 처벌됨을 유념하여 주시길 바랍니다.</p>
+					<p class="f-copy-p">19세 미만일 경우 「복권 및 복권기금법」에 따라 복권을 구매할 수 없습니다.</p>
+					<p class="f-copy-p">Copyright (c) 2026 복권위원회&동행복권. All rights reserved</p>
+				</div>
+				<!-- //===== copyright ===== -->
+			</div>
+			<!-- inbox-right -->
+			<div class="f-inbox">
+				<div class="f-crtfied-box">
+					<img src="/resources/img/main_img/certified_mark.png" alt="certified mark">
+				</div>
+			</div>
+		</div>	  
+	</footer>
+	<!-- //=========== footer =========== -->
+<!-- =====바닥 하단===== -->
+		
+
+
+
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	let isTouchInteraction = false;
+
+	// 포인터 입력 방식 감지
+	document.addEventListener('keydown', () => {
+	  isKeyboardInteraction = true;
+	});
+	document.addEventListener('pointerdown', () => {
+	  isKeyboardInteraction = false;
+	});
+
+	$(".ham").on("click", function(){
+	  navL.fn_selectResource();
+	  $(".mo-ham").stop().animate({"right":0+"%"}, 400)
+	  $('html').css("overflow-y","hidden");
+	  $('.btn-goUp').hide();
+
+	  const $target = $(".ham");
+
+	  if (isTouchInteraction) {
+	    $target.addClass("no-focus-visible");
+	    $target.focus();
+	    requestAnimationFrame(() => {
+	      $target.removeClass("no-focus-visible");
+	    });
+	  } else {
+	    $target.focus();
+	  }
+	});
+	
+	
+/* 	$(".ham").click(function(){
+		navL.fn_selectResource();
+		$(".mo-ham").stop().animate({"right":0+"%"}, 400)
+		$('html').css("overflow-y","hidden");
+		$('.btn-goUp').hide();
+		$(".mo-ham").focus();
+	}); */
+	$(".btn-ham-close").click(function(){
+		$(".mo-ham").stop().animate({"right":-100+"%"}, 400)
+		$('html').css("overflow-y","unset");
+		$('.btn-goUp').show();
+		$(".ham").focus();
+	});
+	// ====== quick-menu start ====== //
+	let quickTab = $('.btn-quick-toggle');
+	let quickMenu = $('.quick-ul');
+
+	$('.btn-goUp').click(function () {
+		$('body,html').animate({
+			scrollTop: 0
+		}, 300);
+	});
+	
+	// 로그인
+/* 	$(".btn-login").click(function(){
+		location.href = "/login";
+	}); */
+	
+	// 로그아웃
+	$(".btn-logout").click(function(){
+		location.href = "/securityLogout.do";
+	});
+	
+	// 충전, 출금, 미확인 복권, 고액미수령 당첨 버튼 클릭
+	$(".btn-pill-sm, .btn-pill-md").click(function(){
+		location.href = $(this).attr("data-url");
+	});
+	
+	// 미확인 복권 건수 클릭
+	$("#spanNcfmLtCnt").click(function(){
+		let url = "";
+		if($("#ncfmLtDate").val()) {
+            url = "&srchStrDt=" + $("#ncfmLtDate").val();
+        }
+		location.href = "/mypage/mylotteryledger?winResult=N" + url;
+	});
+	
+	// 고액미수령 당첨 클릭
+	$("#spanNrcvmtLramWnCnt").click(function(){
+		let url = "";
+		if($("#nrcvmtLramWnDate").val()) {
+            url = "&srchStrDt=" + $("#nrcvmtLramWnDate").val();
+        }
+		location.href = "/mypage/mylotteryledger?lramSmam=H" + url;
+	});
+	
+	// 사용자명 클릭
+	$(".mem-name").click(function(){
+		location.href="/mypage/home";
+	});
+});
+
+const navL = {
+	path : "/mypage",
+	fn_selectResource : function(){
+		// 네비게이션 상단 - 마이페이지 요약 화면
+		if(isLoggedIn){
+			// 2. 예치금
+			cmmUtil.getUserMndp(function(data) {
+				$("#navTotalAmt").text(cmmUtil.addComma(data.totalAmt));    // 총 금액
+			});
+			
+			// 3. 미확인 복권, 고액미수령 당첨
+			navL.fn_selectMyHomeInfo();
+		}
+	},
+	// 마이 홈페이지 메인 조회
+	fn_selectMyHomeInfo : function(){
+		const param = {
+		}
+		const options = {
+			"method": "GET",
+			"async" : true
+		}
+		ajaxUtil.sendHttpJson(param, navL.path + "/selectMyHomeInfo.do", options, function(code, msg, {data}){
+			let ncfmLtCnt = 0;			// 미확인 복권(건수)
+			if(data) ncfmLtCnt = data.ncfmLtInfo.cnt||0;
+			$("#spanNcfmLtCnt").text(cmmUtil.addComma(ncfmLtCnt));
+			$("#ncfmLtDate").val(data.ncfmLtInfo.eltOrdrDt);
+			let nrcvmtLramWnCnt = 0;	// 고액 미수령 당첨금(건수)
+			if(data) nrcvmtLramWnCnt = data.nrcvmtLramWnCntList.length||0;
+			$("#spanNrcvmtLramWnCnt").text(cmmUtil.addComma(nrcvmtLramWnCnt));
+			$("#nrcvmtLramWnDate").val(data.nrcvmtLramWnCntList[0]);
+		});
+	},
+}
+</script>
+
+<!-- =========== quick menu =========== -->
+	<!-- 동행요청으로 인한 숨김처리 -->
+	<div id="quick" class="go-quick" style="display: none;">
+		<ul class="quick-ul">
+			<li class="quick-li">
+				<a href="https://clean.dhlottery.co.kr" target="_blank">
+					<button class="btn-quick" type="button">
+						<span class="icon-quick"></span>
+						<span class="txt-quick">동행클린센터</span>
+					</button>
+				</a>
+			</li>
+			<li class="quick-li">
+				<a href="/guide/wnrGuide">
+					<button class="btn-quick" type="button">
+						<span class="icon-quick"></span>
+						<span class="txt-quick">당첨자 가이드</span>
+					</button>
+				</a>
+			</li>
+			<li class="quick-li">
+				<a href="/nrcvmtwngs/home">
+					<button class="btn-quick" type="button">
+						<span class="icon-quick"></span>
+						<span class="txt-quick" >미수령 당첨금</span>
+					</button>
+				</a>
+			</li>
+			<li class="quick-li">
+				<a href="https://program.imbc.com/info/lotto?seq=607" target="_blank">
+					<button class="btn-quick" type="button">
+						<span class="icon-quick"></span>
+						<span class="txt-quick">추첨방송 참관 신청</span>
+					</button>
+				</a>
+			</li>
+		</ul>
+	</div>
+	<div class="quick-pack">
+        <button class="btn-quick-pack btn-quick-toggle" type="button" style="display: none;">
+        	<span class="hidden">퀵버튼토글</span>
+        </button>
+		<button class="btn-quick-pack btn-goUp" type="button">
+			<span class="hidden">맨 처음으로 이동하기</span>
+		</button>
+	</div>
+	<!-- //=========== quick menu =========== -->
+
+	<!-- =========== MO-gnb =========== -->
+	<div id="mo-gnb" class="mo-ham" id="ham-menu" tabindex="0">
+		<!-- 햄버거 상단 -->
+		<div class="gnb-h-box">
+<!-- 			<h1 class="mo-logo">
+				<img src="/resources/img/main_img/logo_dong.svg">
+			</h1> -->
+			<button class="btn-ham-close" aria-label="닫기">
+				<img src="/resources/img/main_icon/icon-mo-ham-close.svg" alt="" aria-hidden="true">
+			</button>
+		</div>
+		<div class="gnb-b-box">
+		
+        
+            <div class="gnb-mem-box">
+                <a href="/login" class="ment-login btn-login arrow">로그인을 해주세요</a>
+            </div>
+        
+            <nav class="ham-menu-wrap">
+			<!-- 최근 이용 메뉴 -->
+	        <div class="gnb-recent-wrap">
+	            <div class="d-recent-wrap">
+	                <ul class="recent-ul">
+	                    <li class="recent-tit">
+	                        최근이용메뉴
+	                    </li>
+	                </ul>
+	            </div>
+	        </div>
+			<nav class="ham-menu-wrap">
+				<ul class="ham-menu">
+					<!-- 1depth -->
+					<!-- 아코디언 on 클래스 유무 -->
+					<li class="ham-depth1-li">
+					<!-- <li class="ham-depth1-li on"> -->
+						<a class="ham-depth1-a" href="#">
+							추첨식 복권
+						</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<!-- 아코디언 on 클래스 유무 -->
+							<li class="ham-depth2-li arrow">
+							<!-- <li class="ham-depth2-li arrow on"> -->
+								<a class="ham-depth2-a">
+									로또6/45
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="lt645ImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/lt645/intro">
+											로또6/45 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/lt645/result">
+											추첨 결과
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/lt645/stats">
+											통계
+										</a>
+									</li>
+								</ul>
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									연금복권720+
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="pt720ImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="pt720RsrvPrchs">
+											예약구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/pt720/intro">
+											연금복권720+ 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/pt720/result">
+											추첨 결과
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/pt720/wnrStry">
+											당첨자 인터뷰
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/pt720/stats">
+											통계
+										</a>
+									</li>
+								</ul>							   
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									파워볼
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="pbGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/pbGmInfo?stGmTypeCd=LD14">
+											파워볼 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/PbWnNoInq">
+											추첨 결과
+										</a>
+									</li>
+								</ul>							 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									스피드키노
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="skGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/skGmInfo?stGmTypeCd=LD10">
+											스피드키노 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/SkWnNoInq">
+											추첨 결과
+										</a>
+									</li>
+								</ul>							
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a" >
+									메가빙고
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="mbGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/mbGmInfo?stGmTypeCd=LD11">
+											메가빙고 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/srfllt/MbWnNoInq">
+											추첨 결과
+										</a>
+									</li>
+								</ul>								 
+							</li>
+						</ul>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-li">
+						<a class="ham-depth1-a" href="#">
+							즉석식 복권
+						</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">트리플럭</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="tiGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/tlGmInfo?stGmTypeCd=LI21">
+											트리플럭 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI21">
+											당첨내역
+										</a>
+									</li>
+								</ul> 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">트레져헌터</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="thGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/thGmInfo?stGmTypeCd=LI22">
+											트레져헌터 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI22">
+											당첨내역
+										</a>
+									</li>
+								</ul>
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">더블잭마이더스</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="djGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/djGmInfo?stGmTypeCd=LD20">
+											더블잭마이더스 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LD20">
+											당첨내역
+										</a>
+									</li>
+								</ul>							
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">캐치미</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a go-buy" href="#" id="cmGmImdtPrchs">
+											바로구매
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/cmGmInfo?stGmTypeCd=LI23">
+											캐치미 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/inslt/isnt/InsLtWnNoInq?stGmTypeCd=LI23">
+											당첨내역
+										</a>
+									</li>
+								</ul>							
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">스피또2000</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/st20Intro">
+											스피또2000 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/pblcnDsctn?stGmTypeCd=st2000">
+											발행내역
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/wnrStry?stGmTypeCd=st2000">
+											당첨자 이야기
+										</a>
+									</li>
+								</ul>							  
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">스피또1000</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/st10Intro">
+											스피또1000 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/pblcnDsctn?stGmTypeCd=st1000">
+											발행내역
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/wnrStry?stGmTypeCd=st1000">
+											당첨자 이야기
+										</a>
+									</li>
+								</ul>							 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">스피또500</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/st5Intro">
+											스피또500 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/pblcnDsctn?stGmTypeCd=st500">
+											발행내역
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/st/wnrStry?stGmTypeCd=st500">
+											당첨자 이야기
+										</a>
+									</li>
+								</ul>							 
+							</li>
+						</ul>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-li">
+						<a class="ham-depth1-a" href="#">
+							판매점
+						</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/prchsplcsrch/home">복권 판매점 찾기</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/wnprchsplcsrch/home">당첨 판매점 조회</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/mailaply/shpMailInfmAply">신규 판매인 모집</a>
+							</li>
+						</ul>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-li">
+						<a class="ham-depth1-a" href="#">
+							행복공감
+						</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">건전한 복권 문화</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/counselView">
+											복권 바로 알기
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/sdnsBuyProgramView">
+											건전구매 프로그램
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/sdnsCamPainView">
+											건전화 캠페인
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/sdlyRpsbRgltView">
+											건전화 책임 규정
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/ltOvmPrvnView">
+											복권 과몰입 예방법
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/ovmPrvnDscsnInfoView">
+											중독 예방 및 상담안내
+										</a>
+									</li>
+								</ul>							
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">복권기금</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/ltFdFdView">
+											복권기금 소개
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/fdFdBlzActvView">
+											기금사업 활동
+										</a>
+									</li>
+								</ul>							
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/hpns/happyList">행복공감봉사단</a>
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">홍보센터</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/fundListView">
+											광고
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/mediapbrlListView">
+											보도자료
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/hpns/noticeListView">
+											공지사항
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+                                        <a class="ham-depth3-a" href="/hpns/happyPulsAplyView">
+                                            행복더하기 뉴스레터 신청
+                                        </a>
+                                    </li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="https://factcheck.dhlottery.co.kr">
+											복권의 오해와 진실
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="https://lottery-museum.co.kr/artifact_100_story/">
+											복권 역사 자료
+										</a>
+									</li>
+								</ul>							 
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/hpns/eventView">이벤트</a>
+							</li>
+						</ul>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-li">
+						<a class="ham-depth1-a" href="#">
+							고객센터
+						</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/custCntrInfo/home">고객센터 홈</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/faq/home">자주 하는 질문</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/customer/myDiscussionView">1:1 상담</a>
+							</li>
+							<li class="ham-depth2-li"> 
+								<a class="ham-depth2-a ham-depth2-move" href="/nrcvmtwngs/home">미수령 당첨금</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/trms/home">이용약관</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/guide/wnrGuide">당첨자 가이드</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/prvcplcy/home">개인정보처리방침</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="https://law.go.kr/LSW/lsInfoP.do?lsId=009632&ancYnChk=0#0000 ">복권 및 복권기금법</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="https://clean.dhlottery.co.kr">동행클린센터</a>
+							</li>
+							<li class="ham-depth2-li">
+                                <a class="ham-depth2-a ham-depth2-move" href="/saletrms/home">판매약관</a>
+                            </li>
+                            <li class="ham-depth2-li">
+                                <a class="ham-depth2-a ham-depth2-move" href="/buyingGuide/home">복권교환권</a>
+                            </li>
+						</ul>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-li" id="mypageMenu">
+						<a class="ham-depth1-a" href="#">MY</a>
+						<!-- 2depth -->
+						<ul class="ham-depth2-ul">
+							<!-- 아코디언 on 클래스 유무 -->
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/mypage/home">
+									MY 홈
+								</a>
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/mypage/mylotteryledger">
+									구매/당첨 내역
+								</a>							 
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/mypage/mylotteryMngView">
+									나의 복권 번호관리
+								</a>						   
+							</li>
+							<li class="ham-depth2-li">
+								<a class="ham-depth2-a ham-depth2-move" href="/mypage/rstvPrchsDsctnView">
+									예약구매 내역
+								</a>								 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									예치금
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/mndpChrg">
+											충전하기
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/mndpTkmnyAply">
+											출금신청
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/mndpChrgList">
+											예치금 사용내역
+										</a>
+									</li>				
+								</ul>								 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									건전구매 프로그램
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/camPainTestView">
+											셀프 진단평가
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/camPainBuyLimitView">
+											셀프 구매계획
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/camPainRccsView">
+											셀프 휴식계획
+										</a>
+									</li>
+								</ul>								 
+							</li>
+							<li class="ham-depth2-li arrow">
+								<a class="ham-depth2-a">
+									개인정보
+								</a>
+								<!-- 3depth -->
+								<ul class="ham-depth3-ul">
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/userPswdInpt?trgtPage=/mypage/prvcChg">
+											개인정보 변경
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/userPswdInpt?trgtPage=/mypage/pswdChgResult">
+											비밀번호 변경
+										</a>
+									</li>
+									<li class="ham-depth3-li">
+										<a class="ham-depth3-a" href="/mypage/userPswdInpt?trgtPage=/mypage/userWhdwl">
+											회원탈퇴
+										</a>
+									</li>
+								</ul>								 
+							</li>
+						</ul>
+					</li>					
+					<!-- 1depth -->
+					<li class="ham-depth1-bg">
+						<a class="ham-depth1-a" href="/csgmBzmnInfo?tabNo=1">
+							<figure>
+								<img src="/resources/img/main_icon/icon-ham-sutak.svg" alt="">
+							</figure>
+							<span class="ham-depth1-txt">
+								수탁사업자 소개	
+							</span>
+						</a>
+					</li>
+					<!-- 1depth -->
+					<li class="ham-depth1-bg">
+						<a class="ham-depth1-a" href="/aboutUs">
+							<figure>
+								<img src="/resources/img/main_icon/icon-ham-eng.svg" alt="">
+							</figure>
+							<span class="ham-depth1-txt">
+								About us	
+							</span>
+						</a>
+					</li>
+				</ul>
+			</nav>
+			<div class="gnb-f-box">
+				<a class="foot-item-box" href="https://program.imbc.com/info/lotto?seq=607">
+					<figure class="foot-item-cir">
+						<img src="/resources/img/main_icon/icon-ham-foot01.svg" alt="">
+					</figure>
+					<span class="foot-item-txt">
+						추첨방송<br>참관 신청
+					</span>
+				</a>
+				<a class="foot-item-box" href="/nrcvmtwngs/home">
+					<figure class="foot-item-cir">
+						<img src="/resources/img/main_icon/icon-ham-foot02.svg" alt="">
+					</figure>
+					<span class="foot-item-txt">
+						미수령<br>당첨금
+					</span>
+				</a>
+				<a class="foot-item-box" href="/guide/wnrGuide">
+					<figure class="foot-item-cir">
+						<img src="/resources/img/main_icon/icon-ham-foot03.svg" alt="">
+					</figure>
+					<span class="foot-item-txt">
+						당첨자<br>가이드
+					</span>
+				</a>
+				<a class="foot-item-box" href="https://clean.dhlottery.co.kr">
+					<figure class="foot-item-cir">
+						<img src="/resources/img/main_icon/icon-ham-foot04.svg" alt="">
+					</figure>
+					<span class="foot-item-txt">
+						동행<br>클린센터
+					</span>
+				</a>
+			</div>		
+		</div>
+
+	</div>
+	<script>
+		//모바일 메뉴 포지션의 위치로 움직임
+
+		hamSlide01();
+		function hamSlide01() {
+			let $ham_depth01_ul = $('.ham-menu');
+			let $ham_depth01_li = $('.ham-menu .ham-depth1-li');
+			let $ham_depth01_a = $('.ham-menu .ham-depth1-li .ham-depth1-a');
+			$ham_depth01_a.on('click', function (e) {
+			    e.preventDefault();
+
+			    const $current = $(this).next('.ham-depth2-ul');
+
+			    if ($current.is(':visible')) {
+			      $current.stop(true, true).slideUp();
+			    } else {
+			      $('.ham-depth2-ul').stop(true, true).slideUp();
+			      $current.stop(true, true).slideDown();
+			    }
+		  	});
+		}
+
+		hamSlide02();
+		function hamSlide02() {
+			let $ham_depth02_ul = $('.ham-depth2-ul');
+			let $ham_depth02_li = $('.ham-depth2-ul .ham-depth2-li');
+			let $ham_depth02_a = $('.ham-depth2-ul .ham-depth2-li .ham-depth2-a');
+			$ham_depth02_a.click(function(e){
+				if($(this).hasClass("ham-depth2-move")) return;
+				
+				e.preventDefault();
+				// $ham_depth02_li.removeClass("on");
+				// $(this).parent().addClass("on");
+				$(this).parent().siblings().children(".ham-depth3-ul").slideUp();
+				//탐색구문 : li의 태그 형제들(클릭한 li를 제외한 나머지 li들)의 자식들을 선택
+				//탐색했을 때 선택되는 태그들이 많다면 괄호에 선택하고 싶은 클래스, 아이디, 태그를 넣어줌
+
+
+				$(this).siblings(".ham-depth3-ul").stop().slideToggle(50, 'easeInOutQuart');
+			});
+		}
+			// 햄버거 클릭시 메뉴 노출 
+
+			// 햄버거 내 메뉴 토글
+		
+	</script>
+	<!-- //=========== MO-gnb =========== -->
+</body>
+</html>

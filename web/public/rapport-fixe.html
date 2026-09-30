@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고정수 — 어디까지 올릴 수 있는가</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:66ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  h3 { font-size:.9rem; margin:1.7rem 0 .4rem; color:var(--gold-deep); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:68ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1.2rem 1.3rem; margin:1rem 0; overflow-x:auto; }
+  .row { display:grid; grid-template-columns:11rem 1fr 4.2rem; gap:.7rem;
+         align-items:center; margin:.4rem 0; min-width:32rem; }
+  .row .who { font-size:.8rem; color:var(--ink-soft); text-align:right; }
+  .row .who b { display:block; font-size:.67rem; color:var(--muted); font-weight:400; }
+  .trk { position:relative; height:20px; background:var(--line-soft); border-radius:3px; }
+  .trk .fill { position:absolute; top:0; bottom:0; left:0; border-radius:3px;
+               background:linear-gradient(90deg,rgba(184,145,47,.3),rgba(184,145,47,.75)); }
+  .trk .fill.grey { background:linear-gradient(90deg,rgba(139,131,117,.2),rgba(139,131,117,.45)); }
+  .trk .fill.deep { background:linear-gradient(90deg,rgba(58,107,138,.35),rgba(58,107,138,.85)); }
+  .trk .law { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--hot); }
+  .row .v { font-family:var(--figure); font-size:.8rem; text-align:right; }
+  .sc { display:grid; grid-template-columns:11rem 1fr 4.2rem; gap:.7rem;
+        font-family:var(--figure); font-size:.66rem; color:var(--muted); min-width:32rem; }
+  .sc .t { position:relative; height:1rem; }
+  .sc .t span { position:absolute; transform:translateX(-50%); }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.7rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.me td { background:var(--gold-wash); }
+  tr.rule td { color:var(--ink-soft); }
+  .up { color:var(--gold-deep); } .dn { color:var(--hot); }
+  .scroll { overflow-x:auto; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>고정수 — 어디까지 올릴 수 있는가</h1>
+<div class="sub">
+  100조합에서 당첨번호를 더 많이 담으려면 몇 개를 고정해야 하는가. 여섯 가지 규칙을
+  <strong>walk-forward</strong>로 재고, 실제 당첨번호를 고정한 <strong>오라클</strong>을
+  자로 놓아 그 사이의 거리를 측정했습니다. 2026-09-09.
+</div>
+<div class="note">
+  <strong>모든 수치는 walk-forward입니다.</strong> 회차 N의 규칙은 N보다 앞선 회차만 봅니다.
+  오라클만이 예외이고, 그것은 <em>재현 불가능한 자</em>로서만 쓰입니다 — 당첨번호를 미리
+  아는 방법은 없습니다.
+</div>
+
+<h2>① 한 장의 그림</h2>
+<p>
+  가로축은 <strong>내 칸 중 당첨번호가 들어간 비율</strong>. 100조합이면 600칸이고, 그중
+  몇 %가 당첨번호였는가. <span style="color:var(--hot)">붉은 선</span>이 법칙
+  <code>6/45 = 13.33 %</code>입니다.
+</p>
+<div class="chart">
+  <div class="row"><div class="who">오라클 2개<b>당첨번호 2개를 안다면</b></div>
+    <div class="trk"><div class="fill deep" style="width:94.1%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">39.53%</div></div>
+  <div class="row"><div class="who">오라클 1개<b>당첨번호 1개를 안다면</b></div>
+    <div class="trk"><div class="fill deep" style="width:62.2%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">26.14%</div></div>
+  <div class="row"><div class="who">R3 · 2 고정<b>이월 ∩ 패턴 라인</b></div>
+    <div class="trk"><div class="fill" style="width:36.0%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">15.14%</div></div>
+  <div class="row"><div class="who">B · 1 고정<b>이월 × 번호당첨률</b></div>
+    <div class="trk"><div class="fill" style="width:34.7%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">14.57%</div></div>
+  <div class="row"><div class="who">고정 없음<b>실측 444만 칸</b></div>
+    <div class="trk"><div class="fill grey" style="width:31.8%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">13.35%</div></div>
+  <div class="row"><div class="who">A · 1 고정<b>이월 무작위</b></div>
+    <div class="trk"><div class="fill grey" style="width:29.4%"></div>
+      <div class="law" style="left:31.7%"></div></div><div class="v">12.34%</div></div>
+  <div class="sc"><div></div><div class="t">
+    <span style="left:0%">0%</span><span style="left:23.8%">10%</span>
+    <span style="left:47.6%">20%</span><span style="left:71.4%">30%</span>
+    <span style="left:95.2%">40%</span></div><div></div></div>
+  <div class="key">
+    <span style="color:var(--hot)">▮</span> 13.33 % = 법칙 ·
+    금색 = 실제로 잴 수 있는 규칙 · 파랑 = 오라클(재현 불가)
+  </div>
+</div>
+<div class="note bad">
+  <strong>세 규칙은 붉은 선에 붙어 있고, 오라클은 두 배·세 배 떨어져 있습니다.</strong>
+  이 프로젝트가 시험한 모든 규칙 — 이월, 패턴 라인, 번호당첨률, 미출현 간격, 그리고 그
+  교차 — 은 <strong>12.3 %에서 15.1 % 사이</strong>에 있습니다. 오라클 1개는 26.1 %.
+  그 사이의 11 포인트는 <em>아무도 건드리지 못한 공간</em>입니다.
+</div>
+
+<h2>② 자 — 오라클이 보여주는 천장</h2>
+<p>
+  walk-forward 501~1240회 · 740회차 × 100조합 × 씨앗 10 = <strong>줄당 444만 칸</strong>.
+  고정수는 그 회차의 실제 당첨번호에서 무작위로 뽑았습니다.
+</p>
+<div class="scroll">
+<table>
+<thead><tr>
+  <th>구성</th><th class="n">당첨 칸</th><th class="n">비율</th><th class="n">보너스 포함</th>
+  <th class="n">조합당</th><th class="n">3개 (5등)</th><th class="n">4개 (4등)</th>
+  <th class="n">5개</th><th class="n">6개</th><th class="n">회수율</th>
+</tr></thead>
+<tbody>
+<tr class="me"><td>고정 없음</td><td class="n">592,621</td><td class="n">13.35%</td><td class="n">691,322</td><td class="n">0.8008</td><td class="n">16,726</td><td class="n">1,021</td><td class="n">18</td><td class="n">0</td><td class="n">21.9%</td></tr>
+<tr><td>오라클 1개</td><td class="n">1,160,648</td><td class="n">26.14%</td><td class="n">1,244,825</td><td class="n">1.5684</td><td class="n">62,267</td><td class="n">5,066</td><td class="n">136</td><td class="n">1</td><td class="n">458%</td></tr>
+<tr><td>오라클 2개</td><td class="n">1,755,282</td><td class="n">39.53%</td><td class="n">1,824,311</td><td class="n">2.3720</td><td class="n">219,380</td><td class="n">26,553</td><td class="n">928</td><td class="n">3</td><td class="n">1337%</td></tr>
+</tbody>
+</table>
+</div>
+<div class="scroll">
+<table>
+<thead><tr><th>배수 (고정 없음 = 1)</th><th class="n">당첨 총</th><th class="n">5등</th><th class="n">4등</th><th class="n">5개</th><th class="n">회수율</th></tr></thead>
+<tbody>
+<tr><td>오라클 1개</td><td class="n">×1.96</td><td class="n">×3.7</td><td class="n">×5.0</td><td class="n">×7.6</td><td class="n">×21</td></tr>
+<tr class="me"><td>오라클 2개</td><td class="n">×2.96</td><td class="n">×13.1</td><td class="n">×26.0</td><td class="n">×51.6</td><td class="n">×61</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  <strong>등수가 올라갈수록 격차가 폭발합니다.</strong> 당첨번호 총량은 3배인데 4등은
+  <strong>26배</strong>입니다. 문턱을 넘어야 돈이 되고, 고정수의 이점은 칸마다 곱해지기
+  때문입니다. 그리고 <code>고정 없음 = 13.35 %</code>는 444만 칸에서 법칙의 13.33 %에
+  정확히 앉습니다 — 자가 제대로 작동한다는 증거입니다.
+</p>
+
+<h2>③ 실제로 쓸 수 있는 규칙들</h2>
+<p>
+  고른 고정수가 실제 당첨번호였던 비율. 세 구간으로 나눈 것은 <strong>한 구간에서
+  좋아 보이는 규칙이 다음 구간에서 살아남는지</strong>를 보기 위해서입니다.
+</p>
+
+<h3>2개 고정</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>규칙</th><th class="n">301~500</th><th class="n">501~870</th><th class="n">871~1240</th><th class="n">301~1240</th></tr></thead>
+<tbody>
+<tr class="rule"><td>R0 이월 무작위 2</td><td class="n">13.50%</td><td class="n">13.78%</td><td class="n dn">12.43%</td><td class="n dn">13.19%</td></tr>
+<tr class="rule"><td>R1 이월 × 번호당첨률</td><td class="n">14.00%</td><td class="n up">14.73% <small>z+1.12</small></td><td class="n dn">13.24%</td><td class="n">13.99%</td></tr>
+<tr class="rule"><td>R2 패턴 라인 상위 2</td><td class="n">14.25%</td><td class="n dn">12.57%</td><td class="n up">14.73%</td><td class="n">13.78%</td></tr>
+<tr class="me"><td><strong>R3 이월 ∩ 패턴 라인</strong></td><td class="n">13.25%</td><td class="n up">14.59%</td><td class="n up"><strong>15.14% <small>z+1.44</small></strong></td><td class="n up">14.52% <small>z+1.52</small></td></tr>
+<tr><td>무작위 (기준)</td><td class="n">13.33%</td><td class="n">13.33%</td><td class="n">13.33%</td><td class="n">13.33%</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note bad">
+  <strong>R1을 보세요.</strong> 501~870에서 14.73 % (z+1.12) — 지금의 R3와 똑같은 모습이었습니다.
+  다음 구간에서 <strong>13.24 %</strong>, 정확히 우연으로 돌아왔습니다. 870회 시점에
+  이 표를 만들었다면 나는 R1을 두고 지금 R3에 대해 할 말을 했을 것입니다.
+  <br><br>
+  그리고 R3의 두 재료는 <em>따로 놓으면 아무것도 아닙니다</em> — 이월 단독 13.19 %(법칙 아래),
+  패턴 라인 단독 13.78 %(구간마다 부호가 뒤집힘). 여럿 중 가장 좋은 조합을 고르면
+  자연히 그 조합이 재료보다 커 보입니다.
+</div>
+
+<h3>1개 고정</h3>
+<div class="scroll">
+<table>
+<thead><tr><th>규칙</th><th class="n">301~500</th><th class="n">501~870</th><th class="n">871~1240</th><th class="n">301~1240</th><th class="n">100조합 적중</th></tr></thead>
+<tbody>
+<tr class="rule"><td>A 이월 무작위 1개</td><td class="n dn">7.00% <small>z−2.63</small></td><td class="n">15.68%</td><td class="n">11.89%</td><td class="n">12.34%</td><td class="n dn">78.6</td></tr>
+<tr class="rule"><td>B 이월 × 번호당첨률</td><td class="n">15.00%</td><td class="n up">16.22% <small>z+1.63</small></td><td class="n">12.70%</td><td class="n">14.57%</td><td class="n dn">79.4</td></tr>
+<tr class="rule"><td>C 패턴 라인 최고 자리</td><td class="n">13.50%</td><td class="n">11.89%</td><td class="n">12.97%</td><td class="n">12.66%</td><td class="n dn">79.6</td></tr>
+<tr class="rule"><td>D 이월 ∩ 패턴 라인</td><td class="n up">16.50%</td><td class="n">14.05%</td><td class="n">13.24%</td><td class="n">14.26%</td><td class="n dn">79.9</td></tr>
+<tr class="rule"><td>E 번호당첨률 전체 1위</td><td class="n">14.50%</td><td class="n">12.97%</td><td class="n">11.89%</td><td class="n">12.87%</td><td class="n dn">78.6</td></tr>
+<tr class="me"><td>F 가장 오래 안 나온 번호</td><td class="n dn">12.00%</td><td class="n dn">12.70%</td><td class="n up"><strong>16.22%</strong></td><td class="n">13.94%</td><td class="n up"><strong>82.9</strong></td></tr>
+<tr><td>고정 없음</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">13.33%</td><td class="n"><strong>80.0</strong></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  <strong>여섯 중 다섯이 80.0 아래입니다.</strong> 유일하게 위인 F(82.9)는 앞의 두 구간에서
+  12.00 %와 12.70 % — 법칙 아래였다가 마지막 구간에만 16.22 %로 뛰었습니다.
+  전체로는 13.94 %, z = +0.54. R1의 붕괴를 순서만 뒤집어 놓은 모양입니다.
+</p>
+<div class="note cool">
+  <strong>A행이 이 표에서 가장 중요합니다.</strong> 「이월 7개 중 아무거나 1개」는 아무것도
+  판단하지 않는 규칙인데, 301~500 구간에서 <strong>7.00 %, z = −2.63</strong>을 냈습니다.
+  이 표 전체에서 가장 큰 편차가, 규칙이 아닌 순수한 우연에서 나왔습니다. 다른 줄의
+  z = +1.4, +1.6이 무엇을 뜻하는지 이 한 줄이 말해 줍니다.
+</div>
+
+<h3>R3에서 k를 늘리면</h3>
+<div class="scroll">
+<table>
+<thead><tr><th class="n">k</th><th class="n">501~870</th><th class="n">871~1240</th><th class="n">301~1240</th><th class="n">100조합 적중</th><th class="n">1등 가능 회차</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td class="n">14.05%</td><td class="n">13.24%</td><td class="n">14.26%</td><td class="n">79.9 <small>−0.1</small></td><td class="n">13.24%</td></tr>
+<tr class="me"><td class="n"><strong>2</strong></td><td class="n">14.59%</td><td class="n up"><strong>15.14%</strong></td><td class="n">14.52%</td><td class="n up"><strong>83.6 <small>+3.6</small></strong></td><td class="n dn"><strong>1.35%</strong></td></tr>
+<tr><td class="n">3</td><td class="n up">15.23% <small>z+1.85</small></td><td class="n">14.41%</td><td class="n up">14.75% <small>z+2.22</small></td><td class="n">83.2 <small>+3.2</small></td><td class="n dn">0.00%</td></tr>
+<tr><td class="n">4</td><td class="n">13.99%</td><td class="n">13.24%</td><td class="n">13.75%</td><td class="n dn">79.6</td><td class="n dn">0.00%</td></tr>
+<tr><td class="n">5</td><td class="n">14.54%</td><td class="n">13.19%</td><td class="n">14.04%</td><td class="n dn">79.3</td><td class="n dn">0.00%</td></tr>
+<tr><td class="n">6</td><td class="n">14.14%</td><td class="n dn">12.70%</td><td class="n">13.51%</td><td class="n dn">76.2</td><td class="n dn">0.00%</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  최대는 <strong>k = 2에서 +3.6개</strong>. k = 3 이상은 이월 순위 아래쪽의 나쁜 후보를
+  주워 담아 80 아래로 떨어집니다. 그리고 오른쪽 열이 대가입니다 — k = 3부터는 최근
+  370회차 동안 <strong>1등이 가능했던 회차가 한 번도 없습니다</strong>.
+</p>
+
+<h2>④ R3란 무엇인가</h2>
+<p>세 단계뿐입니다.</p>
+<div class="scroll">
+<table>
+<thead><tr><th>단계</th><th>내용</th></tr></thead>
+<tbody>
+<tr><td><strong>① 후보 — 이월</strong></td><td>직전 회차의 <strong>7개</strong>(본번호 6 + 보너스). 이들은 다음 회차에서 미출현 간격이 모두 1이다.</td></tr>
+<tr><td><strong>② 순위 — 패턴 라인</strong></td><td>45개를 <code>간격 오름차순 → 번호 오름차순</code>으로 줄 세운다(「라인 × 미출현 간격」 화면 그대로). 각 <strong>자리</strong>의 과거 당첨률을 <em>그 시점까지의 회차만으로</em> 계산한다.</td></tr>
+<tr><td><strong>③ 선택</strong></td><td>후보 7개 중 자리 당첨률 <strong>상위 2개</strong>를 고정한다. 나머지 4칸은 자유.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>1240회에서 R3가 고른 것</h3>
+<div class="scroll">
+<table>
+<thead><tr><th class="n">후보</th><th class="n">라인 자리</th><th class="n">그 자리의 과거 당첨률</th><th></th></tr></thead>
+<tbody>
+<tr class="me"><td class="n">32</td><td class="n">5</td><td class="n">15.51%</td><td>← 선택</td></tr>
+<tr class="me"><td class="n">13</td><td class="n">3</td><td class="n">15.35%</td><td>← 선택</td></tr>
+<tr><td class="n">8</td><td class="n">1</td><td class="n">14.22%</td><td></td></tr>
+<tr><td class="n">11</td><td class="n">2</td><td class="n">13.09%</td><td></td></tr>
+<tr><td class="n">22</td><td class="n">4</td><td class="n">12.92%</td><td></td></tr>
+<tr><td class="n">36</td><td class="n">7</td><td class="n">12.68%</td><td></td></tr>
+<tr><td class="n">33</td><td class="n">6</td><td class="n">12.52%</td><td></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  실제 1240회 당첨은 <code>11 13 19 20 31 44</code> — <strong>2개 중 1개 적중</strong>(13).
+  <br>1241회에 대해 R3는 <strong>27과 19</strong>를 고릅니다(자리 5 → 15.50 %, 자리 3 → 15.42 %).
+</p>
+<div class="note bad">
+  <strong>규칙의 정체를 그대로 말하면</strong> : 후보 7개는 언제나 자리 1~7을 차지하므로,
+  R3는 결국 <em>「직전 회차 7개 중 세 번째와 다섯 번째로 작은 번호를 골라라」</em>입니다.
+  그리고 네 화면의 주석이 이미 이렇게 적고 있습니다 —
+  <strong>45개 자리 전체 검정 : χ² = 47.8 · df 44 · p = 0.32</strong>.
+  자리 사이의 차이는 통계적으로 존재하지 않습니다.
+</div>
+
+<h2>⑤ 대가 — 1/66</h2>
+<p>
+  고정수는 확률을 만들지 않습니다. <strong>옮깁니다.</strong> 어떤 2개를 고정하든,
+  그 둘이 함께 나올 확률은 정확히
+</p>
+<div class="note">
+  <code>C(43,4) / C(45,6) = 123,410 / 8,145,060 = <strong>1/66 = 1.515 %</strong></code>
+</div>
+<div class="scroll">
+<table>
+<thead><tr><th>구성</th><th class="n">1등이 가능한 회차</th><th class="n">가능할 때 100장의 1등 확률</th><th class="n">곱</th></tr></thead>
+<tbody>
+<tr><td>고정 없음</td><td class="n">100 %</td><td class="n">1 / 81,451</td><td class="n">1/81,451</td></tr>
+<tr class="me"><td>2 고정수</td><td class="n">1/66 (1.515 %)</td><td class="n">1 / 1,234</td><td class="n"><strong>1/81,451</strong></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  <strong>두 줄의 곱이 같습니다 — 근사가 아니라 정확히.</strong> 고정수가 나온 회차에는
+  100장이 <strong>66배</strong> 강해지지만, 그런 회차가 66번에 한 번입니다.
+  <code>1/66 × 66 = 1</code>.
+</p>
+<div class="scroll">
+<table>
+<thead><tr><th>2 고정수일 때</th><th class="n">확률</th></tr></thead>
+<tbody>
+<tr class="me"><td>둘 다 안 나옴 — 100장이 함께 0에서 출발</td><td class="n"><strong>74.85 %</strong></td></tr>
+<tr><td>하나만 나옴</td><td class="n">23.63 %</td></tr>
+<tr><td>둘 다 나옴</td><td class="n">1.52 %</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  네 주 중 세 주는 두 고정수가 모두 빗나갑니다. 그리고 그때 100장은 <em>따로따로</em>가
+  아니라 <strong>함께</strong> 빗나갑니다 — 그것이 고정수의 진짜 성질입니다.
+  <strong>1240-B가 그 두 면을 다 보여줬습니다</strong> : 고정수 <code>13</code>이 나와서
+  조합당 1.525(A안은 1.000). 만약 13이 안 나왔다면 B는 <strong>0.525</strong>,
+  A의 절반이었습니다.
+</p>
+
+<h2>⑥ 돈으로는</h2>
+<p>walk-forward 501~1240 · 740회차 × 100조합 · 실제 지급액 기준.</p>
+<div class="scroll">
+<table>
+<thead><tr><th>전략</th><th class="n">조합당 적중</th><th class="n">5등/회차</th><th class="n">4등/회차</th><th class="n">회수율</th></tr></thead>
+<tbody>
+<tr><td>오라클2 (재현 불가)</td><td class="n">2.3716</td><td class="n">29.55</td><td class="n">3.611</td><td class="n">5333 %</td></tr>
+<tr class="me"><td>R3 · 2 고정</td><td class="n up">0.8292</td><td class="n">2.46</td><td class="n">0.145</td><td class="n">46.1 %*</td></tr>
+<tr><td>패턴 라인 · 2 고정</td><td class="n">0.8021</td><td class="n">2.20</td><td class="n">0.114</td><td class="n dn">20.8 %</td></tr>
+<tr><td><strong>고정 없음</strong></td><td class="n">0.7986</td><td class="n">2.26</td><td class="n">0.138</td><td class="n"><strong>22.7 %</strong></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  <small>* R3의 46.1 %는 37만 조합 중 <strong>2등 한 장</strong>(6,100만원)이 만든 숫자입니다.
+  그 한 장을 빼면 20 % 근처로 내려앉습니다. 최소·평균·최대로 보면 이 줄의 중앙값은
+  고정 없음과 구분되지 않습니다.</small>
+</p>
+<div class="note bad">
+  <strong>적중은 올라가고 돈은 내려갑니다.</strong> R3는 0.8292 대 0.7986으로 번호를 조금 더
+  담지만, 회수율은 <strong>20.8 % 대 22.7 %</strong>. 100장이 함께 빗나가는 회차가 많아
+  작은 당첨의 기회를 놓치기 때문입니다.
+</div>
+
+<h2>⑦ 결론</h2>
+<div class="note ok">
+  <strong>측정된 최대치 : R3 · k=2 → 100조합에서 83.6개 (고정 없음 80.0개).</strong>
+  이것이 이 프로젝트가 만들어낸 모든 규칙의 천장입니다. +3.6개, +4.5 %.
+</div>
+<div class="note bad">
+  <strong>그리고 그것을 믿을 근거는 아직 없습니다.</strong> z = +1.44, 규칙 네 개를 시도했을
+  때의 잡음 천장 ~1.15를 0.3σ 넘을 뿐입니다. R1은 같은 자리에서 무너졌고, R3의 두 재료는
+  따로 놓으면 법칙 아래이며, 자리별 당첨률은 χ² 검정에서 p = 0.32로 존재하지 않습니다.
+</div>
+<div class="note">
+  <strong>대가는 확실합니다.</strong> 2 고정수 → 1등이 가능한 회차 <strong>100 % → 1.5 %</strong>,
+  회수율 <strong>22.7 % → 20.8 %</strong>. 3개 이상 고정하면 최근 370회차 동안 1등 가능
+  회차가 <strong>0회</strong>입니다.
+</div>
+<p>
+  <strong>권고 : 아무것도 고정하지 않는다.</strong> 확실한 손실(회수율, 1등 가능성)을 주고
+  불확실한 +3.6개를 사는 거래이기 때문입니다. 그래도 고정하고 싶다면 R3 · k=2가 최선의
+  선택이고, 그 선택은 이제 <em>고정되어</em> 있습니다 — 1241회에 <code>27</code>과
+  <code>19</code>를 미리 지목했습니다.
+</p>
+<div class="note cool">
+  <strong>다음에 할 수 있는 유일하게 정직한 일</strong> : R3가 매 회차 자기 2개를 미리
+  적고, 우리는 세기만 합니다. 티켓도 돈도 들지 않습니다. <strong>60~80회차</strong>면
+  z가 2.5로 올라가 진짜임이 드러나거나, R1처럼 13.33 %로 되돌아갑니다.
+</div>
+
+<footer>
+  walk-forward 501~1240회 · 740회차 × 100조합 × 씨앗 10 = 줄당 4,440,000칸 ·
+  규칙 통계는 모두 해당 회차 이전 데이터만 사용 · 1~3등은 회차별 실제 지급액,
+  4등 50,000원 · 5등 5,000원 · 구간 검정 301~500 / 501~870 / 871~1240 ·
+  1등 확률은 C(45,6) = 8,145,060 전수 · 2026-09-09
+</footer>
+</div>
+</body>
+</html>

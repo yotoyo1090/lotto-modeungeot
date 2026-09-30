@@ -1,0 +1,14 @@
+node_modules/
+web/node_modules/
+web/dist/
+web/public/data/
+
+# 데이터 : 공개 추첨 기록(lotto.sqlite)만 올리고, 개인 파일은 올리지 않습니다.
+data/*
+!data/lotto.sqlite
+
+# 작업용 임시 파일
+/_*
+tools/_*
+tools/*.txt
+Claude outputs/

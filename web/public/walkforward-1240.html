@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1240회 · 네 리스트 × 20조합 — walk-forward</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.4rem; margin:0 0 .3rem; }
+  .sub { color:var(--muted); font-size:.88rem; }
+  h2 { font-size:1rem; margin:2.4rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  h3 { font-size:.9rem; margin:1.6rem 0 .4rem; color:var(--gold-deep); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:68ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1.2rem 1.4rem; margin:1rem 0; overflow-x:auto; }
+  .row { display:grid; grid-template-columns:8rem 1fr 5.5rem; gap:.7rem;
+         align-items:center; margin:.55rem 0; min-width:32rem; }
+  .row .who { font-size:.82rem; color:var(--ink-soft); text-align:right; }
+  .row .who b { display:block; font-size:.68rem; color:var(--muted); font-weight:400; }
+  .trk { position:relative; height:24px; background:var(--line-soft); border-radius:3px; }
+  .trk .fill { position:absolute; top:0; bottom:0; left:0; border-radius:3px;
+               background:linear-gradient(90deg,rgba(184,145,47,.35),rgba(184,145,47,.7)); }
+  .trk .one { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--hot); }
+  .row .v { font-family:var(--figure); font-size:.82rem; text-align:right; }
+  .sc { display:grid; grid-template-columns:8rem 1fr 5.5rem; gap:.7rem;
+        font-family:var(--figure); font-size:.68rem; color:var(--muted); min-width:32rem; }
+  .sc .t { position:relative; height:1rem; }
+  .sc .t span { position:absolute; transform:translateX(-50%); }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.72rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.me td { background:var(--gold-wash); }
+  .scroll { overflow-x:auto; }
+  .pool { font-family:var(--figure); font-size:.78rem; color:var(--ink-soft);
+          background:var(--surface); border:1px solid var(--line); border-radius:5px;
+          padding:.6rem .8rem; margin:.5rem 0 .8rem; }
+  .grids { columns:4 9rem; column-gap:1.2rem; font-family:var(--figure); font-size:.8rem;
+           background:var(--surface); border:1px solid var(--line); border-radius:6px;
+           padding:.9rem 1.1rem; margin:.5rem 0 1.5rem; }
+  .grids div { break-inside:avoid; padding:.06rem 0; }
+  .grids i { color:var(--muted); font-style:normal; display:inline-block;
+             width:1.5rem; text-align:right; margin-right:.4rem; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>1240회 — 네 리스트 × 20조합</h1>
+<div class="sub">
+  형태 필터 없음. 선택 기준은 <strong>분배(나눌 사람 수)가 가장 낮은 모양</strong> 하나뿐.
+  검정은 <strong>walk-forward</strong> — 매 회차, 그 이전 데이터만으로 모델을 다시 적합합니다.
+</div>
+<div class="note">
+  <strong>지난번 내 검정의 두 가지 결함을 고쳤습니다.</strong><br>
+  ① 학습/맹검 반쪽 나누기 → <em>walk-forward</em>. 1,101회 모델은 1~1,100회만 봅니다.<br>
+  ② 분배를 빼놓았던 것 → 이번엔 분배가 <em>유일한</em> 기준입니다.<br><br>
+  그리고 하나 더 — <code>src/core/sharing.js</code>의 계수는 <strong>1~1,238회 전체</strong>로
+  적합된 값입니다. 그 계수로 같은 1,238회를 채점하면 답을 보고 문제를 푸는 것이므로,
+  <strong>매 회차 포아송 회귀를 처음부터 다시 적합</strong>했습니다(IRLS, 오프셋
+  log(5등 당첨자수 ÷ 182,780), 과분산 그대로).
+</div>
+
+<h2>① 분배는 walk-forward에서 살아남는가</h2>
+<p>
+  회차 300부터 1239까지 <strong>939회차</strong>. 매 회차마다 그 이전 전부로 모델을 적합하고,
+  <em>아직 보지 않은</em> 그 회차의 당첨조합이 어느 구간에 속하는지 예측한 뒤, 실제로 몇 명이
+  그 조합을 골랐는지(1등 당첨자수 ÷ 5등으로 보정한 기대치)와 맞춰 봅니다.
+</p>
+<div class="chart">
+  <div class="row"><div class="who">적게 팔린<b>109회차</b></div>
+    <div class="trk"><div class="fill" style="width:13.2%"></div>
+      <div class="one" style="left:28.6%"></div></div><div class="v">0.8924</div></div>
+  <div class="row"><div class="who">평균 이하<b>421회차</b></div>
+    <div class="trk"><div class="fill" style="width:23.1%"></div>
+      <div class="one" style="left:28.6%"></div></div><div class="v">0.9615</div></div>
+  <div class="row"><div class="who">평균 이상<b>387회차</b></div>
+    <div class="trk"><div class="fill" style="width:36.7%"></div>
+      <div class="one" style="left:28.6%"></div></div><div class="v">1.0566</div></div>
+  <div class="row"><div class="who">많이 팔린<b>22회차</b></div>
+    <div class="trk"><div class="fill" style="width:87.9%"></div>
+      <div class="one" style="left:28.6%"></div></div><div class="v">1.4152</div></div>
+  <div class="sc"><div></div><div class="t">
+    <span style="left:0%">0.80</span><span style="left:28.6%">1.00</span>
+    <span style="left:57.1%">1.20</span><span style="left:100%">1.50</span>
+  </div><div></div></div>
+  <div style="font-size:.76rem;color:var(--muted);margin-top:.7rem">
+    실제 지표 = 관측 1등 당첨자수 ÷ 기대 1등 당첨자수 ·
+    <span style="color:var(--hot)">붉은 선</span> = 1.00 (평균 인기)
+  </div>
+</div>
+<div class="note ok">
+  <strong>네 구간이 순서대로 늘어섭니다.</strong> 예측이 「적게 팔린」이라 한 회차에서는
+  실제로 <strong>0.8924</strong>명분, 「많이 팔린」이라 한 회차에서는 <strong>1.4152</strong>명분.
+  전체 데이터로 적합했던 옛 표(0.8745 / 1.4458)와 거의 같은 값입니다 —
+  <strong>미래를 한 번도 보지 않고도 같은 결과</strong>가 나옵니다.
+</div>
+<h3>계수는 흔들리는가</h3>
+<div class="scroll">
+<table>
+<thead><tr><th class="n">회차</th><th class="n">base</th><th class="n">연속 1~2</th><th class="n">연속 3+</th><th class="n">작은수 1~2</th><th class="n">작은수 3+</th><th class="n">넓음</th><th>최저 칸</th></tr></thead>
+<tbody>
+<tr><td class="n">300</td><td class="n">0.048</td><td class="n">−0.097</td><td class="n">0.332</td><td class="n">0.092</td><td class="n">−0.012</td><td class="n">−0.080</td><td>cell 11</td></tr>
+<tr><td class="n">501</td><td class="n">0.214</td><td class="n">−0.121</td><td class="n">0.162</td><td class="n">0.072</td><td class="n">0.085</td><td class="n">−0.209</td><td>cell 7</td></tr>
+<tr><td class="n">701</td><td class="n">0.196</td><td class="n">−0.118</td><td class="n">0.200</td><td class="n">0.086</td><td class="n">0.034</td><td class="n">−0.187</td><td>cell 7</td></tr>
+<tr><td class="n">901</td><td class="n">0.132</td><td class="n">−0.099</td><td class="n">0.201</td><td class="n">0.134</td><td class="n">0.115</td><td class="n">−0.181</td><td>cell 7</td></tr>
+<tr><td class="n">1101</td><td class="n">0.078</td><td class="n">−0.104</td><td class="n">0.233</td><td class="n">0.137</td><td class="n">0.152</td><td class="n">−0.150</td><td>cell 7</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  501회 이후로는 부호도 크기도 안정적이고, <strong>「가장 덜 팔리는 모양」이 한 번도
+  바뀌지 않습니다</strong> — 언제나 cell 7 :
+  <strong>연속 쌍 1~2개 · 9 이하 번호 없음 · 최대−최소 ≥ 21</strong>.
+  (연속이 0개보다 1~2개가 더 <em>덜</em> 팔린다는 것이 이 모델에서 가장 뜻밖의 부분입니다.
+  사람들은 연속 번호를 피하니까요.)
+</p>
+
+<h2>② 그 선택이 당첨 확률을 깎는가</h2>
+<p>
+  이것이 핵심 검정입니다. 8,145,060개 조합을 <strong>전수 열거</strong>해 cell 7이 공간에서
+  차지하는 비율을 정확히 구하고, 그 시점의 모델이 cell 7을 지목한 뒤 <em>실제 당첨조합</em>이
+  거기에 떨어졌는지 셌습니다.
+</p>
+<div class="scroll">
+<table>
+<thead><tr><th>항목</th><th class="n">값</th></tr></thead>
+<tbody>
+<tr><td>검정 회차</td><td class="n">939</td></tr>
+<tr><td>실제 당첨조합이 cell 7이었던 회차</td><td class="n">107 / 939 = 11.40%</td></tr>
+<tr><td>cell 7이 8,145,060개 중 차지하는 비율</td><td class="n">11.63%</td></tr>
+<tr class="me"><td><strong>lift</strong></td><td class="n"><strong>0.980</strong> · z = −0.23</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note">
+  <strong>lift 0.980, z = −0.23.</strong> 분배 최저 모양을 고르는 것은 당첨 확률을
+  올리지도, 내리지도 않습니다. 이것이 정확히 우리가 원하는 답입니다 — 공짜로
+  나눌 사람만 줄인다는 뜻이니까요.
+</div>
+
+<h2>③ 네 리스트 위에서, 501~1239회차</h2>
+<p>
+  회차마다 네 리스트를 다시 계산하고, 각각에서 <strong>20조합</strong>을 뽑습니다 —
+  한 번은 분배 최저(cell 7)로, 한 번은 아무렇게나. 씨앗 8개 = 줄당
+  <strong>118,240조합</strong>. 739회차.
+</p>
+<div class="scroll">
+<table>
+<thead><tr>
+  <th>리스트</th><th>선택</th><th class="n">풀</th>
+  <th class="n">조합당 맞춤 (최소~평균~최대)</th><th class="n">5등</th><th class="n">4등</th>
+</tr></thead>
+<tbody>
+<tr class="me"><td>여집합 ▸ 차뜨 cold (11~19)</td><td>분배 최저</td><td class="n">38.6</td><td class="n">0.7980 ~ <strong>0.8030</strong> ~ 0.8104</td><td class="n">344</td><td class="n">17.8</td></tr>
+<tr><td>여집합 ▸ 차뜨 cold (11~19)</td><td>무작위</td><td class="n">38.6</td><td class="n">0.7900 ~ 0.7971 ~ 0.8035</td><td class="n">331</td><td class="n">21.8</td></tr>
+<tr class="me"><td>제외번호 직전10회 출현</td><td>분배 최저</td><td class="n">36.9</td><td class="n">0.7959 ~ <strong>0.8022</strong> ~ 0.8096</td><td class="n">325</td><td class="n">22.0</td></tr>
+<tr><td>제외번호 직전10회 출현</td><td>무작위</td><td class="n">36.9</td><td class="n">0.7814 ~ 0.7939 ~ 0.8013</td><td class="n">322</td><td class="n">16.1</td></tr>
+<tr class="me"><td>여집합 ▸ 차뜨 midle (6~10)</td><td>분배 최저</td><td class="n">33.8</td><td class="n">0.8014 ~ <strong>0.8080</strong> ~ 0.8141</td><td class="n">343</td><td class="n">18.5</td></tr>
+<tr><td>여집합 ▸ 차뜨 midle (6~10)</td><td>무작위</td><td class="n">33.8</td><td class="n">0.7794 ~ 0.7975 ~ 0.8045</td><td class="n">327</td><td class="n">18.3</td></tr>
+<tr class="me"><td>여집합 ▸ 리스트 최다 12 (짝수)</td><td>분배 최저</td><td class="n">33.0</td><td class="n">0.8074 ~ <strong>0.8168</strong> ~ 0.8258</td><td class="n">347</td><td class="n">22.5</td></tr>
+<tr><td>여집합 ▸ 리스트 최다 12 (짝수)</td><td>무작위</td><td class="n">33.0</td><td class="n">0.7938 ~ 0.8062 ~ 0.8148</td><td class="n">340</td><td class="n">18.5</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note">
+  분배 최저 쪽이 네 번 다 조금 위입니다(+0.006 ~ +0.011). <strong>분배의 공이 아닙니다</strong> —
+  cell 7은 「9 이하 번호 없음」을 포함하는데, 1~9번은 이 표본에서 기대(1.20개)보다 조금 덜
+  (1.15개) 나왔습니다. 4% 편차, 잡음입니다. 씨앗을 바꾸면 각 줄이 0.01~0.02 흔들리고,
+  차이는 그 안입니다. 그리고 §②의 정확한 검정이 이미 답했습니다 — <strong>lift 0.980</strong>.
+</div>
+
+<h2>④ 1240회 — 네 리스트 × 20조합</h2>
+<p>
+  모두 <strong>cell 7</strong>(연속 쌍 1~2 · 9 이하 없음 · 폭 ≥ 21)이고, 형태 필터는 하나도
+  걸지 않았습니다. 같은 리스트 안에서 두 조합이 <strong>3개 이상 겹치지 않게</strong> 했습니다.
+</p>
+
+<h3>1240-A · 여집합 ▸ 차뜨 cold (gap 11~19) — 39개</h3>
+<div class="pool">1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 18 19 20 21 22 23 24 25 27 28 29 31 32 33 34 35 36 37 38 39 40 42 43 45</div>
+<div class="grids">
+<div><i>1</i>10 18 25 27 28 38</div><div><i>2</i>13 14 19 37 40 45</div>
+<div><i>3</i>11 25 28 36 37 40</div><div><i>4</i>11 14 21 22 36 42</div>
+<div><i>5</i>19 23 28 29 32 40</div><div><i>6</i>15 22 34 35 36 40</div>
+<div><i>7</i>19 22 25 33 34 43</div><div><i>8</i>12 13 14 29 32 43</div>
+<div><i>9</i>12 13 19 24 34 38</div><div><i>10</i>11 20 24 25 31 33</div>
+<div><i>11</i>10 11 19 29 33 38</div><div><i>12</i>10 21 24 32 33 39</div>
+<div><i>13</i>13 15 20 27 28 37</div><div><i>14</i>12 18 19 22 23 35</div>
+<div><i>15</i>11 27 29 34 35 45</div><div><i>16</i>12 15 28 32 33 45</div>
+<div><i>17</i>11 12 14 20 34 37</div><div><i>18</i>12 14 15 23 36 38</div>
+<div><i>19</i>12 13 27 31 40 42</div><div><i>20</i>10 28 31 32 34 42</div>
+</div>
+
+<h3>1240-B · 제외번호 직전10회 출현 — 38개</h3>
+<div class="pool">1 2 3 4 6 7 8 9 10 11 12 13 14 15 18 19 20 21 22 23 24 25 27 28 29 31 32 33 34 35 36 37 38 39 40 42 43 45</div>
+<div class="grids">
+<div><i>1</i>10 11 25 28 31 42</div><div><i>2</i>14 18 21 22 32 37</div>
+<div><i>3</i>12 14 23 24 36 39</div><div><i>4</i>19 25 29 37 42 43</div>
+<div><i>5</i>11 18 19 29 31 39</div><div><i>6</i>23 24 27 29 35 45</div>
+<div><i>7</i>11 21 22 25 34 36</div><div><i>8</i>12 19 20 33 40 42</div>
+<div><i>9</i>14 24 31 34 35 37</div><div><i>10</i>15 21 28 29 40 43</div>
+<div><i>11</i>12 13 15 21 27 35</div><div><i>12</i>15 21 23 24 33 38</div>
+<div><i>13</i>11 23 27 31 32 40</div><div><i>14</i>10 12 28 32 38 39</div>
+<div><i>15</i>12 15 18 33 34 39</div><div><i>16</i>15 20 29 34 35 36</div>
+<div><i>17</i>14 20 21 28 36 45</div><div><i>18</i>13 14 15 18 36 38</div>
+<div><i>19</i>18 21 25 39 40 42</div><div><i>20</i>11 12 22 28 37 43</div>
+</div>
+
+<h3>1240-C · 여집합 ▸ 차뜨 midle (6~10) — 32개</h3>
+<div class="pool">2 5 6 7 8 10 11 12 13 15 16 17 18 20 21 22 23 26 29 30 32 33 34 36 37 38 39 40 41 42 43 44</div>
+<div class="grids">
+<div><i>1</i>15 17 22 23 30 37</div><div><i>2</i>22 26 29 30 34 44</div>
+<div><i>3</i>12 13 16 26 41 44</div><div><i>4</i>13 30 32 36 37 39</div>
+<div><i>5</i>10 20 21 23 32 36</div><div><i>6</i>12 13 22 29 32 40</div>
+<div><i>7</i>12 13 17 23 36 42</div><div><i>8</i>20 29 37 38 39 41</div>
+<div><i>9</i>11 17 33 40 43 44</div><div><i>10</i>20 22 36 41 42 44</div>
+<div><i>11</i>11 15 16 26 29 39</div><div><i>12</i>11 21 29 32 41 42</div>
+<div><i>13</i>16 18 21 22 36 37</div><div><i>14</i>10 11 15 18 40 42</div>
+<div><i>15</i>16 17 20 26 42 43</div><div><i>16</i>11 12 15 21 23 38</div>
+<div><i>17</i>12 16 18 32 33 42</div><div><i>18</i>10 12 26 30 38 39</div>
+<div><i>19</i>16 23 30 33 34 38</div><div><i>20</i>13 29 33 34 37 42</div>
+</div>
+
+<h3>1240-D · 여집합 ▸ 리스트 최다 출현 12 (짝수) — 33개</h3>
+<div class="pool">1 2 3 5 7 8 9 10 11 13 15 17 19 21 22 23 25 27 28 29 30 31 32 33 35 36 37 39 41 42 43 44 45</div>
+<div class="grids">
+<div><i>1</i>11 17 21 32 35 36</div><div><i>2</i>15 19 31 36 37 45</div>
+<div><i>3</i>22 25 32 33 42 45</div><div><i>4</i>13 22 29 35 36 45</div>
+<div><i>5</i>10 15 19 32 33 35</div><div><i>6</i>11 23 30 32 43 44</div>
+<div><i>7</i>13 19 23 27 28 37</div><div><i>8</i>11 19 22 39 44 45</div>
+<div><i>9</i>11 27 28 36 39 41</div><div><i>10</i>10 23 31 35 36 39</div>
+<div><i>11</i>15 22 27 29 30 44</div><div><i>12</i>17 27 29 36 37 43</div>
+<div><i>13</i>10 13 15 36 42 43</div><div><i>14</i>15 30 35 39 41 42</div>
+<div><i>15</i>21 27 28 29 32 45</div><div><i>16</i>21 28 30 31 41 43</div>
+<div><i>17</i>21 30 37 42 44 45</div><div><i>18</i>23 25 28 29 33 44</div>
+<div><i>19</i>10 21 22 25 30 39</div><div><i>20</i>15 17 29 31 32 42</div>
+</div>
+
+<h2>⑤ 결론</h2>
+<div class="note ok">
+  <strong>분배는 walk-forward를 통과합니다.</strong> 매 회차 다시 적합해도 네 구간이
+  순서대로 늘어서고(0.8924 → 0.9615 → 1.0566 → 1.4152), 501회 이후 「가장 덜 팔리는
+  모양」이 한 번도 바뀌지 않습니다. 이 프로젝트에서 이 시험을 통과한 것은
+  <strong>이것 하나뿐</strong>입니다.
+</div>
+<div class="note">
+  <strong>그리고 그것은 확률을 건드리지 않습니다.</strong> lift 0.980 · z = −0.23.
+  분배가 바꾸는 것은 「맞을 확률」이 아니라 「맞았을 때 몇 명과 나누는가」입니다.
+  실측으로 <strong>평균보다 약 11% 적은 인원</strong> — 1등 상금이 그만큼 덜 쪼개집니다.
+</div>
+<div class="note bad">
+  <strong>숨기지 않고 :</strong> 네 리스트 합쳐 80장이면 1등 확률은
+  <strong>80 / 8,145,060 = 1/101,813</strong>입니다. 80,000원이고, 1인 1회차 법정 한도
+  10만원 안입니다. 기대값은 어느 조합을 골라도 마이너스이고, 이 문서의 어떤 계산도
+  그것을 바꾸지 못합니다. 분배가 하는 일은, 일어나기 어려운 일이 일어났을 때
+  몫을 11% 키우는 것뿐입니다.
+</div>
+<p>
+  네 리스트 사이에는 <strong>차이가 없습니다</strong> — 조합당 맞춤 0.803 · 0.802 ·
+  0.808 · 0.817, 씨앗 흔들림 안입니다. 어느 리스트를 쓸지는 취향이고, 넷을 다 쓰는 것은
+  같은 돈으로 서로 다른 80장을 갖는다는 뜻입니다 — 그것만으로도 1등 확률은 20장의
+  네 배가 됩니다.
+</p>
+
+<footer>
+  walk-forward : 회차 300~1239, 매 회차 이전 데이터 전부로 포아송 회귀 재적합(IRLS, 6모수,
+  오프셋 log(5등÷182,780)) · lift 검정은 8,145,060조합 전수 열거 ·
+  리스트 백테스트 501~1239(739회차) × 20조합 × 씨앗 8 = 줄당 118,240조합 ·
+  cell 7 = 연속 쌍 1~2 · 9 이하 없음 · 폭 ≥ 21 · 2026-09-04
+</footer>
+</div>
+</body>
+</html>

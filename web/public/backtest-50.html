@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1240회 50조합 — 필터 1,200개 탐색과 맹검</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.4rem; margin:0 0 .3rem; }
+  .sub { color:var(--muted); font-size:.88rem; }
+  h2 { font-size:1rem; margin:2.4rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:68ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .nums { font-family:var(--figure); font-size:.82rem; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1rem; margin:1rem 0; overflow-x:auto; }
+  .chart svg { display:block; margin:0 auto; }
+  table { width:100%; border-collapse:collapse; font-size:.8rem; margin:1rem 0; }
+  th { text-align:left; font-size:.7rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .4rem; white-space:nowrap; }
+  td { padding:.26rem .4rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  td.set { white-space:normal; font-size:.74rem; color:var(--muted); }
+  .n { font-family:var(--figure); text-align:right; }
+  .up { color:var(--gold-deep); } .dn { color:var(--hot); }
+  tr.me td { background:var(--gold-wash); }
+  .scroll { overflow-x:auto; }
+  .grids { columns:5 8rem; column-gap:1rem; font-family:var(--figure); font-size:.78rem;
+           background:var(--surface); border:1px solid var(--line); border-radius:6px;
+           padding:1rem 1.2rem; margin:1rem 0; }
+  .grids div { break-inside:avoid; padding:.08rem 0; }
+  .grids i { color:var(--muted); font-style:normal; display:inline-block;
+             width:1.6rem; text-align:right; margin-right:.4rem; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>1240회 · 50조합 — 필터 1,200개를 뒤졌습니다</h1>
+<div class="sub">
+  풀은 <strong>여집합 ▸ 차뜨 cold</strong>(1240회 기준 39개). 「가장 좋은 필터를 고른다」는
+  요청 그대로 하되, 고르는 곳과 재는 곳을 나눴습니다 —
+  <strong>401~820회차에서 고르고, 821~1239회차에서 잽니다</strong>.
+</div>
+<div class="note">
+  왜 나누는가 : 설정 1,200개를 재서 1등을 고르면, 그 1등은 <em>실력 + 운</em>입니다.
+  같은 자료에서 고르고 같은 자료에서 자랑하면 운을 실력으로 셉니다. 고른 뒤
+  <strong>한 번도 보지 않은 419회차</strong>에서 다시 재야 실력만 남습니다.
+</div>
+
+<h2>탐색 — 무엇을 몇 개 뒤졌나</h2>
+<p>
+  필터 10종에 각각 3~5개의 후보 구간(「없음」 포함)을 두면 설정 공간은
+  <strong>320만 개</strong>. 그중 <strong>1,200개</strong>를 무작위로 뽑아 전부 쟀습니다.
+  회차마다 그 회차의 cold 풀에서 400조합을 미리 뽑아 두고(총 335,600조합), 모든 설정이
+  <em>같은 조합들</em>을 채점하도록 했습니다 — 설정 간 비교에서 표본 차이를 없애기 위해서입니다.
+</p>
+<div class="scroll">
+<table>
+<thead><tr><th>필터</th><th>후보 구간</th></tr></thead>
+<tbody>
+<tr><td>저고</td><td class="set">없음 · 2~4 · 3:3 · 2~3 · 3~4</td></tr>
+<tr><td>홀짝</td><td class="set">없음 · 2~4 · 3:3 · 2~3 · 3~4</td></tr>
+<tr><td>AC값</td><td class="set">없음 · 8~10 · 7~10 · 8~9 · 9~10</td></tr>
+<tr><td>이월</td><td class="set">없음 · 0~1 · 0 · 1 · 0~2</td></tr>
+<tr><td>소수</td><td class="set">없음 · 1~2 · 2~3 · 1~3</td></tr>
+<tr><td>3배수</td><td class="set">없음 · 1~3 · 1~2 · 2~3</td></tr>
+<tr><td>5배수</td><td class="set">없음 · 0~2 · 0~1 · 1~2</td></tr>
+<tr><td>앞자리합</td><td class="set">없음 · 13~21 · 14~20 · 12~22</td></tr>
+<tr><td>끝자리합</td><td class="set">없음 · 19~33 · 22~30 · 20~32</td></tr>
+<tr><td>총합</td><td class="set">없음 · 100~175 · 110~170 · 120~160 · 130~180</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>결과 — 학습에서 맹검으로</h2>
+<p>
+  왼쪽이 학습(401~820), 오른쪽이 맹검(821~1239). 선 하나가 설정 하나 —
+  학습 상위 10개입니다. <span style="color:var(--hot)">붉은 선</span>은
+  <strong>필터 없음</strong>의 값입니다.
+</p>
+<div class="chart">
+<svg viewBox="0 0 620 320" width="620" height="320" role="img"
+     aria-label="학습과 맹검 사이의 기울기 그래프">
+  <g font-family="ui-monospace,monospace" font-size="10" fill="#8b8375">
+    <text x="112" y="34" text-anchor="end">0.85</text>
+    <text x="112" y="69.7" text-anchor="end">0.84</text>
+    <text x="112" y="141.1" text-anchor="end">0.82</text>
+    <text x="112" y="212.6" text-anchor="end">0.80</text>
+    <text x="112" y="284" text-anchor="end">0.78</text>
+  </g>
+  <g stroke="#f0ebe1" stroke-width="1">
+    <line x1="120" y1="30" x2="500" y2="30"/>
+    <line x1="120" y1="65.7" x2="500" y2="65.7"/>
+    <line x1="120" y1="137.1" x2="500" y2="137.1"/>
+    <line x1="120" y1="208.6" x2="500" y2="208.6"/>
+    <line x1="120" y1="280" x2="500" y2="280"/>
+  </g>
+  <g stroke="#b8912f" stroke-width="1.4" fill="none" opacity=".55">
+    <path d="M120,71.8 L500,216.4"/>
+    <path d="M120,81.4 L500,226.0"/>
+    <path d="M120,82.9 L500,190.7"/>
+    <path d="M120,87.5 L500,172.1"/>
+    <path d="M120,87.9 L500,172.9"/>
+    <path d="M120,88.6 L500,91.8"/>
+    <path d="M120,88.6 L500,223.6"/>
+    <path d="M120,98.6 L500,253.2"/>
+    <path d="M120,102.1 L500,162.5"/>
+    <path d="M120,102.5 L500,72.1"/>
+  </g>
+  <g fill="#b8912f">
+    <circle cx="120" cy="71.8" r="3.4"/><circle cx="120" cy="81.4" r="3.4"/>
+    <circle cx="120" cy="82.9" r="3.4"/><circle cx="120" cy="87.5" r="3.4"/>
+    <circle cx="120" cy="87.9" r="3.4"/><circle cx="120" cy="88.6" r="3.4"/>
+    <circle cx="120" cy="98.6" r="3.4"/><circle cx="120" cy="102.1" r="3.4"/>
+    <circle cx="120" cy="102.5" r="3.4"/>
+    <circle cx="500" cy="216.4" r="3.4"/><circle cx="500" cy="226.0" r="3.4"/>
+    <circle cx="500" cy="190.7" r="3.4"/><circle cx="500" cy="172.1" r="3.4"/>
+    <circle cx="500" cy="172.9" r="3.4"/><circle cx="500" cy="91.8" r="3.4"/>
+    <circle cx="500" cy="223.6" r="3.4"/><circle cx="500" cy="253.2" r="3.4"/>
+    <circle cx="500" cy="162.5" r="3.4"/><circle cx="500" cy="72.1" r="3.4"/>
+  </g>
+  <g stroke="#b4432f" stroke-width="1.6" stroke-dasharray="5 3">
+    <line x1="120" y1="242.9" x2="500" y2="192.9"/>
+  </g>
+  <g fill="#b4432f" font-family="ui-monospace,monospace" font-size="10">
+    <circle cx="120" cy="242.9" r="3.4"/><circle cx="500" cy="192.9" r="3.4"/>
+    <text x="510" y="196">필터 없음 0.804</text>
+  </g>
+  <g font-family="ui-monospace,monospace" font-size="11" fill="#4a453c">
+    <text x="120" y="303" text-anchor="middle">학습 401~820</text>
+    <text x="500" y="303" text-anchor="middle">맹검 821~1239</text>
+  </g>
+  <g fill="#8a6a1c" font-family="ui-monospace,monospace" font-size="10">
+    <text x="112" y="68" text-anchor="end" opacity="0"> </text>
+  </g>
+</svg>
+</div>
+
+<div class="note bad">
+  <strong>선이 전부 무너집니다.</strong> 학습에서 0.830~0.838로 모여 있던 열 개가,
+  맹검에서는 0.788부터 0.838까지 흩어집니다. 학습 순위와 맹검 순위의
+  <strong>상관은 r = −0.053</strong> — 없음입니다. 학습에서 1등이었던 설정이
+  맹검에서 위에서 일곱 번째입니다.
+</div>
+
+<div class="scroll">
+<table>
+<thead><tr>
+  <th class="n">#</th><th class="n">학습</th><th class="n">z</th><th class="n">통과</th>
+  <th class="n">맹검</th><th class="n">z</th><th>설정</th>
+</tr></thead>
+<tbody>
+<tr class="me"><td class="n">1</td><td class="n">0.8383</td><td class="n up">2.63</td><td class="n">1899</td><td class="n">0.7978</td><td class="n dn">−0.37</td><td class="set">저고 3~4 · 홀짝 2~4 · AC 8~9 · 이월 0~2 · 소수 1~2 · 3배수 1~2 · 앞합 12~22 · 끝합 22~30 · 총합 110~170</td></tr>
+<tr><td class="n">2</td><td class="n">0.8356</td><td class="n up">2.31</td><td class="n">1654</td><td class="n">0.7951</td><td class="n dn">−0.47</td><td class="set">저고 2~3 · 홀짝 3~4 · AC 8~9 · 이월 0 · 소수 1~2 · 3배수 1~3 · 앞합 12~22 · 끝합 22~30 · 총합 130~180</td></tr>
+<tr><td class="n">3</td><td class="n">0.8352</td><td class="n up">2.29</td><td class="n">1705</td><td class="n">0.8050</td><td class="n">0.03</td><td class="set">저고 3 · 홀짝 2~3 · AC 9~10 · 소수 2~3 · 5배수 0~2 · 앞합 12~22 · 끝합 19~33 · 총합 130~180</td></tr>
+<tr><td class="n">4</td><td class="n">0.8339</td><td class="n up">2.37</td><td class="n">1920</td><td class="n">0.8102</td><td class="n">0.32</td><td class="set">저고 3~4 · 홀짝 2~3 · AC 9~10 · 소수 2~3 · 앞합 12~22 · 끝합 19~33</td></tr>
+<tr><td class="n">5</td><td class="n">0.8338</td><td class="n up">2.65</td><td class="n">2394</td><td class="n">0.8100</td><td class="n">0.35</td><td class="set">저고 3 · 홀짝 2~4 · AC 8~10 · 이월 0~2 · 소수 1~3 · 앞합 13~21 · 끝합 20~32 · 총합 120~160</td></tr>
+<tr><td class="n">6</td><td class="n">0.8336</td><td class="n up">2.50</td><td class="n">2140</td><td class="n">0.8327</td><td class="n up">1.67</td><td class="set">저고 3 · 홀짝 3 · 소수 2~3 · 3배수 1~2 · 5배수 0~1 · 앞합 12~22 · 총합 130~180</td></tr>
+<tr><td class="n">7</td><td class="n">0.8336</td><td class="n up">2.17</td><td class="n">1623</td><td class="n">0.7958</td><td class="n dn">−0.44</td><td class="set">저고 3 · AC 8~10 · 이월 1 · 소수 1~3 · 3배수 1~2 · 5배수 0~2 · 앞합 12~22 · 끝합 22~30 · 총합 100~175</td></tr>
+<tr><td class="n">8</td><td class="n">0.8308</td><td class="n up">2.46</td><td class="n">2328</td><td class="n">0.7875</td><td class="n dn">−1.00</td><td class="set">저고 2~3 · 홀짝 3~4 · AC 8~10 · 이월 0 · 소수 1~2 · 3배수 1~2 · 5배수 0~2 · 끝합 20~32 · 총합 130~180</td></tr>
+<tr><td class="n">9</td><td class="n">0.8298</td><td class="n up">2.41</td><td class="n">2379</td><td class="n">0.8129</td><td class="n">0.50</td><td class="set">저고 3~4 · 홀짝 3~4 · 이월 1 · 소수 2~3 · 3배수 1~2 · 끝합 22~30 · 총합 130~180</td></tr>
+<tr><td class="n">10</td><td class="n">0.8297</td><td class="n">1.95</td><td class="n">1603</td><td class="n">0.8382</td><td class="n up">1.77</td><td class="set">저고 3 · 홀짝 2~3 · AC 8~10 · 소수 1~3 · 3배수 1~2 · 5배수 0~1 · 앞합 12~22 · 끝합 22~30 · 총합 110~170</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note">
+  <strong>1,200개를 뒤지면 z 3.17쯤은 저절로 나옵니다.</strong> 아무 신호도 없을 때
+  K번 재면 가장 큰 |z|의 기댓값은 √(2·ln K) 근처 — K=1,200이면
+  <strong>3.17</strong>입니다. 실제로 학습에서 가장 큰 |z|는 <strong>3.80</strong>이었습니다.
+  천장을 조금 넘었을 뿐이고, 그 설정은 맹검에서 살아남지 못했습니다.
+</div>
+
+<h2>50조합으로 다시 — 맹검 419회차</h2>
+<p>
+  이번엔 표본이 아니라 실제로 만들어 봤습니다. 회차마다 cold 풀에서 필터를 통과하는
+  <strong>50조합</strong>을 뽑아 채점, 씨앗 10개 = 줄당 <strong>209,500조합</strong>.
+</p>
+<div class="scroll">
+<table>
+<thead><tr>
+  <th>전략</th><th class="n">조합당 맞춤 (최소~평균~최대)</th><th class="n">5등</th>
+  <th class="n">4등</th><th class="n">3등</th><th class="n">회수율 (최소~평균~최대)</th>
+</tr></thead>
+<tbody>
+<tr class="me"><td>챔피언 필터 (학습 1위)</td><td class="n">0.7959 ~ <strong>0.8060</strong> ~ 0.8175</td><td class="n">481</td><td class="n">30.6</td><td class="n">0.7</td><td class="n">18.4 ~ 23.9 ~ 32.6%</td></tr>
+<tr><td>넓은 띠 필터</td><td class="n">0.8050 ~ <strong>0.8109</strong> ~ 0.8162</td><td class="n">485</td><td class="n">33.2</td><td class="n">0.9</td><td class="n">18.5 ~ 25.6 ~ 41.8%</td></tr>
+<tr><td>필터 없음</td><td class="n">0.7894 ~ <strong>0.7996</strong> ~ 0.8071</td><td class="n">478</td><td class="n">25.2</td><td class="n">0.7</td><td class="n">15.4 ~ 51.7 ~ 310.5%</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+  챔피언(0.8060)이 <strong>내가 미리 정해 둔 넓은 띠(0.8109)보다 낮습니다</strong>.
+  1,200개를 뒤져 고른 것이, 아무것도 뒤지지 않고 상식으로 정한 것보다 못합니다.
+  세 줄의 차이(0.006~0.011)는 씨앗을 바꾸면 생기는 흔들림(0.02)보다 작습니다.
+  「필터 없음」의 회수율 평균 51.7%는 씨앗 하나가 2등을 맞은 것이고, 나머지 아홉은
+  15~30%입니다.
+</p>
+
+<h2>딱 하나 움직인 것 — 4등</h2>
+<p>
+  조합당 맞춤은 세 줄이 같은데, <strong>4등만 다릅니다</strong> — 필터 없음 25.2개,
+  챔피언 30.6개, 넓은 띠 33.2개(209,500조합 기준). 맞춘 개수의 분포를 보면 이유가 보입니다.
+</p>
+<div class="scroll">
+<table>
+<thead><tr><th>전략</th><th class="n">0개</th><th class="n">1개</th><th class="n">2개</th><th class="n">3개</th><th class="n">4개</th></tr></thead>
+<tbody>
+<tr class="me"><td>챔피언 필터</td><td class="n">40.0%</td><td class="n">42.1%</td><td class="n">15.5%</td><td class="n">2.2%</td><td class="n">0.146%</td></tr>
+<tr><td>넓은 띠 필터</td><td class="n">39.9%</td><td class="n">42.3%</td><td class="n">15.4%</td><td class="n">2.2%</td><td class="n">0.159%</td></tr>
+<tr><td>필터 없음</td><td class="n">40.2%</td><td class="n">41.9%</td><td class="n">15.3%</td><td class="n">2.5%</td><td class="n">0.120%</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note cool">
+  <strong>평균은 그대로인데 꼬리가 두꺼워졌습니다.</strong> 필터는 조합을 번호판
+  가운데로 모읍니다(총합·저고·앞뒤자리합이 전부 중앙을 요구하니까). 추첨도 대개
+  가운데에서 나오므로, 조합들끼리도 <em>추첨과도</em> 더 닮게 됩니다 — 그래서 크게
+  맞는 회차와 아예 안 맞는 회차가 같이 늘어납니다. 합계는 움직이지 않습니다.
+  <br><br>
+  이것은 이 프로젝트의 <strong>스윕 검정</strong>이 이미 찾아낸 「뭉치는 효과」와
+  같은 현상입니다 — 뭉침은 진짜이고, 합계는 그대로. 4등 25 → 33은
+  씨앗 10개 기준으로 z ≈ 3 이지만, <strong>아직 그 자체로 따로 검정하지
+  않았습니다</strong>. 돈으로는 4등 8개 × 5만원 = 40만원, 209,500조합
+  (2억 950만원어치)에 대해 <strong>0.2%p</strong>입니다.
+</div>
+
+<h2>1240회 — 50조합</h2>
+<p>
+  풀 39개, <strong>챔피언 필터</strong>(요청대로 「가장 좋게 나온 것」)를 통과한 서로 다른
+  50조합. 5,646번 뽑아 채웠습니다(통과율 0.9%). 풀 39개가 <strong>전부</strong> 쓰였고,
+  가장 많이 쓰인 번호는 22번(25회), 20번(21회)입니다 — 필터가 가운데를 좋아하기 때문입니다.
+</p>
+<div class="grids">
+<div><i>1</i>7 18 20 33 34 40</div><div><i>2</i>13 14 20 27 37 45</div>
+<div><i>3</i>8 15 22 25 35 43</div><div><i>4</i>5 18 20 23 35 45</div>
+<div><i>5</i>13 14 21 34 35 37</div><div><i>6</i>2 7 22 35 36 40</div>
+<div><i>7</i>11 18 20 24 37 38</div><div><i>8</i>7 18 20 28 31 45</div>
+<div><i>9</i>8 15 21 32 34 43</div><div><i>10</i>15 19 20 22 32 37</div>
+<div><i>11</i>7 18 20 34 35 45</div><div><i>12</i>10 11 15 34 38 45</div>
+<div><i>13</i>9 11 22 28 31 45</div><div><i>14</i>2 8 22 36 39 43</div>
+<div><i>15</i>7 19 22 24 32 40</div><div><i>16</i>14 21 22 34 36 37</div>
+<div><i>17</i>7 20 21 28 38 42</div><div><i>18</i>4 11 20 35 36 38</div>
+<div><i>19</i>11 18 20 25 39 40</div><div><i>20</i>12 20 22 29 34 37</div>
+<div><i>21</i>4 11 18 28 40 43</div><div><i>22</i>10 15 22 28 31 38</div>
+<div><i>23</i>9 19 20 22 39 40</div><div><i>24</i>18 19 22 25 32 43</div>
+<div><i>25</i>2 15 22 25 37 42</div><div><i>26</i>8 18 22 25 40 43</div>
+<div><i>27</i>14 15 18 22 38 43</div><div><i>28</i>2 8 20 39 40 45</div>
+<div><i>29</i>7 14 22 29 40 42</div><div><i>30</i>5 8 14 36 40 45</div>
+<div><i>31</i>12 18 22 29 31 32</div><div><i>32</i>14 15 19 20 34 45</div>
+<div><i>33</i>5 10 21 29 39 40</div><div><i>34</i>4 15 22 28 31 42</div>
+<div><i>35</i>8 12 22 23 37 42</div><div><i>36</i>3 19 22 32 34 38</div>
+<div><i>37</i>10 18 20 25 36 43</div><div><i>38</i>6 20 22 23 29 45</div>
+<div><i>39</i>1 19 22 25 38 45</div><div><i>40</i>8 11 15 28 40 45</div>
+<div><i>41</i>15 20 22 34 35 37</div><div><i>42</i>8 11 14 34 36 45</div>
+<div><i>43</i>7 13 18 32 34 45</div><div><i>44</i>8 20 22 31 32 39</div>
+<div><i>45</i>18 19 20 24 31 34</div><div><i>46</i>14 15 19 20 33 43</div>
+<div><i>47</i>5 6 20 35 39 43</div><div><i>48</i>3 14 22 25 38 40</div>
+<div><i>49</i>14 15 18 29 31 40</div><div><i>50</i>8 21 22 28 34 43</div>
+</div>
+<div class="note">
+  50장 = <strong>50,000원</strong>. 1인 1회차 법정 한도 10만원 안입니다.
+  1등 확률은 <strong>50 ÷ 8,145,060</strong> — 풀을 39개로 좁혔든, 필터를 아홉 개
+  걸었든, 45개에서 아무렇게나 뽑았든 똑같습니다. 서로 다른 50장이기만 하면 됩니다.
+</div>
+
+<h2>결론</h2>
+<p>
+  <strong>1,200개 중 가장 좋았던 필터는, 처음 보는 419회차에서 아무 이득도 주지
+  않았습니다</strong> — 학습 +0.048, 맹검 −0.007. 학습 순위와 맹검 순위의 상관은 −0.05.
+  이 프로젝트에서 같은 붕괴를 본 것이 이번이 네 번째입니다(신호 z=2.22, 제외 규칙
+  5.96→5.40, 순위 목록, 그리고 이번 필터 탐색).
+</p>
+<p>
+  필터가 하는 일은 <strong>조합의 모양을 과거와 닮게 만드는 것</strong>입니다. 그 결과
+  당첨 분포의 꼬리가 조금 두꺼워지고(4등이 늘고), 평균은 그대로입니다. 사고 싶은 모양을
+  고르는 도구로는 쓸 만하지만, <em>맞출 확률을 올리는 도구는 아닙니다</em>.
+</p>
+
+<footer>
+  풀 = 회차마다 다시 계산한 여집합 ▸ 차뜨 cold · 탐색 401~820(420회차, 168,000표본조합) ·
+  맹검 821~1239(419회차) · 설정 1,200개(공간 320만) · 최소 통과 1,500조합 ·
+  50조합 백테스트는 씨앗 10개 × 419회차 × 50 = 209,500조합 ·
+  1~3등 실제 지급액, 4등 50,000원 · 5등 5,000원 · 2026-09-04
+</footer>
+</div>
+</body>
+</html>

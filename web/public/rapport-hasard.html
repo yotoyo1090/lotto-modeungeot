@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>무작위성 보고서 — 로또 6/45는 정말 우연인가</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:940px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:70ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  h3 { font-size:.9rem; margin:1.7rem 0 .4rem; color:var(--gold-deep); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:70ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1rem 1.1rem; margin:1rem 0; overflow-x:auto; }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.law td { color:var(--muted); }
+  .scroll { overflow-x:auto; }
+  svg { display:block; max-width:100%; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>무작위성 보고서 — 로또 6/45는 정말 우연인가</h1>
+<div class="sub">
+  빈도(퍼센트)가 같다는 건 누구나 안다. 이 보고서는 빈도를 보지 않는 다섯 가지 검정으로
+  같은 질문을 다섯 번 묻는다 — 대기시간, 압축, 스펙트럼, 추첨기, 공 나온 순서.
+  1~1,240회 (2002-12 ~ 2026-09). 2026-09-13.
+</div>
+<div class="note">
+  <strong>이 보고서는 번호를 예측하지 않는다.</strong> 묻는 것은 하나 — 지난 1,240회의 기록이
+  우연과 <em>구별되는가</em>. 다섯 검정 모두 「구별되지 않는다」고 답했다. 그리고 그 답이
+  정확히 무엇을 배제하고 무엇을 배제하지 못하는지를 마지막 장에서 수치로 적는다.
+</div>
+
+<h2>0. 왜 빈도로는 안 되는가</h2>
+<p>45개 번호가 각각 13.3%씩 나온다는 사실은 우연 <strong>그리고</strong> 숨은 구조 양쪽과 모두 양립한다.
+주기·전이·패턴은 번호별 합계를 바꾸지 않고도 존재할 수 있다. 그래서 아래 다섯 검정은
+어느 것도 「몇 번 나왔나」를 세지 않는다. 각각은 다른 종류의 구조를 겨냥한다.</p>
+<div class="scroll"><table>
+<tr><th>검정</th><th>겨냥하는 구조</th><th>자료</th><th>결과</th></tr>
+<tr><td>1. 대기시간 hazard</td><td>번호마다의 「주기」</td><td>1,240회 · 7개 번호</td><td class="n">평탄 · 최대 |z| 2.10 / 30점</td></tr>
+<tr><td>2. 압축</td><td>반복 가능한 <em>모든</em> 규칙</td><td>1,240회 × 2 직렬화 × 3 압축기</td><td class="n">z −0.03 ~ +1.14 · 구조 없음</td></tr>
+<tr><td>3. 스펙트럼</td><td>숨은 주기성</td><td>45개 0/1 시계열</td><td class="n">최소 p 0.072 (45개 중)</td></tr>
+<tr><td>4. 추첨기별</td><td>기계 하나의 물리적 결함</td><td>262~1,240회 · 979회 · 3대</td><td class="n">동질성 p 0.73 · 분류 z −2.6</td></tr>
+<tr><td>5. 공 나온 순서</td><td>공 하나의 물리적 결함</td><td>468~1,240회 · 771회</td><td class="n">최소 p 0.026 (45개 중)</td></tr>
+</table></div>
+
+<h2>1. 대기시간 — 「이제 나올 때가 됐다」는 존재하는가</h2>
+<p>번호에 주기가 있다면, 나올 확률은 <strong>얼마나 오래 안 나왔는가</strong>에 따라 달라져야 한다.
+기억이 없다면 어떤 대기 뒤에도 7/45 = 15.56%로 평탄하다. 1,240회 전체에서 대기 g마다
+「그 다음 회차에 나온 비율」을 세었다.</p>
+<div class="chart"><svg viewBox="0 0 880 240" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="206.0" x2="862" y2="206.0" stroke="#f0ebe1"/>
+<text x="42" y="210.0" font-size="10" text-anchor="end" fill="#8b8375">8%</text>
+<line x1="48" y1="158.0" x2="862" y2="158.0" stroke="#f0ebe1"/>
+<text x="42" y="162.0" font-size="10" text-anchor="end" fill="#8b8375">12%</text>
+<line x1="48" y1="110.0" x2="862" y2="110.0" stroke="#f0ebe1"/>
+<text x="42" y="114.0" font-size="10" text-anchor="end" fill="#8b8375">15%</text>
+<line x1="48" y1="62.0" x2="862" y2="62.0" stroke="#f0ebe1"/>
+<text x="42" y="66.0" font-size="10" text-anchor="end" fill="#8b8375">18%</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">22%</text>
+<line x1="48" y1="102.3" x2="862" y2="102.3" stroke="#3a6b8a" stroke-dasharray="4 3"/>
+<text x="862" y="98.3" font-size="10" text-anchor="end" fill="#3a6b8a">기억 없음 = 15.56%</text>
+<text x="48.0" y="220" font-size="10" text-anchor="middle" fill="#8b8375">1</text>
+<text x="132.2" y="220" font-size="10" text-anchor="middle" fill="#8b8375">4</text>
+<text x="216.4" y="220" font-size="10" text-anchor="middle" fill="#8b8375">7</text>
+<text x="300.6" y="220" font-size="10" text-anchor="middle" fill="#8b8375">10</text>
+<text x="384.8" y="220" font-size="10" text-anchor="middle" fill="#8b8375">13</text>
+<text x="469.0" y="220" font-size="10" text-anchor="middle" fill="#8b8375">16</text>
+<text x="553.2" y="220" font-size="10" text-anchor="middle" fill="#8b8375">19</text>
+<text x="637.4" y="220" font-size="10" text-anchor="middle" fill="#8b8375">22</text>
+<text x="721.7" y="220" font-size="10" text-anchor="middle" fill="#8b8375">25</text>
+<text x="805.9" y="220" font-size="10" text-anchor="middle" fill="#8b8375">28</text>
+<text x="862.0" y="220" font-size="10" text-anchor="middle" fill="#8b8375">30</text>
+<polyline points="48.0,94.6 76.1,96.3 104.1,115.8 132.2,112.7 160.3,100.8 188.3,107.1 216.4,97.2 244.5,93.4 272.6,96.4 300.6,115.3 328.7,98.6 356.8,86.3 384.8,105.2 412.9,114.8 441.0,108.8 469.0,102.2 497.1,72.4 525.2,60.6 553.2,105.6 581.3,143.2 609.4,137.7 637.4,149.8 665.5,89.3 693.6,74.6 721.7,96.3 749.7,108.9 777.8,123.4 805.9,89.7 833.9,153.3 862.0,90.5" fill="none" stroke="#b8912f" stroke-width="2"/>
+</svg><div class="key">가로 : 마지막 출현 이후 회차 수 (1~30) · 세로 : 그 다음 회차에 나올 비율. 오른쪽으로 갈수록 표본이 줄어 흔들림이 커진다.</div></div>
+<div class="note ok">30개 점 중 가장 큰 편차는 g = 3의 z = −2.10. 30번 검정하면 우연만으로도 최대치가 2.6 근처에 온다.
+「오래 안 나온 번호」는 그렇지 않은 번호와 같은 확률로 나온다 — 대기시간에 주기는 없다.</div>
+
+<h2>2. 압축 — 규칙이 있다면 짧아진다</h2>
+<p>가장 일반적인 검정. 진짜 우연은 <strong>압축되지 않는다</strong>. 1,240회를 바이트로 직렬화해
+lzma·zlib·bz2로 압축하고, 같은 길이의 <em>시뮬레이션 복권 1,000개</em>와
+<em>회차 순서를 섞은 실제 자료 1,000개</em>에 견주었다. 구조가 있다면 실제 자료가 더 작아야 한다 — z가 −2 아래로.</p>
+<div class="chart"><svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="180.0" x2="862" y2="180.0" stroke="#f0ebe1"/>
+<text x="42" y="184.0" font-size="10" text-anchor="end" fill="#8b8375">-3.00</text>
+<line x1="48" y1="138.5" x2="862" y2="138.5" stroke="#f0ebe1"/>
+<text x="42" y="142.5" font-size="10" text-anchor="end" fill="#8b8375">-1.50</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#f0ebe1"/>
+<text x="42" y="101.0" font-size="10" text-anchor="end" fill="#8b8375">+0.00</text>
+<line x1="48" y1="55.5" x2="862" y2="55.5" stroke="#f0ebe1"/>
+<text x="42" y="59.5" font-size="10" text-anchor="end" fill="#8b8375">+1.50</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">+3.00</text>
+<line x1="48" y1="152.3" x2="862" y2="152.3" stroke="#b4432f" stroke-dasharray="4 3"/>
+<text x="862" y="148.3" font-size="10" text-anchor="end" fill="#b4432f">구조 있음 ← −2</text>
+<rect x="75.1" y="67.7" width="81.4" height="29.3" fill="#b8912f" rx="2"/>
+<text x="115.8" y="63.7" font-size="10" text-anchor="middle" fill="#4a453c">+1.06</text>
+<text x="115.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">lzma·번호</text>
+<rect x="210.8" y="71.3" width="81.4" height="25.7" fill="#b8912f" rx="2"/>
+<text x="251.5" y="67.3" font-size="10" text-anchor="middle" fill="#4a453c">+0.93</text>
+<text x="251.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">zlib·번호</text>
+<rect x="346.5" y="65.5" width="81.4" height="31.5" fill="#b8912f" rx="2"/>
+<text x="387.2" y="61.5" font-size="10" text-anchor="middle" fill="#4a453c">+1.14</text>
+<text x="387.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">bz2·번호</text>
+<rect x="482.1" y="97.0" width="81.4" height="0.8" fill="#b8912f" rx="2"/>
+<text x="522.8" y="93.0" font-size="10" text-anchor="middle" fill="#4a453c">-0.03</text>
+<text x="522.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">lzma·비트맵</text>
+<rect x="617.8" y="70.7" width="81.4" height="26.3" fill="#b8912f" rx="2"/>
+<text x="658.5" y="66.7" font-size="10" text-anchor="middle" fill="#4a453c">+0.95</text>
+<text x="658.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">zlib·비트맵</text>
+<rect x="753.5" y="68.2" width="81.4" height="28.8" fill="#b8912f" rx="2"/>
+<text x="794.2" y="64.2" font-size="10" text-anchor="middle" fill="#4a453c">+1.04</text>
+<text x="794.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">bz2·비트맵</text>
+</svg><div class="key">실제 압축 크기의 z (1,000개 시뮬레이션 대비). 양수 = 우연보다 <em>덜</em> 압축됨. 순서를 섞은 대조군에서도 z는 +0.13 ~ +0.90.</div></div>
+<div class="note ok">여섯 측정 모두 0 근처 또는 양수. 특히 <strong>회차 순서를 섞어도 압축률이 변하지 않는다</strong> —
+순서가 정보를 담고 있었다면 순서를 부순 자료는 더 커져야 했다. 패턴·주기·전이 어느 것도 이 검정을 통과하지 못했다.</div>
+
+<h2>3. 스펙트럼 — 숨은 주기가 있다면 봉우리가 선다</h2>
+<p>번호마다 1,240점의 0/1 시계열을 푸리에 변환했다. 약한 주기성도 잡아내도록 만들어진 도구이고,
+가장 높은 봉우리가 잡음이 만드는 수준을 넘는지 Fisher의 g로 검정했다. 45개 번호 + 합계·짝수 개수·저구간 개수·범위 네 전역 계열.</p>
+<div class="chart"><svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="180.0" x2="862" y2="180.0" stroke="#f0ebe1"/>
+<text x="42" y="184.0" font-size="10" text-anchor="end" fill="#8b8375">0.50</text>
+<line x1="48" y1="138.5" x2="862" y2="138.5" stroke="#f0ebe1"/>
+<text x="42" y="142.5" font-size="10" text-anchor="end" fill="#8b8375">0.75</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#f0ebe1"/>
+<text x="42" y="101.0" font-size="10" text-anchor="end" fill="#8b8375">1.00</text>
+<line x1="48" y1="55.5" x2="862" y2="55.5" stroke="#f0ebe1"/>
+<text x="42" y="59.5" font-size="10" text-anchor="end" fill="#8b8375">1.25</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">1.50</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#3a6b8a" stroke-dasharray="4 3"/>
+<text x="862" y="93.0" font-size="10" text-anchor="end" fill="#3a6b8a">백색잡음 = 1</text>
+<rect x="64.3" y="97.2" width="48.8" height="82.8" fill="#b8912f" rx="2"/>
+<text x="88.7" y="93.2" font-size="10" text-anchor="middle" fill="#4a453c">1.00</text>
+<text x="88.7" y="194" font-size="10" text-anchor="middle" fill="#8b8375">2–3</text>
+<rect x="145.7" y="102.0" width="48.8" height="78.0" fill="#b8912f" rx="2"/>
+<text x="170.1" y="98.0" font-size="10" text-anchor="middle" fill="#4a453c">0.97</text>
+<text x="170.1" y="194" font-size="10" text-anchor="middle" fill="#8b8375">3–4</text>
+<rect x="227.1" y="97.8" width="48.8" height="82.2" fill="#b8912f" rx="2"/>
+<text x="251.5" y="93.8" font-size="10" text-anchor="middle" fill="#4a453c">0.99</text>
+<text x="251.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">4–6</text>
+<rect x="308.5" y="94.5" width="48.8" height="85.5" fill="#b8912f" rx="2"/>
+<text x="332.9" y="90.5" font-size="10" text-anchor="middle" fill="#4a453c">1.01</text>
+<text x="332.9" y="194" font-size="10" text-anchor="middle" fill="#8b8375">6–8</text>
+<rect x="389.9" y="88.9" width="48.8" height="91.1" fill="#b8912f" rx="2"/>
+<text x="414.3" y="84.9" font-size="10" text-anchor="middle" fill="#4a453c">1.05</text>
+<text x="414.3" y="194" font-size="10" text-anchor="middle" fill="#8b8375">8–12</text>
+<rect x="471.3" y="99.3" width="48.8" height="80.7" fill="#b8912f" rx="2"/>
+<text x="495.7" y="95.3" font-size="10" text-anchor="middle" fill="#4a453c">0.99</text>
+<text x="495.7" y="194" font-size="10" text-anchor="middle" fill="#8b8375">12–20</text>
+<rect x="552.7" y="93.3" width="48.8" height="86.7" fill="#b8912f" rx="2"/>
+<text x="577.1" y="89.3" font-size="10" text-anchor="middle" fill="#4a453c">1.02</text>
+<text x="577.1" y="194" font-size="10" text-anchor="middle" fill="#8b8375">20–52</text>
+<rect x="634.1" y="99.2" width="48.8" height="80.8" fill="#b8912f" rx="2"/>
+<text x="658.5" y="95.2" font-size="10" text-anchor="middle" fill="#4a453c">0.99</text>
+<text x="658.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">52–104</text>
+<rect x="715.5" y="90.2" width="48.8" height="89.8" fill="#b8912f" rx="2"/>
+<text x="739.9" y="86.2" font-size="10" text-anchor="middle" fill="#4a453c">1.04</text>
+<text x="739.9" y="194" font-size="10" text-anchor="middle" fill="#8b8375">104–300</text>
+<rect x="796.9" y="92.9" width="48.8" height="87.1" fill="#b8912f" rx="2"/>
+<text x="821.3" y="88.9" font-size="10" text-anchor="middle" fill="#4a453c">1.02</text>
+<text x="821.3" y="194" font-size="10" text-anchor="middle" fill="#8b8375">300+</text>
+</svg><div class="key">45개 번호의 평균 스펙트럼 파워, 주기 구간별 (회차 단위). 1 = 백색잡음.</div></div>
+<div class="note ok">45개 중 가장 작은 p는 34번의 0.072 (주기 38.8회). 우연에서 45개 중 최소 p의 기대값은 0.02 — 실제는 그보다도 평탄하다.
+p &lt; 0.05인 번호는 0개 (기대 2.25개). 2회부터 24년까지 어느 주기에도 봉우리가 없다.</div>
+
+<h2>4. 추첨기별 — 세 대는 같은 우연인가</h2>
+<p>262회부터 비너스 추첨기 세 대(1·2·3호기)가 달마다 번갈아 쓰인다. 기계 한 대의 결함은 전체에서 1/3로 희석되어
+보이지 않지만, 기계별로 나누면 세 배로 보인다. 호기 정보는 공식 자료에 없어 방송·카페 발표를 옮겨 적은 기록(979회)을 썼다.</p>
+<div class="chart"><svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="180.0" x2="862" y2="180.0" stroke="#f0ebe1"/>
+<text x="42" y="184.0" font-size="10" text-anchor="end" fill="#8b8375">0.00</text>
+<line x1="48" y1="138.5" x2="862" y2="138.5" stroke="#f0ebe1"/>
+<text x="42" y="142.5" font-size="10" text-anchor="end" fill="#8b8375">0.25</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#f0ebe1"/>
+<text x="42" y="101.0" font-size="10" text-anchor="end" fill="#8b8375">0.50</text>
+<line x1="48" y1="55.5" x2="862" y2="55.5" stroke="#f0ebe1"/>
+<text x="42" y="59.5" font-size="10" text-anchor="end" fill="#8b8375">0.75</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">1.00</text>
+<line x1="48" y1="177.2" x2="862" y2="177.2" stroke="#b4432f" stroke-dasharray="4 3"/>
+<text x="862" y="173.2" font-size="10" text-anchor="end" fill="#b4432f">기준 0.0167</text>
+<rect x="88.7" y="15.5" width="122.1" height="164.5" fill="#b8912f" rx="2"/>
+<text x="149.8" y="11.5" font-size="10" text-anchor="middle" fill="#4a453c">0.99</text>
+<text x="149.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">1호기 278회</text>
+<rect x="292.2" y="45.4" width="122.1" height="134.6" fill="#b8912f" rx="2"/>
+<text x="353.2" y="41.4" font-size="10" text-anchor="middle" fill="#4a453c">0.81</text>
+<text x="353.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">2호기 295회</text>
+<rect x="495.7" y="128.0" width="122.1" height="52.0" fill="#b8912f" rx="2"/>
+<text x="556.8" y="124.0" font-size="10" text-anchor="middle" fill="#4a453c">0.31</text>
+<text x="556.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">3호기 406회</text>
+<rect x="699.2" y="59.5" width="122.1" height="120.5" fill="#b8912f" rx="2"/>
+<text x="760.2" y="55.5" font-size="10" text-anchor="middle" fill="#4a453c">0.73</text>
+<text x="760.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">셋이 같은가</text>
+</svg><div class="key">기계별 45개 번호 균등성 χ²의 p (기준 0.05/3), 그리고 3 × 45 동질성 검정의 p (df 88).</div></div>
+<div class="scroll"><table>
+<tr><th>질문</th><th>통계량</th><th class="n">값</th><th class="n">p</th><th>판정</th></tr>
+<tr><td>1호기 혼자 균등한가</td><td>χ² (df 44) · 278회</td><td class="n">25.0</td><td class="n">0.991</td><td>기대대로</td></tr>
+<tr><td>2호기</td><td>χ² (df 44) · 295회</td><td class="n">35.6</td><td class="n">0.811</td><td>기대대로</td></tr>
+<tr><td>3호기</td><td>χ² (df 44) · 406회</td><td class="n">48.0</td><td class="n">0.313</td><td>기대대로</td></tr>
+<tr><td>세 대가 같은 분포인가</td><td>χ² (df 88)</td><td class="n">79.6</td><td class="n">0.726</td><td>구별되지 않는다</td></tr>
+<tr><td>번호 6개로 기계를 맞힐 수 있는가</td><td>walk-forward 879회 · 적중 37.2% vs 대조군 41.5%</td><td class="n">z −2.60</td><td class="n">—</td><td>잡음 (신호는 +2 초과)</td></tr>
+</table></div>
+<div class="note ok">분류기가 대조군보다 <em>못</em> 맞힌다는 것이 핵심이다. 과거 빈도를 따라가면 손해를 본다 — 빈도가 잡음이라는 뜻.
+세 기계는 하나의 우연이다. 부수 사실 : 3호기가 눈에 띄게 많이 쓰였다 (406 vs 278·295).</div>
+
+<h2>5. 공 나온 순서 — 어떤 공이 유난히 먼저 떨어지는가</h2>
+<p>공식 자료는 정렬된 번호만 준다. 방송에서 실제로 떨어진 순서(468회~, 771회)를 보면 다른 질문이 가능하다 —
+무거운 공은 더 자주 나오지 않아도 <strong>다른 시점에</strong> 나올 수 있다. 우연이라면 모든 번호가 1~6번째 자리를 각각 1/6씩 차지한다.</p>
+<div class="chart"><svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="180.0" x2="862" y2="180.0" stroke="#f0ebe1"/>
+<text x="42" y="184.0" font-size="10" text-anchor="end" fill="#8b8375">2.80</text>
+<line x1="48" y1="138.5" x2="862" y2="138.5" stroke="#f0ebe1"/>
+<text x="42" y="142.5" font-size="10" text-anchor="end" fill="#8b8375">3.15</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#f0ebe1"/>
+<text x="42" y="101.0" font-size="10" text-anchor="end" fill="#8b8375">3.50</text>
+<line x1="48" y1="55.5" x2="862" y2="55.5" stroke="#f0ebe1"/>
+<text x="42" y="59.5" font-size="10" text-anchor="end" fill="#8b8375">3.85</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">4.20</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#3a6b8a" stroke-dasharray="4 3"/>
+<text x="862" y="93.0" font-size="10" text-anchor="end" fill="#3a6b8a">우연 = 3.50</text>
+<line x1="48" y1="57.9" x2="862" y2="57.9" stroke="#8b8375" stroke-dasharray="4 3"/>
+<text x="862" y="53.9" font-size="10" text-anchor="end" fill="#8b8375">+2σ</text>
+<line x1="48" y1="136.1" x2="862" y2="136.1" stroke="#8b8375" stroke-dasharray="4 3"/>
+<text x="862" y="132.1" font-size="10" text-anchor="end" fill="#8b8375">−2σ</text>
+<rect x="68.3" y="106.5" width="61.0" height="73.5" fill="#b8912f" rx="2"/>
+<text x="98.9" y="102.5" font-size="10" text-anchor="middle" fill="#4a453c">3.42</text>
+<text x="98.9" y="194" font-size="10" text-anchor="middle" fill="#8b8375">17</text>
+<rect x="170.1" y="140.9" width="61.0" height="39.1" fill="#b8912f" rx="2"/>
+<text x="200.6" y="136.9" font-size="10" text-anchor="middle" fill="#4a453c">3.13</text>
+<text x="200.6" y="194" font-size="10" text-anchor="middle" fill="#8b8375">45</text>
+<rect x="271.9" y="65.0" width="61.0" height="115.0" fill="#b8912f" rx="2"/>
+<text x="302.4" y="61.0" font-size="10" text-anchor="middle" fill="#4a453c">3.77</text>
+<text x="302.4" y="194" font-size="10" text-anchor="middle" fill="#8b8375">44</text>
+<rect x="373.6" y="137.3" width="61.0" height="42.7" fill="#b8912f" rx="2"/>
+<text x="404.1" y="133.3" font-size="10" text-anchor="middle" fill="#4a453c">3.16</text>
+<text x="404.1" y="194" font-size="10" text-anchor="middle" fill="#8b8375">37</text>
+<rect x="475.4" y="80.4" width="61.0" height="99.6" fill="#b8912f" rx="2"/>
+<text x="505.9" y="76.4" font-size="10" text-anchor="middle" fill="#4a453c">3.64</text>
+<text x="505.9" y="194" font-size="10" text-anchor="middle" fill="#8b8375">33</text>
+<rect x="577.1" y="112.4" width="61.0" height="67.6" fill="#b8912f" rx="2"/>
+<text x="607.6" y="108.4" font-size="10" text-anchor="middle" fill="#4a453c">3.37</text>
+<text x="607.6" y="194" font-size="10" text-anchor="middle" fill="#8b8375">12</text>
+<rect x="678.9" y="89.9" width="61.0" height="90.1" fill="#b8912f" rx="2"/>
+<text x="709.4" y="85.9" font-size="10" text-anchor="middle" fill="#4a453c">3.56</text>
+<text x="709.4" y="194" font-size="10" text-anchor="middle" fill="#8b8375">43</text>
+<rect x="780.6" y="124.3" width="61.0" height="55.7" fill="#b8912f" rx="2"/>
+<text x="811.1" y="120.3" font-size="10" text-anchor="middle" fill="#4a453c">3.27</text>
+<text x="811.1" y="194" font-size="10" text-anchor="middle" fill="#8b8375">26</text>
+</svg><div class="key">가장 치우친 여덟 번호의 평균 출현 자리. 우연 = 3.50, 표본 ~105회일 때 ±2σ = 3.17 ~ 3.83.</div></div>
+<div class="note ok">45개 번호 중 최소 p는 17번의 0.026 (기준 0.05/45 = 0.0011). 45개 중 하나는 늘 0.02 근처에 온다.
+두 번호(45·37)가 −2σ 경계에 닿는다 — 45개 중 둘, 정확히 기대치. 먼저 나오는 공도, 늦게 나오는 공도 없다.
+크롤링 시 사이트 기록 2건이 공식 번호와 불일치해 자동 거부되었다 — 17년치 기록에 오타 둘.</div>
+
+<h2>6. 이 「없음」은 무엇을 배제하는가 — 검정력</h2>
+<p>검정이 아무것도 찾지 못했다는 것은 「편향이 없다」가 아니라 「이 크기 이상의 편향은 없다」이다.
+그 크기를 적지 않으면 음성 결과는 아무 말도 하지 않는다. 검정력 80%, 45개 번호 다중비교 보정 기준으로,
+번호 하나의 빈도 편향이 얼마나 커야 잡히는가 :</p>
+<div class="chart"><svg viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg">
+<line x1="48" y1="180.0" x2="862" y2="180.0" stroke="#f0ebe1"/>
+<text x="42" y="184.0" font-size="10" text-anchor="end" fill="#8b8375">0%</text>
+<line x1="48" y1="138.5" x2="862" y2="138.5" stroke="#f0ebe1"/>
+<text x="42" y="142.5" font-size="10" text-anchor="end" fill="#8b8375">15%</text>
+<line x1="48" y1="97.0" x2="862" y2="97.0" stroke="#f0ebe1"/>
+<text x="42" y="101.0" font-size="10" text-anchor="end" fill="#8b8375">30%</text>
+<line x1="48" y1="55.5" x2="862" y2="55.5" stroke="#f0ebe1"/>
+<text x="42" y="59.5" font-size="10" text-anchor="end" fill="#8b8375">45%</text>
+<line x1="48" y1="14.0" x2="862" y2="14.0" stroke="#f0ebe1"/>
+<text x="42" y="18.0" font-size="10" text-anchor="end" fill="#8b8375">60%</text>
+<rect x="75.1" y="22.3" width="81.4" height="157.7" fill="#b8912f" rx="2"/>
+<text x="115.8" y="18.3" font-size="10" text-anchor="middle" fill="#4a453c">57%</text>
+<text x="115.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">300 (추첨기 1대)</text>
+<rect x="210.8" y="69.3" width="81.4" height="110.7" fill="#b8912f" rx="2"/>
+<text x="251.5" y="65.3" font-size="10" text-anchor="middle" fill="#4a453c">40%</text>
+<text x="251.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">600</text>
+<rect x="346.5" y="102.5" width="81.4" height="77.5" fill="#b8912f" rx="2"/>
+<text x="387.2" y="98.5" font-size="10" text-anchor="middle" fill="#4a453c">28%</text>
+<text x="387.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">1,240 (지금)</text>
+<rect x="482.1" y="124.7" width="81.4" height="55.3" fill="#b8912f" rx="2"/>
+<text x="522.8" y="120.7" font-size="10" text-anchor="middle" fill="#4a453c">20%</text>
+<text x="522.8" y="194" font-size="10" text-anchor="middle" fill="#8b8375">2,500 (2050년)</text>
+<rect x="617.8" y="141.3" width="81.4" height="38.7" fill="#b8912f" rx="2"/>
+<text x="658.5" y="137.3" font-size="10" text-anchor="middle" fill="#4a453c">14%</text>
+<text x="658.5" y="194" font-size="10" text-anchor="middle" fill="#8b8375">5,000</text>
+<rect x="753.5" y="155.1" width="81.4" height="24.9" fill="#b8912f" rx="2"/>
+<text x="794.2" y="151.1" font-size="10" text-anchor="middle" fill="#4a453c">9%</text>
+<text x="794.2" y="194" font-size="10" text-anchor="middle" fill="#8b8375">12,000</text>
+</svg><div class="key">회차 수에 따른 최소 검출 가능 편향 (번호 하나의 상대 빈도). 추첨기 한 대 = 약 300회.</div></div>
+<div class="note bad">
+  <strong>1,240회로는 28% 이상의 편향만 배제된다.</strong> 5% 무거운 공이 5% 더 자주 나온다면 앞으로 한 세기 동안 보이지 않는다.
+  이것은 검정의 약점이 아니라 문제의 물리적 한계다 — 일주일에 추첨은 한 번뿐이다. 기계 한 대(300회)로는 57%까지밖에 배제하지 못한다.
+</div>
+<p>같은 이유로 결론은 이렇게 적어야 한다. <strong>「1,240회의 로또 6/45 기록은, 다섯 가지 서로 다른 검정에서, 이 표본 크기로 검출 가능한
+어떤 구조도 보이지 않는다.」</strong> 우연을 증명한 것이 아니다. 우연이 아니라는 가설을 기각할 근거를 다섯 번 찾아 다섯 번 찾지 못한 것이다.</p>
+
+<h2>7. 그래서 무엇이 남는가</h2>
+<p>이 자료로 <strong>할 수 없는 것</strong> : 번호 예측. 어느 지표를 몇 개 겹쳐도 확률은 1/8,145,060에서 움직이지 않는다 —
+지표가 서로 독립적이어도 각각의 우도비가 1이라 곱해도 1이다.</p>
+<p>이 자료로 <strong>할 수 있는 것</strong> :</p>
+<div class="scroll"><table>
+<tr><th>무엇</th><th>왜 되는가</th><th>상태</th></tr>
+<tr><td>분배 지표 — 덜 팔린 형태 고르기</td><td>확률이 아니라 <em>당첨금 배분</em>에 작용. 수동·자동 당첨자 분리로 희석 제거 중.</td><td>재보정 진행</td></tr>
+<tr><td>주간 감시 — 기계가 계속 바르게 도는가</td><td>다섯 검정을 누적(CUSUM)으로 돌리면 <em>변화</em>를 잡는다. 단, 위 검정력의 한계는 그대로다.</td><td>「감시」 탭</td></tr>
+<tr><td>연금복권 720+</td><td>다른 기계, 다른 방식(자리별 독립 추첨). 같은 검정이 그대로 적용된다.</td><td>미착수</td></tr>
+</table></div>
+
+<footer>
+  자료 : 동행복권 공식 API (회차·번호·등수별 당첨자), 로또타파 「호기별 당첨번호」(262회~)·「공나온 순서」(468회~).
+  코드 : <code>src/core/machine.js</code> · <code>src/core/order.js</code> · 대기시간·압축·스펙트럼은 일회성 분석 (Python, 2026-09-12~13).
+  본 보고서의 모든 p는 다중비교를 보정한 기준과 함께 읽어야 한다.
+</footer>
+</div>
+</body>
+</html>

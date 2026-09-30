@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고정수 방법 — 일곱 가지를 겨루게 하다</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:940px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:70ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  h3 { font-size:.9rem; margin:1.7rem 0 .4rem; color:var(--gold-deep); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:70ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1rem 1.1rem; margin:1rem 0; overflow-x:auto; }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.me td { background:var(--gold-wash); }
+  tr.law td { color:var(--muted); }
+  .up { color:var(--gold-deep); font-weight:600; } .dn { color:var(--hot); }
+  .scroll { overflow-x:auto; }
+  svg { display:block; max-width:100%; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>고정수 방법 — 일곱 가지를 겨루게 하다</h1>
+<div class="sub">
+  번호를 고정하기로 했다면 <strong>어떤 방법으로</strong> 고를 것인가.
+  화면에서 나오는 세 가지 + 회차마다 상황을 분석하는 네 가지 + 대조군,
+  모두 walk-forward로 840회차. 2026-09-09.
+</div>
+<div class="note">
+  <strong>모든 수치는 walk-forward.</strong> 회차 N의 선택은 N보다 앞선 회차만 봅니다.
+  표·라인·당첨률 누적은 회차 t를 평가한 <em>뒤에</em> 갱신됩니다.
+</div>
+
+<h2>① 일곱 가지 방법</h2>
+<h3>화면에서 그대로 나오는 세 가지</h3>
+<div class="scroll"><table>
+<thead><tr><th>이름</th><th>무엇을 하는가</th><th>후보 수</th></tr></thead>
+<tbody>
+<tr><td><strong>이월</strong></td><td>직전 회차의 7개(보너스 포함). 그중 가장 작은 번호를 고정.</td><td class="n">7</td></tr>
+<tr><td><strong>7 당첨자리</strong></td><td>직전 회차 당첨번호가 앉아 있던 <em>자리</em>를 기억하고, 이번 주 표에서 그 자리에 앉은 번호를 고정. 번호가 아니라 자리를 따라감.</td><td class="n">45</td></tr>
+<tr><td><strong>45 라인</strong></td><td>45개 자리를 과거 당첨률로 정렬해 1위 자리의 번호를 고정.</td><td class="n">45</td></tr>
+</tbody></table></div>
+<div class="note bad">
+  <strong>45 라인은 대개 이월과 같은 번호를 냅니다.</strong> 당첨률 1위 자리는 대부분
+  <strong>라인 1</strong>이고, 라인 1은 정의상 이월 7개 중 가장 작은 번호입니다.
+  최근 10회차에서는 <strong>10번 모두</strong> 두 방법이 같은 번호를 냈습니다.
+  세 방법이라고 부르지만, 시기에 따라 실제로는 둘뿐입니다.
+</div>
+
+<h3>회차마다 상황을 분석하는 네 가지</h3>
+<div class="scroll"><table>
+<thead><tr><th>이름</th><th>무엇을 분석하는가</th></tr></thead>
+<tbody>
+<tr><td><strong>M1 유사 회차</strong></td><td>이번 표와 가장 닮은 과거 회차 60개를 찾습니다(네 온도의 인원, 직전 이월 개수, 평균 대기). 그 회차들 <em>다음에</em> 어느 자리가 당첨됐는지 세어, 가장 많이 나온 자리의 번호를 고정.</td></tr>
+<tr><td><strong>M2 친구 · 중복</strong></td><td>직전 7개 각각에 대해, 역사적으로 그 번호 <em>다음 회차</em>에 잘 나오는 번호를 집계해 합산. 최고 점수를 고정.</td></tr>
+<tr><td><strong>M3 이월 상황</strong></td><td>이월 7개 중에서, 그 번호가 <em>이월 후보였을 때</em> 실제로 재출현한 비율이 가장 높은 것을 고정.</td></tr>
+<tr><td><strong>M4 규칙 갈아타기</strong></td><td>이번 회차의 <em>모양</em>(직전 이월 개수 × 사망 밴드 크기, 6칸)을 읽고, 그 모양에서 가장 잘 통했던 기본 규칙을 골라 적용.</td></tr>
+</tbody></table></div>
+<p>
+  그리고 <strong>대조군</strong> — 45개 중 아무 자리나. 어떤 방법도 이것을 넘지 못하면
+  그 방법은 아무것도 하지 않은 것입니다.
+</p>
+
+<h2>② 고정 1개 — 결과</h2>
+<p>고른 번호가 당첨 6개에 들어간 비율. 840회차(401~1240).
+   <span style="color:var(--hot)">붉은 선</span>이 법칙 <code>13.33 %</code>.</p>
+<div class="chart">
+<svg viewBox="0 0 900 252" role="img" aria-label="고정 1개 방법별 적중률">
+<line x1="514.2" y1="6" x2="514.2" y2="214" stroke="#b4432f" stroke-width="1.5"/>
+<text x="182" y="24" text-anchor="end" font-size="11" fill="#4a453c">7 당첨자리</text>
+<rect x="190" y="14" width="606.6" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="25" font-size="10.5" font-family="monospace" fill="#1c1a16">15.36</text>
+<text x="182" y="50" text-anchor="end" font-size="11" fill="#4a453c">M4 규칙 갈아타기</text>
+<rect x="190" y="40" width="523.1" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="51" font-size="10.5" font-family="monospace" fill="#1c1a16">14.76</text>
+<text x="182" y="76" text-anchor="end" font-size="11" fill="#4a453c">이월 (라인 1)</text>
+<rect x="190" y="66" width="489.7" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="77" font-size="10.5" font-family="monospace" fill="#1c1a16">14.52</text>
+<text x="182" y="102" text-anchor="end" font-size="11" fill="#4a453c">M1 유사 회차</text>
+<rect x="190" y="92" width="424.4" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="103" font-size="10.5" font-family="monospace" fill="#1c1a16">14.05</text>
+<text x="182" y="128" text-anchor="end" font-size="11" fill="#4a453c">M2 친구 · 중복</text>
+<rect x="190" y="118" width="340.9" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="129" font-size="10.5" font-family="monospace" fill="#1c1a16">13.45</text>
+<text x="182" y="154" text-anchor="end" font-size="11" fill="#4a453c">45 라인</text>
+<rect x="190" y="144" width="258.8" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="155" font-size="10.5" font-family="monospace" fill="#1c1a16">12.86</text>
+<text x="182" y="180" text-anchor="end" font-size="11" fill="#4a453c">M3 이월 상황</text>
+<rect x="190" y="170" width="208.7" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="181" font-size="10.5" font-family="monospace" fill="#1c1a16">12.50</text>
+<text x="182" y="206" text-anchor="end" font-size="11" fill="#4a453c">대조군</text>
+<rect x="190" y="196" width="9.7" height="14" rx="2" fill="#8b8375" opacity="0.4"/>
+<text x="806" y="207" font-size="10.5" font-family="monospace" fill="#1c1a16">11.07</text>
+<text x="514.2" y="232" text-anchor="middle" font-size="9.5" fill="#b4432f" font-family="monospace">13.33 % = 법칙</text>
+</svg>
+<div class="key">진한 금색 = 화면의 세 방법 · 연한 금색 = 분석 네 방법 · 회색 = 대조군</div>
+</div>
+
+<div class="scroll"><table>
+<thead><tr><th>방법</th><th class="n">적중률</th><th class="n">z</th><th class="n">100조합</th></tr></thead>
+<tbody>
+<tr class="me"><td>7 당첨자리</td><td class="n up">15.36 %</td><td class="n">+1.73</td><td class="n">81.8</td></tr>
+<tr><td>M4 규칙 갈아타기</td><td class="n">14.76 %</td><td class="n">+1.22</td><td class="n">81.3</td></tr>
+<tr class="me"><td>이월 (라인 1)</td><td class="n">14.52 %</td><td class="n">+1.01</td><td class="n">81.1</td></tr>
+<tr><td>M1 유사 회차</td><td class="n">14.05 %</td><td class="n">+0.61</td><td class="n">80.6</td></tr>
+<tr><td>M2 친구 · 중복</td><td class="n">13.45 %</td><td class="n">+0.10</td><td class="n">80.1</td></tr>
+<tr class="law"><td>법칙 (고정 없음)</td><td class="n">13.33 %</td><td class="n">0</td><td class="n">80.0</td></tr>
+<tr><td>45 라인</td><td class="n dn">12.86 %</td><td class="n">−0.41</td><td class="n">79.6</td></tr>
+<tr><td>M3 이월 상황</td><td class="n dn">12.50 %</td><td class="n">−0.71</td><td class="n">79.3</td></tr>
+<tr class="law"><td>대조군 · 무작위</td><td class="n dn">11.07 %</td><td class="n">−1.93</td><td class="n">78.0</td></tr>
+</tbody></table></div>
+<div class="note bad">
+  <strong>8개 방법을 훑었을 때 |z| 천장은 2.04.</strong> 최고가 <strong>1.73</strong>입니다 —
+  넘지 못합니다. 그리고 대조군이 −1.93까지 내려간 것을 보십시오. 이 실험에서는
+  대조군을 <strong>한 번만</strong> 뽑았기 때문에 그 자체가 크게 흔들립니다.
+  진짜 기준선은 13.33 %이고, 대조군의 흔들림은 <em>잡음의 크기</em>를 보여주는 자입니다.
+</div>
+<p>
+  분석 네 가지의 성적은 <strong>기본 세 가지 사이에 흩어졌습니다</strong> — 둘은 법칙 위,
+  둘은 아래. 회차마다 상황을 읽는다고 해서 나아지지 않았습니다.
+</p>
+
+<h3>구간을 나누면</h3>
+<div class="scroll"><table>
+<thead><tr><th>방법</th><th class="n">301~1240</th><th class="n">401~1240</th>
+<th class="n">301~500</th><th class="n">501~870</th><th class="n">871~1240</th>
+<th>세 구간 모두 법칙 위?</th></tr></thead>
+<tbody>
+<tr class="me"><td>7 당첨자리</td><td class="n up">14.89 %</td><td class="n up">15.36 %</td><td class="n dn">12.50</td><td class="n">15.68</td><td class="n">15.41</td><td class="dn">아니오 — 첫 구간</td></tr>
+<tr class="me"><td>이월 · 라인 1</td><td class="n">14.79 %</td><td class="n">14.52 %</td><td class="n">16.50</td><td class="n">15.68</td><td class="n dn">12.97</td><td class="dn">아니오 — 최근 구간</td></tr>
+<tr><td>이월 · 무작위</td><td class="n">13.87 %</td><td class="n">—</td><td class="n">13.65</td><td class="n">14.68</td><td class="n">13.19</td><td class="up">예 — 유일</td></tr>
+<tr><td>45 라인</td><td class="n dn">13.09 %</td><td class="n dn">12.86 %</td><td class="n">14.00</td><td class="n dn">12.97</td><td class="n dn">12.70</td><td class="dn">아니오</td></tr>
+<tr class="law"><td>법칙 (고정 없음)</td><td class="n">13.33 %</td><td class="n">13.33 %</td><td class="n">13.33</td><td class="n">13.33</td><td class="n">13.33</td><td>—</td></tr>
+</tbody></table></div>
+<p>
+  두 계산 창구를 나란히 둔 것은 <strong>순위가 창구에 따라 흔들리는지</strong>를
+  보기 위해서입니다. 여기서는 흔들리지 않습니다 — <strong>7 당첨자리가 둘 다에서
+  1위</strong>입니다(14.89 / 15.36). 이월 · 라인 1은 둘 다에서 2위.
+  하지만 구간을 셋으로 자르면 <strong>둘 다 한 구간씩 법칙 아래로 떨어집니다</strong>,
+  그리고 그 구간이 서로 반대편입니다.
+</p>
+<p>
+  7 당첨자리는 <strong>최근 두 구간이 강한</strong> 쪽이고, 이월 · 라인 1은 반대로
+  <strong>옛 구간이 강한</strong> 쪽입니다. 어느 쪽 증거를 더 믿느냐가 선택을 가릅니다.
+</p>
+
+<h2>③ 고정 2개 — 결과</h2>
+<div class="chart">
+<svg viewBox="0 0 900 252" role="img" aria-label="고정 2개 방법별 적중률">
+<line x1="473.7" y1="6" x2="473.7" y2="214" stroke="#b4432f" stroke-width="1.5"/>
+<text x="182" y="24" text-anchor="end" font-size="11" fill="#4a453c">M1 유사 회차</text>
+<rect x="190" y="14" width="576.0" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="25" font-size="10.5" font-family="monospace" fill="#1c1a16">14.70</text>
+<text x="182" y="50" text-anchor="end" font-size="11" fill="#4a453c">대조군</text>
+<rect x="190" y="40" width="437.3" height="14" rx="2" fill="#8b8375" opacity="0.4"/>
+<text x="806" y="51" font-size="10.5" font-family="monospace" fill="#1c1a16">14.05</text>
+<text x="182" y="76" text-anchor="end" font-size="11" fill="#4a453c">7 당첨자리</text>
+<rect x="190" y="66" width="360.5" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="77" font-size="10.5" font-family="monospace" fill="#1c1a16">13.69</text>
+<text x="182" y="102" text-anchor="end" font-size="11" fill="#4a453c">M4 규칙 갈아타기</text>
+<rect x="190" y="92" width="309.3" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="103" font-size="10.5" font-family="monospace" fill="#1c1a16">13.45</text>
+<text x="182" y="128" text-anchor="end" font-size="11" fill="#4a453c">이월 (라인 1)</text>
+<rect x="190" y="118" width="270.9" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="129" font-size="10.5" font-family="monospace" fill="#1c1a16">13.27</text>
+<text x="182" y="154" text-anchor="end" font-size="11" fill="#4a453c">45 라인</text>
+<rect x="190" y="144" width="221.9" height="14" rx="2" fill="#b8912f" opacity="0.85"/>
+<text x="806" y="155" font-size="10.5" font-family="monospace" fill="#1c1a16">13.04</text>
+<text x="182" y="180" text-anchor="end" font-size="11" fill="#4a453c">M3 이월 상황</text>
+<rect x="190" y="170" width="209.1" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="181" font-size="10.5" font-family="monospace" fill="#1c1a16">12.98</text>
+<text x="182" y="206" text-anchor="end" font-size="11" fill="#4a453c">M2 친구 · 중복</text>
+<rect x="190" y="196" width="29.9" height="14" rx="2" fill="#b8912f" opacity="0.6"/>
+<text x="806" y="207" font-size="10.5" font-family="monospace" fill="#1c1a16">12.14</text>
+<text x="473.7" y="232" text-anchor="middle" font-size="9.5" fill="#b4432f" font-family="monospace">13.33 % = 법칙</text>
+</svg>
+</div>
+<div class="note bad">
+  <strong>대조군이 2위입니다.</strong> 14.05 %로, 여덟 중 일곱을 이겼습니다.
+  그리고 같은 대조군이 고정 1개에서는 11.07 %였습니다 — <strong>세 포인트가 순전히
+  운으로 움직였습니다.</strong> 방법들 사이의 거리보다 큽니다.
+  고정 2개에서는 어떤 방법도 의미 있게 앞서지 않습니다.
+</div>
+
+<h2>④ 10회차짜리 판으로 보면</h2>
+<p>
+  940회차를 10회차짜리 판 94개로 자르고, 무작위 규칙은 실험을 200번 다시 돌려
+  모든 판을 모았습니다. 한 판 = 10회차 × 100조합. 법칙이면 고정수 적중 <code>1.33회</code>.
+</p>
+<div class="scroll"><table>
+<thead><tr><th>방법</th><th class="n">최소</th><th class="n">평균</th><th class="n">최대</th>
+<th class="n">표준편차</th><th class="n">0회인 판</th><th class="n">판 1등 비율</th></tr></thead>
+<tbody>
+<tr class="me"><td>7 당첨자리</td><td class="n">0</td><td class="n up">1.49</td><td class="n">6</td><td class="n">1.06</td><td class="n">15 %</td><td class="n up">22.9 %</td></tr>
+<tr><td>이월 · 라인 1</td><td class="n">0</td><td class="n">1.48</td><td class="n">6</td><td class="n">1.11</td><td class="n">17 %</td><td class="n">18.3 %</td></tr>
+<tr><td>이월 · 무작위</td><td class="n">0</td><td class="n">1.38</td><td class="n">7</td><td class="n">1.09</td><td class="n">23 %</td><td class="n">21.6 %</td></tr>
+<tr class="law"><td>대조군 · 무작위</td><td class="n">0</td><td class="n">1.34</td><td class="n">8</td><td class="n">1.08</td><td class="n">24 %</td><td class="n">21.8 %</td></tr>
+<tr><td>45 라인</td><td class="n">0</td><td class="n">1.30</td><td class="n">5</td><td class="n">1.04</td><td class="n">24 %</td><td class="n">15.4 %</td></tr>
+</tbody></table></div>
+<div class="note bad">
+  <strong>한 판에서 1등을 하는 비율 : 최고가 22.9 %, 대조군이 21.8 %.</strong>
+  다섯이 완전히 같다면 각 20 %입니다. 그리고 가장 좋았던 단 하나의 판
+  <strong>(8회 적중)</strong> 은 대조군이 가져갔습니다.
+</div>
+<p>
+  이유는 산수입니다. 방법들 사이의 평균 차이는 <strong>0.19</strong>(1.49 − 1.30)인데,
+  한 판의 표준편차는 <strong>1.07</strong>입니다. <strong>잡음이 신호의 여섯 배.</strong>
+  10회차로는 절대 구별되지 않습니다.
+</p>
+<p>
+  그리고 실무적으로 알아야 할 것 : <strong>판 넷 중 하나꼴로 고정수가 열 주 내내
+  한 번도 안 나옵니다.</strong>
+</p>
+
+<h2>⑤ 번호는 오르는데 돈은 안 오릅니다</h2>
+<p>
+  「10회차 중 4회차에서 고정수가 맞으면 100조합의 적중이 올라가지 않는가?」 —
+  <strong>오릅니다.</strong> 하지만 등수와 돈은 따라오지 않습니다.
+  아래는 시뮬레이션이 아니라 <strong>조합론으로 정확히 계산한</strong> 값입니다.
+  10회차 × 100조합 = 1,000장, 지출 100만원.
+</p>
+<div class="scroll"><table>
+<thead><tr><th>경우</th><th class="n">적중 (법칙 800)</th><th class="n">5등</th><th class="n">4등</th>
+<th class="n">기대 수령</th><th class="n">회수율</th></tr></thead>
+<tbody>
+<tr class="law"><td><strong>A</strong> 고정 없음</td><td class="n">800.0</td><td class="n">22.44장</td><td class="n">1.365장</td><td class="n">231,017원</td><td class="n up">23.1 %</td></tr>
+<tr><td><strong>B</strong> 2고정 · 3/10회차 적중</td><td class="n">830.2</td><td class="n">21.29장</td><td class="n">1.009장</td><td class="n">175,107원</td><td class="n dn">17.5 %</td></tr>
+<tr class="me"><td><strong>C</strong> 2고정 · <strong>4/10회차 적중</strong></td><td class="n up">920.9</td><td class="n">26.38장</td><td class="n dn">1.305장</td><td class="n">221,457원</td><td class="n dn">22.1 %</td></tr>
+<tr><td><strong>D</strong> 2고정 · 7/10 (한 번은 둘 다)</td><td class="n">1283.7</td><td class="n">65.60장</td><td class="n">5.487장</td><td class="n">877,830원</td><td class="n">87.8 %</td></tr>
+<tr><td><strong>E</strong> 1고정 · 4/10회차 적중</td><td class="n">1036.4</td><td class="n">41.43장</td><td class="n">3.044장</td><td class="n">494,527원</td><td class="n">49.5 %</td></tr>
+</tbody></table></div>
+<div class="note bad">
+  <strong>C를 보십시오.</strong> 적중이 800 → <strong>920.9</strong>로 15 % 올랐는데,
+  회수율은 <strong>22.1 %</strong> — 아무것도 고정하지 않은 <strong>23.1 %</strong>보다
+  <em>낮습니다</em>. 번호 120개를 더 얻고 돈은 잃었습니다.
+</div>
+<p>
+  이유는 <strong>4등 칸</strong>에 있습니다. C의 4등은 <code>1.305장</code>,
+  고정 없음은 <code>1.365장</code> — <strong>줄었습니다.</strong>
+  늘어난 번호는 고정수가 맞은 4회차에 <em>몰려서</em> 들어오고, 거기서는 주로 3개(5등)를
+  만듭니다. 나머지 6회차에는 자유 칸이 6개가 아니라 4개뿐이라 조합 전체가 약해집니다.
+  좋은 주에 버는 것이 나쁜 주에 잃는 것을 메우지 못합니다.
+</p>
+<div class="note cool">
+  손익분기(회수율 100 %)에 닿는 줄은 하나도 없습니다. D — 10회차 중 7회차 적중,
+  그중 한 번은 두 개 다 — 라는 비현실적인 판에서도 <strong>87.8 %</strong>입니다.
+  고정은 확률을 <strong>옮길</strong> 뿐 만들지 않습니다.
+</div>
+
+<h2>⑥ 결론</h2>
+<div class="note ok">
+  <strong>고정 1개 → 7 당첨자리.</strong> 15.36 % (z +1.73), 100조합 81.8.
+  두 계산 창구 모두에서 1위이고, 강한 구간이 <strong>최근 두 개</strong>입니다.
+</div>
+<div class="note bad">
+  <strong>다만 증명된 규칙은 아닙니다.</strong> 첫 구간(301~500)은 12.50 %로 법칙보다
+  낮고, z 1.73은 천장 2.04를 넘지 못합니다. <em>가장 덜 나쁜 것</em>이지
+  <em>통하는 것</em>이 아닙니다.
+</div>
+<div class="note">
+  <strong>안정을 택한다면 → 이월 · 무작위.</strong> 직전 7개 중 아무거나.
+  세 구간 모두 법칙 위에 있는 유일한 방법이지만, 13.87 % — 거의 법칙입니다.
+</div>
+<div class="note bad">
+  <strong>고정 2개 → 권하지 않습니다.</strong> 대조군이 2위(14.05 %)를 차지했습니다.
+  어떤 방법도 무작위와 구별되지 않습니다.
+</div>
+<div class="note">
+  <strong>쓰지 말 것 :</strong> 45 라인 (12.86 %) · M3 이월 상황 (12.50 %) ·
+  M2 친구 · 중복 (2개에서 12.14 %). 셋 다 법칙보다 낮습니다.
+  <strong>과거 당첨률로 고르는 방식은 자리로 하든 번호로 하든 통하지 않습니다.</strong>
+</div>
+
+<h2>⑦ 1,241회 — 각 방법의 선택</h2>
+<p>직전 1,240회의 7개 : <code>11 13 19 20 27 31 44</code></p>
+<div class="scroll"><table>
+<thead><tr><th>방법</th><th>1개 고정</th></tr></thead>
+<tbody>
+<tr class="me"><td><strong>7 당첨자리</strong> (권장)</td><td class="n">13</td></tr>
+<tr><td>이월 · 라인 1</td><td class="n">11</td></tr>
+<tr><td>이월 · 무작위</td><td class="n">11 13 19 20 27 31 44 중 하나</td></tr>
+<tr><td>이월 × 번호당첨률</td><td class="n">27</td></tr>
+<tr><td>45 라인</td><td class="n">11</td></tr>
+</tbody></table></div>
+<p>
+  이번 주는 <strong>13</strong>이 이월 안에도 있습니다 — 두 방법이 같은 무리를
+  가리키고 있습니다.
+</p>
+
+<footer>
+  회차 1~1,240 · 방법 검정 401~1,240 (840회) · 판 분석 301~1,240 (94판 × 200회 반복) ·
+  walk-forward. 표와 라인은 화면 <strong>차가운번호/뜨거운번호 › 번호 패턴</strong>의
+  코드를 그대로 사용(<code>allCells</code>, <code>hotColdRow</code>) — 재구현하지
+  않았습니다. ⑤의 금액은 조합론 정확값이며 5등 5,000원 · 4등 50,000원 기준입니다.
+</footer>
+</div>
+</body>
+</html>

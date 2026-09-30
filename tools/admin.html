@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Update · 로또</title>
+<style>
+  /* Les mêmes teintes que le site — un seul fichier, aucune dépendance. */
+  :root {
+    --ink: #1a1a18; --muted: #7c7568; --line: #e2ddd3; --line-soft: #efebe3;
+    --paper: #faf8f4; --surface: #fff;
+    --gold: #c9a227; --gold-deep: #8f6b14; --gold-soft: #efe3bd;
+    --ok: #2f6f4f; --bad: #a33b2a;
+    --figure: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 15px/1.55 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 1.25rem; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 1rem 0;
+  }
+  .brand { display: flex; align-items: baseline; gap: 0.6rem; }
+  .brand b { color: var(--gold-deep); font-size: 1.1rem; }
+  .brand span { color: var(--muted); font-size: 0.8125rem; }
+  .local {
+    margin-left: auto; font-size: 0.75rem; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.6rem;
+  }
+  .bar { display: flex; align-items: baseline; gap: 0.6rem; }
+
+  main { padding: 1.25rem 0 4rem; display: grid; gap: 1.25rem; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 1.25rem;
+    /* Un élément de grille ne descend pas sous la largeur de son contenu
+       tant qu'on ne le lui dit pas — et le tableau des montants déborderait
+       la page au lieu de défiler dans son cadre. */
+    min-width: 0;
+  }
+  h2 { margin: 0; font-size: 1rem; font-weight: 600; }
+  .head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.9rem; }
+  .head .gloss { color: var(--muted); font-size: 0.8125rem; }
+  .head .right { margin-left: auto; font-size: 0.8125rem; color: var(--muted); }
+
+  .two { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+
+  button {
+    font: inherit; font-size: 0.875rem; cursor: pointer;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 7px;
+    padding: 0.4rem 0.9rem;
+  }
+  button:hover { border-color: var(--gold); }
+  button:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
+  button.go { border-color: var(--gold); color: var(--gold-deep); font-weight: 600; }
+  .row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .row + .row { margin-top: 0.6rem; }
+
+  input {
+    font: inherit; font-family: var(--figure); font-size: 0.8125rem;
+    border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.5rem;
+    background: var(--surface); color: var(--ink); width: 100%;
+  }
+  input:focus { outline: 2px solid var(--gold-soft); outline-offset: -1px; }
+  label { display: grid; gap: 0.2rem; font-size: 0.6875rem; color: var(--muted); }
+  .w6 { width: 6.5rem; }
+  .w9 { width: 9rem; }
+
+  .stats { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+  .stat .k { color: var(--muted); font-size: 0.75rem; }
+  .stat .v { font-family: var(--figure); font-size: 1.5rem; }
+  .stat .n { color: var(--muted); font-size: 0.75rem; }
+  .stat.warn .v { color: var(--bad); }
+
+  .grid { display: grid; gap: 0.5rem 0.75rem; }
+  .g7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .g5 { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+
+  pre.log {
+    margin: 0; font-family: var(--figure); font-size: 0.75rem; line-height: 1.5;
+    background: #1a1a18; color: #e8e2d6; border-radius: 8px;
+    padding: 0.85rem 1rem; max-height: 22rem; overflow: auto;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .log .ok { color: #9fd0a8; }
+  .log .bad { color: #e8a08f; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  th, td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--line-soft); }
+  th { color: var(--muted); font-weight: 400; font-size: 0.75rem; }
+  td.f, th.f { font-family: var(--figure); }
+  .n { font-family: var(--figure); display: inline-block; min-width: 1.6rem; }
+  .n.b { color: var(--gold-deep); }
+  .box { max-height: 24rem; overflow: auto; min-width: 0; }
+
+  /* Sur un téléphone, sept colonnes de saisie ne tiennent pas, et les
+     montants en won débordent le tableau. Les premières se replient, le
+     second défile dans son cadre. */
+  @media (max-width: 640px) {
+    .g7 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .box table { min-width: 34rem; }
+  }
+
+  .note { color: var(--muted); font-size: 0.75rem; line-height: 1.6; margin: 0.9rem 0 0; }
+  .note b { color: var(--ink); }
+  .err { color: var(--bad); font-size: 0.8125rem; margin: 0.5rem 0 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand">
+      <b>로또</b><span>관리 · Update</span>
+    </div>
+    <span class="local">127.0.0.1 전용</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 현재 상태 -->
+  <section class="panel">
+    <div class="head">
+      <h2>현재 상태</h2>
+      <span class="gloss">지금 데이터베이스에 무엇이 있는지</span>
+      <span class="right" id="print">—</span>
+    </div>
+    <div class="stats" id="state"></div>
+    <p class="note" id="stateNote"></p>
+  </section>
+
+  <div class="two">
+    <!-- 자동 로또 업데이트 -->
+    <section class="panel">
+      <div class="head">
+        <h2>자동 로또 업데이트</h2>
+        <span class="gloss">동행복권에서 받아오기</span>
+      </div>
+      <div class="row">
+        <button class="go" data-action="lotto_since">최근 회차 업데이트</button>
+        <button data-action="lotto_all">전회차 업데이트</button>
+        <button data-action="lotto_missing">빠진 회차</button>
+      </div>
+      <p class="note">
+        <b>최근 회차</b>는 마지막으로 저장된 회차 다음부터 오늘까지.
+        <b>전회차</b>는 1회차부터 — 이미 있는 회차는 다시 쓰지 않습니다.
+      </p>
+    </section>
+
+    <!-- 자동 복권 업데이트 -->
+    <section class="panel">
+      <div class="head">
+        <h2>자동 복권 업데이트</h2>
+        <span class="gloss">연금복권 720+</span>
+      </div>
+      <div class="row">
+        <button class="go" data-action="pension_since">최근 회차 업데이트</button>
+        <button data-action="pension_all">전회차 업데이트</button>
+        <button data-action="pension_missing">빠진 회차</button>
+      </div>
+      <p class="note">
+        옛 페이지의 복권 버튼은 <b>마지막 회차를 한 번도 받아오지 못했습니다</b>
+        — 반복문의 끝이 하나 짧았기 때문입니다. 여기서는 마지막까지 받아옵니다.
+      </p>
+    </section>
+  </div>
+
+  <!-- 수동 로또 업데이트 -->
+  <section class="panel">
+    <div class="head">
+      <h2>수동 로또 업데이트</h2>
+      <span class="gloss">회차를 직접 지정해서 받아오기</span>
+    </div>
+    <div class="row">
+      <label>회차 <input class="w6" id="oneRang" placeholder="1238" inputmode="numeric" /></label>
+      <button data-action="lotto_one" data-args="rang:oneRang">하나만</button>
+    </div>
+    <div class="row">
+      <label>시작 <input class="w6" id="rangeStart" placeholder="1200" inputmode="numeric" /></label>
+      <label>끝 <input class="w6" id="rangeEnd" placeholder="1238" inputmode="numeric" /></label>
+      <button data-action="lotto_range" data-args="start:rangeStart,end:rangeEnd">여러 개</button>
+    </div>
+    <div class="row">
+      <label>회차 수 <input class="w6" id="verifyCount" value="5" inputmode="numeric" /></label>
+      <button data-action="lotto_verify" data-args="count:verifyCount">검증</button>
+      <span class="gloss" style="color:var(--muted);font-size:0.75rem">
+        저장된 내용을 오늘의 페이지와 다시 비교합니다 — 아무것도 쓰지 않습니다.
+      </span>
+    </div>
+  </section>
+
+  <!-- 직접 입력 -->
+  <section class="panel">
+    <div class="head">
+      <h2>직접 입력</h2>
+      <span class="gloss">한 회차를 손으로</span>
+    </div>
+
+    <div class="grid g5" style="margin-bottom:0.9rem">
+      <label>회차 <input id="m_rang" placeholder="1238" inputmode="numeric" /></label>
+      <label>날짜 <input id="m_date" placeholder="비우면 자동" /></label>
+      <label>비고 <input id="m_notes" placeholder="1등, 자동8, 수동4" /></label>
+    </div>
+
+    <div class="grid g7" style="margin-bottom:0.9rem">
+      <label>일 <input id="m_n1" inputmode="numeric" /></label>
+      <label>이 <input id="m_n2" inputmode="numeric" /></label>
+      <label>삼 <input id="m_n3" inputmode="numeric" /></label>
+      <label>사 <input id="m_n4" inputmode="numeric" /></label>
+      <label>오 <input id="m_n5" inputmode="numeric" /></label>
+      <label>육 <input id="m_n6" inputmode="numeric" /></label>
+      <label>보너스 <input id="m_bonus" inputmode="numeric" /></label>
+    </div>
+
+    <div class="box">
+      <table>
+        <thead><tr><th>등수</th><th>당첨자수</th><th>당첨금액</th></tr></thead>
+        <tbody id="prizeRows"></tbody>
+      </table>
+    </div>
+
+    <div class="row" style="margin-top:0.9rem">
+      <button class="go" id="manualGo">저장</button>
+      <span class="gloss" id="manualHint" style="color:var(--muted);font-size:0.75rem">
+        여섯 개는 서로 달라야 하고, 보너스는 그 안에 없어야 합니다.
+      </span>
+    </div>
+    <p class="err" id="manualErr"></p>
+  </section>
+
+  <!-- 기록 -->
+  <section class="panel">
+    <div class="head">
+      <h2>기록</h2>
+      <span class="gloss">지금 무엇이 일어나고 있는지</span>
+      <span class="right"><button id="clearLog">지우기</button></span>
+    </div>
+    <pre class="log" id="log">준비되었습니다.</pre>
+  </section>
+
+  <!-- Tables -->
+  <section class="panel">
+    <div class="head">
+      <h2>Tables</h2>
+      <span class="gloss">최근 회차</span>
+      <span class="right"><button id="reloadTable">새로고침</button></span>
+    </div>
+    <div class="box">
+      <table>
+        <thead>
+          <tr><th class="f">회차</th><th class="f">날짜</th><th>당첨번호</th>
+              <th class="f">1등 당첨자수</th><th class="f">1등 당첨금액</th><th>비고</th></tr>
+        </thead>
+        <tbody id="tableRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id)
+const fmt = (n) => (n === null || n === undefined ? '—' : n.toLocaleString('ko-KR'))
+
+// ─────────────────────────────────────────────────────────── le journal
+
+const log = $('log')
+let empty = true
+function write(text, kind) {
+  if (empty) { log.textContent = ''; empty = false }
+  const line = document.createElement('span')
+  if (kind) line.className = kind
+  line.textContent = text + '\n'
+  log.appendChild(line)
+  log.scrollTop = log.scrollHeight
+}
+$('clearLog').onclick = () => { log.textContent = '준비되었습니다.'; empty = true }
+
+// ─────────────────────────────────────────────────────────── 현재 상태
+
+async function refresh() {
+  const s = await (await fetch('/api/status')).json()
+  $('print').textContent = '데이터 ' + s.fingerprint
+
+  $('state').innerHTML = s.products.map((p) => `
+    <div class="stat"><div class="k">${p.label}</div>
+      <div class="v">${fmt(p.draws)}</div>
+      <div class="n">최신 ${fmt(p.lastRang)}회 · ${p.lastDate ?? '—'}</div></div>
+    <div class="stat ${p.gapCount ? 'warn' : ''}"><div class="k">${p.label} 빠진 회차</div>
+      <div class="v">${fmt(p.gapCount)}</div>
+      <div class="n">${p.gapCount ? p.gaps.join(', ') : '없음'}</div></div>
+  `).join('')
+
+  const last = s.log[0]
+  $('stateNote').innerHTML = last
+    ? `마지막 실행 : <b>${last.at.slice(0, 16).replace('T', ' ')}</b> · ${last.product} ${last.mode} · 추가 ${fmt(last.added)} · 실패 ${fmt(last.failed)}`
+    : '아직 실행 기록이 없습니다.'
+}
+
+// ────────────────────────────────────────────────────── les huit boutons
+
+function busy(on) {
+  document.querySelectorAll('button').forEach((b) => { b.disabled = on })
+}
+
+async function go(action, args) {
+  busy(true)
+  write('▸ ' + action)
+  try {
+    const res = await fetch('/api/run', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action, ...args }),
+    })
+    // Le serveur envoie une ligne JSON par événement : on les lit au fil de
+    // l'eau plutôt que d'attendre la fin, sinon la page reste muette
+    // pendant deux minutes.
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    for (;;) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop()
+      for (const line of lines) {
+        if (line.trim()) event(JSON.parse(line))
+      }
+    }
+  } catch (e) {
+    write('✕ ' + e.message, 'bad')
+  } finally {
+    busy(false)
+    refresh()
+  }
+}
+
+// Ouverte dans l'onglet 업데이트 du site, la page prévient celui-ci que les
+// fichiers de données ont changé : il les relit sans recharger la page.
+// Ouverte seule (`npm run admin`), il n'y a pas de parent et rien ne part.
+function notifySite() {
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: 'lotto:data-updated' }, location.origin)
+  }
+}
+
+function event(e) {
+  if (e.type === 'plan') {
+    write(`  ${e.label} — ${fmt(e.count)}회차`)
+  } else if (e.type === 'step') {
+    write(`  [${e.index + 1}/${e.total}] ${e.rang}회 ${e.ok ? 'ok' : '실패 · ' + (e.reason ?? '')}`,
+          e.ok ? 'ok' : 'bad')
+  } else if (e.type === 'done') {
+    write('  ' + e.message, e.failed ? 'bad' : 'ok')
+  } else if (e.type === 'third') {
+    write(`  ${e.label} · ${e.message}`, e.ok ? 'ok' : 'bad')
+  } else if (e.type === 'built') {
+    write(`  재생성 · ${e.written.join(' + ')} · 로또 ${e.meta.lotto.rang}회 · 복권 ${e.meta.pension.rang}회`, 'ok')
+    notifySite()
+  } else if (e.type === 'error') {
+    write('  ✕ ' + e.message, 'bad')
+  }
+}
+
+document.querySelectorAll('button[data-action]').forEach((b) => {
+  b.onclick = () => {
+    const args = {}
+    for (const pair of (b.dataset.args ?? '').split(',').filter(Boolean)) {
+      const [key, id] = pair.split(':')
+      args[key] = $(id).value.trim()
+    }
+    go(b.dataset.action, args)
+  }
+})
+
+// ────────────────────────────────────────────────────────── 직접 입력
+
+const RANKS = ['1등', '2등', '3등', '4등', '5등']
+$('prizeRows').innerHTML = RANKS.map((label, i) => `
+  <tr><td>${label}</td>
+    <td><input class="w9" id="m_w${i + 1}" inputmode="numeric" /></td>
+    <td><input class="w9" id="m_a${i + 1}" inputmode="numeric" /></td></tr>
+`).join('')
+
+$('manualGo').onclick = async () => {
+  const body = { rang: $('m_rang').value.trim(), date: $('m_date').value.trim(),
+                 notes: $('m_notes').value.trim() }
+  for (const k of ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'bonus']) {
+    body[k] = $('m_' + k).value.trim()
+  }
+  for (let r = 1; r <= 5; r++) {
+    body['w' + r] = $('m_w' + r).value.trim()
+    body['a' + r] = $('m_a' + r).value.trim()
+  }
+
+  $('manualErr').textContent = ''
+  busy(true)
+  try {
+    const res = await fetch('/api/manual', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const out = await res.json()
+    if (!res.ok) {
+      $('manualErr').textContent = out.error
+      write('✕ 직접 입력 · ' + out.error, 'bad')
+    } else {
+      write(`▸ 직접 입력 · ${body.rang}회 저장 · 재생성 ${out.written.join(' + ')}`, 'ok')
+      loadTable()
+      notifySite()
+    }
+  } finally {
+    busy(false)
+    refresh()
+  }
+}
+
+// ────────────────────────────────────────────────────────────── Tables
+
+async function loadTable() {
+  const { rows } = await (await fetch('/api/table?limit=60')).json()
+  $('tableRows').innerHTML = rows.map((r) => {
+    const first = r.prizes[1]
+    return `<tr>
+      <td class="f">${fmt(r.rang)}</td>
+      <td class="f">${r.date}</td>
+      <td>${r.numbers.map((n) => `<span class="n">${n}</span>`).join('')}
+          <span class="n b">+${r.bonus}</span></td>
+      <td class="f">${fmt(first?.winners ?? null)}</td>
+      <td class="f">${fmt(first?.amount ?? null)}</td>
+      <td>${r.notes.join(', ')}</td>
+    </tr>`
+  }).join('')
+}
+$('reloadTable').onclick = loadTable
+
+refresh()
+loadTable()
+</script>
+</body>
+</html>

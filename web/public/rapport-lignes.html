@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이월번호와 번호 패턴 라인 — 같은 표의 두 이름</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:900px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:66ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  h3 { font-size:.9rem; margin:1.7rem 0 .4rem; color:var(--gold-deep); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:68ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1.2rem 1.3rem; margin:1rem 0; overflow-x:auto; }
+  .row { display:grid; grid-template-columns:11rem 1fr 4.6rem; gap:.7rem;
+         align-items:center; margin:.4rem 0; min-width:32rem; }
+  .row .who { font-size:.8rem; color:var(--ink-soft); text-align:right; }
+  .row .who b { display:block; font-size:.67rem; color:var(--muted); font-weight:400; }
+  .trk { position:relative; height:20px; background:var(--line-soft); border-radius:3px; }
+  .trk .fill { position:absolute; top:0; bottom:0; left:0; border-radius:3px;
+               background:linear-gradient(90deg,rgba(184,145,47,.3),rgba(184,145,47,.75)); }
+  .trk .fill.grey { background:linear-gradient(90deg,rgba(139,131,117,.2),rgba(139,131,117,.45)); }
+  .trk .fill.deep { background:linear-gradient(90deg,rgba(58,107,138,.35),rgba(58,107,138,.85)); }
+  .trk .law { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--hot); }
+  .row .v { font-family:var(--figure); font-size:.8rem; text-align:right; }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.7rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.me td { background:var(--gold-wash); }
+  .up { color:var(--gold-deep); font-weight:600; } .dn { color:var(--hot); }
+  .scroll { overflow-x:auto; }
+  svg { display:block; max-width:100%; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>이월번호와 번호 패턴 라인 — 같은 표의 두 이름</h1>
+<div class="sub">
+  둘 중 어느 쪽이 당첨번호를 더 많이 담는가. 940회차를 <strong>walk-forward</strong>로
+  재고, 두 규칙의 성격이 어디서 갈라지는지까지 봅니다. 2026-09-09.
+</div>
+<div class="note">
+  <strong>모든 수치는 walk-forward입니다.</strong> 회차 N에서 쓰는 통계는 N보다 앞선
+  회차만으로 계산합니다. 표도 규칙도 토요일 추첨 전에 알 수 있는 것만 씁니다.
+</div>
+
+<h2>① 두 규칙은 서로 다른 것이 아닙니다</h2>
+<p>
+  <strong>차가운번호/뜨거운번호</strong>의 「번호 패턴」 표는 45개 번호를
+  <strong>대기(마지막 출현 이후 지난 회차 수)</strong>가 짧은 순으로 늘어놓습니다.
+  대기가 같으면 번호가 작은 쪽이 왼쪽입니다. 그런데 직전 회차에 나온 7개는
+  <strong>대기가 반드시 1</strong>이고, 1보다 작은 대기는 존재할 수 없습니다.
+</p>
+<div class="note ok">
+  <strong>코드로 확인했습니다.</strong> 1,239개 회차 전부에서
+  <strong>라인 1~7 = 직전 회차의 7개 번호</strong>였고, 그 일곱 칸의 대기값은
+  모두 1이었습니다. 불일치 <strong>0회</strong>.
+  <div style="font-family:var(--figure);font-size:.78rem;color:var(--muted);margin-top:.5rem">
+    [검증] 라인 1~7 = 직전 회차 7개 : 일치 1239회 · 불일치 0회<br>
+    [검증] 라인 1~7 의 대기값이 모두 1 : 1239 / 1239회
+  </div>
+</div>
+<p>
+  그러니까 <strong>이월번호는 번호 패턴 라인의 바깥에 있는 다른 규칙이 아니라,
+  그 표의 맨 앞 일곱 칸입니다.</strong> 둘을 겨루게 한다는 것은 「표의 앞머리」와
+  「표에서 당첨률이 제일 높다고 나온 자리」를 겨루게 한다는 뜻입니다.
+</p>
+
+<h2>② 45개 라인은 각각 얼마나 당첨을 담았나</h2>
+<p>
+  세로축은 그 자리에 앉은 번호가 그 회차에 나온 비율. 전체 1,240회차,
+  화면의 <strong>당첨률</strong>과 같은 정의(보너스 포함 7개 기준)이므로 법칙은
+  <code>7/45 = 15.56 %</code>입니다 — <span style="color:var(--hot)">붉은 선</span>.
+</p>
+<div class="chart">
+<svg viewBox="0 0 920 240" role="img" aria-label="45개 라인의 당첨률">
+  <line x1="40" y1="200" x2="910" y2="200" stroke="#e3ddd1"/>
+  <line x1="40" y1="100.35" x2="910" y2="100.35" stroke="#b4432f" stroke-width="1.5"/>
+  <text x="36" y="103.5" text-anchor="end" font-size="9" fill="#b4432f" font-family="monospace">15.56</text>
+  <text x="36" y="30" text-anchor="end" font-size="9" fill="#8b8375" font-family="monospace">19%</text>
+  <text x="36" y="204" text-anchor="end" font-size="9" fill="#8b8375" font-family="monospace">11%</text>
+  <rect x="42.5" y="43.7" width="14" height="156.3" fill="#b8912f" opacity="0.85"/>
+  <text x="49.5" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">1</text>
+  <rect x="61.8" y="107.2" width="14" height="92.8" fill="#b8912f" opacity="0.85"/>
+  <rect x="81.2" y="59.6" width="14" height="140.4" fill="#b8912f" opacity="0.85"/>
+  <rect x="100.5" y="116.0" width="14" height="84.0" fill="#b8912f" opacity="0.85"/>
+  <rect x="119.8" y="57.8" width="14" height="142.2" fill="#b8912f" opacity="0.85"/>
+  <text x="126.8" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">5</text>
+  <rect x="139.1" y="114.3" width="14" height="85.7" fill="#b8912f" opacity="0.85"/>
+  <rect x="158.5" y="119.6" width="14" height="80.4" fill="#b8912f" opacity="0.85"/>
+  <rect x="177.8" y="86.0" width="14" height="114.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="197.1" y="54.3" width="14" height="145.7" fill="#8b8375" opacity="0.4"/>
+  <rect x="216.5" y="103.7" width="14" height="96.3" fill="#8b8375" opacity="0.4"/>
+  <text x="223.5" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">10</text>
+  <rect x="235.8" y="77.2" width="14" height="122.8" fill="#8b8375" opacity="0.4"/>
+  <rect x="255.1" y="94.9" width="14" height="105.1" fill="#8b8375" opacity="0.4"/>
+  <rect x="274.5" y="128.4" width="14" height="71.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="293.8" y="135.4" width="14" height="64.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="313.1" y="117.8" width="14" height="82.2" fill="#8b8375" opacity="0.4"/>
+  <text x="320.1" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">15</text>
+  <rect x="332.4" y="128.4" width="14" height="71.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="351.8" y="116.0" width="14" height="84.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="371.1" y="116.0" width="14" height="84.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="390.4" y="94.9" width="14" height="105.1" fill="#8b8375" opacity="0.4"/>
+  <rect x="409.8" y="133.7" width="14" height="66.3" fill="#8b8375" opacity="0.4"/>
+  <text x="416.8" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">20</text>
+  <rect x="429.1" y="161.9" width="14" height="38.1" fill="#8b8375" opacity="0.4"/>
+  <rect x="448.4" y="56.0" width="14" height="144.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="467.8" y="116.0" width="14" height="84.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="487.1" y="119.6" width="14" height="80.4" fill="#8b8375" opacity="0.4"/>
+  <rect x="506.4" y="109.0" width="14" height="91.0" fill="#8b8375" opacity="0.4"/>
+  <text x="513.4" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">25</text>
+  <rect x="525.8" y="87.8" width="14" height="112.2" fill="#8b8375" opacity="0.4"/>
+  <rect x="545.1" y="107.2" width="14" height="92.8" fill="#8b8375" opacity="0.4"/>
+  <rect x="564.4" y="135.4" width="14" height="64.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="583.7" y="109.0" width="14" height="91.0" fill="#8b8375" opacity="0.4"/>
+  <rect x="603.1" y="61.3" width="14" height="138.7" fill="#8b8375" opacity="0.4"/>
+  <text x="610.1" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">30</text>
+  <rect x="622.4" y="119.6" width="14" height="80.4" fill="#8b8375" opacity="0.4"/>
+  <rect x="641.7" y="82.5" width="14" height="117.5" fill="#8b8375" opacity="0.4"/>
+  <rect x="661.1" y="57.8" width="14" height="142.2" fill="#8b8375" opacity="0.4"/>
+  <rect x="680.4" y="91.3" width="14" height="108.7" fill="#8b8375" opacity="0.4"/>
+  <rect x="699.7" y="103.7" width="14" height="96.3" fill="#8b8375" opacity="0.4"/>
+  <text x="706.7" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">35</text>
+  <rect x="719.0" y="94.9" width="14" height="105.1" fill="#8b8375" opacity="0.4"/>
+  <rect x="738.4" y="98.4" width="14" height="101.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="757.7" y="98.4" width="14" height="101.6" fill="#8b8375" opacity="0.4"/>
+  <rect x="777.0" y="91.3" width="14" height="108.7" fill="#8b8375" opacity="0.4"/>
+  <rect x="796.4" y="94.9" width="14" height="105.1" fill="#8b8375" opacity="0.4"/>
+  <text x="803.4" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">40</text>
+  <rect x="815.7" y="93.1" width="14" height="106.9" fill="#8b8375" opacity="0.4"/>
+  <rect x="835.0" y="107.2" width="14" height="92.8" fill="#8b8375" opacity="0.4"/>
+  <rect x="854.4" y="131.9" width="14" height="68.1" fill="#8b8375" opacity="0.4"/>
+  <rect x="873.7" y="91.3" width="14" height="108.7" fill="#8b8375" opacity="0.4"/>
+  <rect x="893.0" y="91.3" width="14" height="108.7" fill="#8b8375" opacity="0.4"/>
+  <text x="900.0" y="214" text-anchor="middle" font-size="9" fill="#8b8375" font-family="monospace">45</text>
+  <text x="475" y="232" text-anchor="middle" font-size="10" fill="#8b8375">?쇱씤 (?쇱そ = ?湲곌? 吏㏃? 踰덊샇)</text>
+  <rect x="42.5" y="14" width="135" height="0" fill="none"/>
+</svg>
+<div class="key">
+  <span style="color:#8a6a1c">■</span> 라인 1~7 = 이월번호 ·
+  <span style="color:#8b8375">■</span> 라인 8~45
+</div>
+</div>
+<p>
+  라인 1이 <strong>18.15 %</strong>로 45개 중 가장 높습니다. 그런데 라인 3(17.42), 5(17.50),
+  9(17.66), 22(17.58), 30(17.34), 33(17.50)도 거의 같은 높이에 있고, 라인 21은 12.74 %로
+  아래로 똑같이 튀어 있습니다. <strong>45개를 훑어서 제일 높은 것을 고르면</strong>
+  이 정도 높이는 그냥 나옵니다.
+</p>
+<div class="note bad">
+  45개 자리를 훑었을 때 우연만으로 기대되는 최대 |z| ≈ <strong>2.76</strong>.<br>
+  실제 최고는 <strong>라인 1의 z = 2.52</strong> — <strong>천장을 넘지 못합니다.</strong>
+</div>
+<p>
+  이월을 <strong>일곱 개 블록으로</strong>, 즉 고르지 않고 통째로 보면 이렇습니다.
+  이쪽은 45개를 훑은 결과가 아니라 <em>미리 이름을 붙일 수 있는 규칙</em>이므로
+  천장이 훨씬 낮습니다.
+</p>
+<div class="scroll"><table>
+<thead><tr><th>구간</th><th class="n">당첨률</th><th class="n">기대</th><th class="n">z</th><th class="n">표본</th></tr></thead>
+<tbody>
+<tr class="me"><td>라인 1~7 (이월 7개)</td><td class="n">16.11 %</td><td class="n">15.56 %</td><td class="n">+1.43</td><td class="n">8,680</td></tr>
+<tr><td>라인 8~45</td><td class="n">15.45 %</td><td class="n">15.56 %</td><td class="n">−0.33</td><td class="n">47,120</td></tr>
+<tr><td>전체 45개 라인</td><td class="n">15.56 %</td><td class="n">15.56 %</td><td class="n">0</td><td class="n">55,800</td></tr>
+</tbody></table></div>
+<p>
+  같은 것을 회차 단위로 세면 <strong>직전 회차의 7개 중 평균 1.128개가 다시 나옵니다.</strong>
+  독립이라면 <code>7 × 7/45 = 1.089</code>. 차이는 0.04개, <strong>z = +1.45</strong>.
+  분석 › 이월 화면이 「평균 1.13개」라고 적는 그 숫자입니다.
+</p>
+
+<h2>③ 정면 대결 — 940회차 walk-forward</h2>
+<p>
+  k개를 고른다고 할 때, <strong>이월</strong>은 라인 1~k(화면 순서 그대로)를 쓰고,
+  <strong>패턴 라인</strong>은 그 회차까지의 당첨률이 가장 높은 k개 라인을 씁니다.
+  고른 번호가 실제 당첨 6개에 들어간 비율, 기대 <code>6/45 = 13.33 %</code>.
+</p>
+<div class="chart">
+  <div class="row"><div class="who">k=1<b>한 개만 고정</b></div>
+    <div class="trk"><div class="fill" style="width:73.9%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">14.79</div></div>
+  <div class="row"><div class="who"><b>패턴 라인</b></div>
+    <div class="trk"><div class="fill grey" style="width:65.5%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">13.09</div></div>
+  <div class="row"><div class="who">k=3<b>이월</b></div>
+    <div class="trk"><div class="fill" style="width:70.4%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">14.08</div></div>
+  <div class="row"><div class="who"><b>패턴 라인</b></div>
+    <div class="trk"><div class="fill grey" style="width:63.3%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">12.66</div></div>
+  <div class="row"><div class="who">k=5<b>이월</b></div>
+    <div class="trk"><div class="fill" style="width:70.6%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">14.11</div></div>
+  <div class="row"><div class="who"><b>패턴 라인</b></div>
+    <div class="trk"><div class="fill grey" style="width:66.8%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">13.36</div></div>
+  <div class="row"><div class="who">k=7<b>이월 = 전부</b></div>
+    <div class="trk"><div class="fill" style="width:68.3%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">13.66</div></div>
+  <div class="row"><div class="who"><b>패턴 라인</b></div>
+    <div class="trk"><div class="fill deep" style="width:70.7%"></div>
+      <div class="law" style="left:66.7%"></div></div><div class="v">14.13</div></div>
+  <div class="key">
+    가로축 0~20 % · <span style="color:var(--hot)">붉은 선</span> = 13.33 % ·
+    301~1,240회차
+  </div>
+</div>
+
+<p>구간을 셋으로 잘라 보면 어느 쪽도 자리를 지키지 못합니다.</p>
+<div class="scroll"><table>
+<thead><tr><th>k</th><th>구간</th><th class="n">이월</th><th class="n">z</th>
+<th class="n">패턴 라인</th><th class="n">z</th><th class="n">겹침 /k</th><th class="n">차이</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>301~500</td><td class="n">16.50</td><td class="n">+1.32</td><td class="n">14.00</td><td class="n">+0.28</td><td class="n">0.00</td><td class="n dn">−2.50</td></tr>
+<tr><td>1</td><td>501~870</td><td class="n">15.68</td><td class="n">+1.33</td><td class="n">12.97</td><td class="n">−0.20</td><td class="n">0.73</td><td class="n dn">−2.70</td></tr>
+<tr><td>1</td><td>871~1240</td><td class="n">12.97</td><td class="n">−0.20</td><td class="n">12.70</td><td class="n">−0.36</td><td class="n">0.88</td><td class="n dn">−0.27</td></tr>
+<tr class="me"><td>1</td><td>301~1240</td><td class="n">14.79</td><td class="n">+1.31</td><td class="n">13.09</td><td class="n">−0.22</td><td class="n">0.63</td><td class="n dn">−1.70</td></tr>
+<tr><td>2</td><td>301~1240</td><td class="n">13.51</td><td class="n">+0.23</td><td class="n">12.82</td><td class="n">−0.66</td><td class="n">0.71</td><td class="n dn">−0.69</td></tr>
+<tr><td>3</td><td>301~1240</td><td class="n">14.08</td><td class="n">+1.16</td><td class="n">12.66</td><td class="n">−1.05</td><td class="n">0.92</td><td class="n dn">−1.42</td></tr>
+<tr><td>4</td><td>301~1240</td><td class="n">13.75</td><td class="n">+0.75</td><td class="n">13.16</td><td class="n">−0.30</td><td class="n">1.17</td><td class="n dn">−0.59</td></tr>
+<tr><td>5</td><td>301~1240</td><td class="n">14.11</td><td class="n">+1.56</td><td class="n">13.36</td><td class="n">+0.06</td><td class="n">2.23</td><td class="n dn">−0.74</td></tr>
+<tr><td>6</td><td>301~1240</td><td class="n">13.83</td><td class="n">+1.10</td><td class="n">13.72</td><td class="n">+0.86</td><td class="n">2.51</td><td class="n dn">−0.11</td></tr>
+<tr><td>7</td><td>871~1240</td><td class="n">12.97</td><td class="n">−0.54</td><td class="n">15.06</td><td class="n">+2.58</td><td class="n">3.00</td><td class="n up">+2.08</td></tr>
+<tr><td>7</td><td>301~1240</td><td class="n">13.66</td><td class="n">+0.79</td><td class="n">14.13</td><td class="n">+1.91</td><td class="n">2.68</td><td class="n up">+0.47</td></tr>
+</tbody></table></div>
+<div class="note">
+  <strong>이월이 k=1부터 6까지 전부 이깁니다.</strong> 패턴 라인이 이기는 칸은
+  <strong>k=7 하나뿐</strong>이고, 거기서도 <strong>겹침이 2.68/7</strong> — 패턴 라인이
+  고른 일곱 자리 중 셋 가까이가 <em>이미 이월 번호</em>입니다. 이긴 것이 아니라
+  이월을 삼킨 것에 가깝습니다.
+</div>
+<div class="note bad">
+  871~1240 구간의 패턴 라인 k=7, <strong>15.06 % · z +2.58</strong>은 눈에 띕니다.
+  하지만 이것은 <strong>45개 라인을 훑어서 고른 뒤</strong>의 z이고, 그 천장은
+  2.76입니다. 게다가 앞 두 구간(12.57, 14.05)에서는 이월에게 졌습니다.
+  <strong>구간마다 주인이 바뀌는 우위는 우위가 아닙니다.</strong>
+</div>
+
+<h2>④ 100조합으로 옮기면</h2>
+<p>
+  k개를 고정하고 나머지 <code>6−k</code>칸을 무작위로 채운 <strong>100조합</strong>이
+  담는 당첨번호의 기댓값. 아무것도 고정하지 않으면
+  <code>100 × 6 × 6/45 = 80.0개</code>입니다.
+</p>
+<div class="scroll"><table>
+<thead><tr><th>k</th><th class="n">이월</th><th class="n">패턴 라인</th><th class="n">고정 없음</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="n up">81.3</td><td class="n">79.8</td><td class="n">80.0</td></tr>
+<tr><td>2</td><td class="n up">80.3</td><td class="n">79.1</td><td class="n">80.0</td></tr>
+<tr><td>3</td><td class="n up">82.1</td><td class="n">78.1</td><td class="n">80.0</td></tr>
+<tr><td>4</td><td class="n up">81.6</td><td class="n">79.4</td><td class="n">80.0</td></tr>
+<tr class="me"><td>5</td><td class="n up">83.8</td><td class="n">80.1</td><td class="n">80.0</td></tr>
+<tr><td>6</td><td class="n up">83.0</td><td class="n">82.3</td><td class="n">80.0</td></tr>
+<tr><td>7</td><td class="n">82.4</td><td class="n up">85.8</td><td class="n">80.0</td></tr>
+</tbody></table></div>
+<p>
+  가장 벌어진 칸이 <strong>85.8 대 78.1</strong> — 100조합에 <strong>7.7개</strong> 차이.
+  600칸 중 7.7칸, <strong>1.3 %p</strong>입니다. 그리고 이 차이는 등수로는
+  거의 옮겨지지 않습니다. 적중이 <em>여러 조합에 흩어져</em> 늘어나기 때문에
+  3개·4개짜리가 늘지 않습니다 — 「고정수 보고서」 ⑥에서 이미 잰 것과 같습니다.
+</p>
+
+<h2>⑤ 1위 라인은 자리를 지키지 않습니다</h2>
+<p>
+  회차마다 「그때까지의 당첨률 1위 라인」이 어디였는지 따라가면 이렇습니다.
+</p>
+<div class="chart">
+<svg viewBox="0 0 920 150" role="img" aria-label="1위 라인의 이동">
+  <line x1="45" y1="120" x2="905" y2="120" stroke="#e3ddd1"/>
+  <rect x="45" y="18" width="140" height="102" fill="#3a6b8a" opacity="0.10"/>
+  <text x="115" y="14" text-anchor="middle" font-size="10" fill="#3a6b8a">라인 34</text>
+  <rect x="185" y="18" width="115" height="102" fill="#8b8375" opacity="0.10"/>
+  <text x="242" y="14" text-anchor="middle" font-size="10" fill="#8b8375">라인 5</text>
+  <rect x="300" y="18" width="70" height="102" fill="#8b8375" opacity="0.16"/>
+  <text x="335" y="14" text-anchor="middle" font-size="10" fill="#8b8375">9 · 12 · 33</text>
+  <rect x="370" y="18" width="535" height="102" fill="#b8912f" opacity="0.16"/>
+  <text x="637" y="14" text-anchor="middle" font-size="10" fill="#8a6a1c">라인 1 (= 이월)</text>
+  <text x="45" y="136" font-size="10" fill="#8b8375" font-family="monospace">301회</text>
+  <text x="475" y="136" text-anchor="middle" font-size="10" fill="#8b8375" font-family="monospace">770회</text>
+  <text x="905" y="136" text-anchor="end" font-size="10" fill="#8b8375" font-family="monospace">1,240회</text>
+</svg>
+</div>
+<p>
+  1위 자리가 <strong>34 → 5 → 9·12·33 → 1</strong>로 네 번 옮겨 다녔습니다.
+  비교해 보십시오. 분배 모델의 최저 칸(<strong>cell 7</strong>)은 회차 501부터
+  1,240까지 <strong>한 번도 바뀌지 않았습니다</strong>. 진짜 구조는 자리를 지키고,
+  잡음은 계속 이사합니다.
+</p>
+
+<h2>⑥ 차이의 성격 — 표로</h2>
+<p>어느 쪽이 더 나오느냐보다, <strong>두 규칙이 어떻게 다른 물건인지</strong>가 실은 더 중요합니다.</p>
+<div class="scroll"><table>
+<thead><tr><th></th><th>이월번호</th><th>번호 패턴 라인</th></tr></thead>
+<tbody>
+<tr><td>정체</td><td>표의 라인 1~7</td><td>표 전체에서 고른 자리</td></tr>
+<tr><td>고르는 방식</td><td class="up">고르지 않음 — 규칙이 하나뿐</td><td>45개를 훑어 최고를 채택</td></tr>
+<tr><td>넘어야 할 |z| 천장</td><td class="up">약 2.0</td><td>약 2.76</td></tr>
+<tr><td>실제 z</td><td>+1.43</td><td>+2.52 (라인 1 = 이월)</td></tr>
+<tr><td>대기(온도)</td><td>항상 1 — 전부 뜨거운</td><td>22·30·33 등 사망(20+)도 섞임</td></tr>
+<tr><td>번호 성향</td><td>직전 7개 중 작은 쪽부터</td><td>성향 없음</td></tr>
+<tr><td>언제 알 수 있나</td><td class="up">토요일 추첨 직후 즉시</td><td>같음 (둘 다 추첨 전 확정)</td></tr>
+<tr><td>시간에 따른 안정성</td><td class="up">정의가 고정 — 변할 수 없음</td><td>1위가 4번 이동 (34→5→…→1)</td></tr>
+<tr><td>k=1~6 승부</td><td class="up">6칸 전부 우세</td><td>0칸</td></tr>
+<tr><td>k=7 승부</td><td>13.66 %</td><td class="up">14.13 % (겹침 2.68)</td></tr>
+</tbody></table></div>
+
+<h2>⑦ 결론</h2>
+<div class="note ok">
+  <strong>1. 이월이 더 많이 담습니다 —</strong> k=1부터 6까지 전부. 940회차 전체로
+  이월 14.79 %(k=1) 대 패턴 라인 13.09 %. 100조합으로는 83.8 대 80.1이 최대 격차입니다.
+</div>
+<div class="note">
+  <strong>2. 그런데 이월도 법칙을 이기지는 못합니다.</strong> 일곱 개를 통째로 재면
+  16.11 % 대 15.56 %, <strong>z = +1.43</strong>. 회차당 1.128개 대 1.089개.
+  「조금 더 나온다」와 「우연히 조금 더 나온 것처럼 보인다」를 <strong>이 자료로는
+  구별할 수 없습니다.</strong>
+</div>
+<div class="note bad">
+  <strong>3. 패턴 라인의 당첨률 순위는 쓰지 마십시오.</strong> 45개를 훑어 1위를
+  고르는 절차라서 천장이 2.76인데, 실제로 얻은 최고가 2.52입니다. 그리고 그 1위가
+  결국 <strong>라인 1 — 즉 이월</strong>입니다. 표를 한 바퀴 돌아 원래 자리로
+  돌아온 셈입니다.
+</div>
+<div class="note cool">
+  <strong>4. 실용적으로.</strong> 굳이 고정한다면 <strong>이월에서 고르는 쪽</strong>이
+  낫고, 그 이득의 크기는 100조합에 <strong>1~4개</strong>입니다. 그 정도는
+  <strong>등수를 바꾸지 않습니다</strong> — 적중이 여러 조합에 흩어지기 때문입니다.
+  고정의 진짜 대가는 「고정수 보고서」 ⑤의 <code>1/66</code> 그대로입니다.
+</div>
+
+<footer>
+  회차 1~1,240 · 검정 구간 301~1,240 (940회차) · walk-forward.
+  표와 라인 순서는 화면 <strong>차가운번호/뜨거운번호 › 번호 패턴</strong>의 코드를
+  그대로 씁니다(<code>allCells</code>, <code>hotColdRow</code>) — 재구현하지 않았습니다.
+  당첨률의 정의도 화면과 같은 보너스 포함 7개 기준이며, 돈·등수 계산만 6개 기준입니다.
+</footer>
+</div>
+</body>
+</html>

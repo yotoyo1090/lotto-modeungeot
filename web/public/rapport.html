@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로또 6/45 — 사(沙) 검정 보고서</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
+  }
+  .wrap { max-width:860px; margin:0 auto; padding:3rem 1.5rem 6rem; }
+  header { border-bottom:2px solid var(--gold); padding-bottom:1.2rem; margin-bottom:2.5rem; }
+  h1 { font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.01em; }
+  .sub { color:var(--muted); font-size:.9rem; }
+  h2 {
+    font-size:1.15rem; margin:3rem 0 .8rem; padding-top:1.5rem;
+    border-top:1px solid var(--line);
+  }
+  h2:first-of-type { border-top:0; padding-top:0; }
+  h3 { font-size:.95rem; margin:1.8rem 0 .5rem; color:var(--gold-deep); }
+  p { margin:.7rem 0; color:var(--ink-soft); }
+  strong { color:var(--ink); font-weight:600; }
+  em { font-style:normal; color:var(--gold-deep); font-weight:500; }
+  .lede { font-size:1.05rem; }
+
+  .big {
+    display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+    margin:1.5rem 0;
+  }
+  .card {
+    background:var(--surface); border:1px solid var(--line); border-radius:6px;
+    padding:1rem 1.1rem;
+  }
+  .card .v { font-family:var(--figure); font-size:1.6rem; color:var(--ink); display:block; }
+  .card .k { font-size:.78rem; color:var(--muted); }
+  .card.hero { background:var(--gold-wash); border-color:var(--gold); }
+  .card.hero .v { color:var(--gold-deep); }
+
+  table { width:100%; border-collapse:collapse; font-size:.85rem; margin:1rem 0; }
+  th { text-align:left; font-weight:600; color:var(--ink); font-size:.78rem;
+       border-bottom:1px solid var(--line); padding:.5rem .5rem .45rem;
+       white-space:nowrap; vertical-align:bottom; }
+  /* L'unite, puis l'explication : chaque colonne dit ce qu'elle est sans
+     qu'on ait a remonter au mode d'emploi. */
+  th .unit { display:block; font-weight:400; color:var(--muted); font-size:.72rem;
+             margin-top:.1rem; }
+  th .hint { display:block; font-weight:400; color:var(--muted); font-size:.68rem;
+             line-height:1.35; margin-top:.35rem; padding-top:.3rem;
+             border-top:1px dotted var(--line); }
+  th .hint b { color:var(--gold-deep); font-weight:600; }
+  td { padding:.35rem .5rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.witness td { background:var(--gold-wash); }
+  tr.witness td:first-child { color:var(--gold-deep); font-weight:600; }
+  /* Les lignes oracle : le plafond de reference. Fond ardoise pour qu'on
+     ne les confonde jamais avec les sacs mesurables. */
+  tr.oracle td { background:#eef3f6; border-bottom-color:#dae3e9; }
+  tr.oracle td:first-child { color:var(--cool); font-weight:600; }
+  tr.oracle .bar { background:#dae3e9; }
+  tr.oracle .bar i { background:var(--cool); }
+  .over { color:var(--cool); font-family:var(--figure); font-size:.75rem; }
+  /* Le tableau de distribution : les colonnes basses s'effacent, les
+     colonnes 3+ portent le regard. */
+  td.dim { color:#b3aa99; }
+  td.hi { color:var(--gold-deep); font-weight:600; background:var(--gold-wash); }
+  td.exp { color:var(--muted); }
+  /* Un comptage nul s'ecrit «—» : sinon le 0 de la colonne «0개» se lit
+     comme un resultat, alors que c'est un nombre de 회차. */
+  td.never { color:#d5cdbd; }
+  th.grp { text-align:center; border-bottom:1px solid var(--line-soft);
+           background:var(--line-soft); }
+  th.grp .unit { text-align:center; }
+  th.grp b { color:var(--gold-deep); }
+  th.sm { font-size:.72rem; color:var(--muted); text-align:right; }
+  /* Les complements : le sac retourne. Meme mesure, numeros opposes. */
+  tr.comp td:first-child { color:var(--muted); }
+  tr.comp td { background:#fbfaf7; }
+  tr.oracle td.hi { background:#e2ecf2; color:var(--cool); }
+
+  /* La barre du rapport : centrée sur 1.00, ±5 %. */
+  .bar { position:relative; width:120px; height:14px; background:var(--line-soft);
+         border-radius:2px; overflow:hidden; }
+  .bar i { position:absolute; top:0; bottom:0; background:var(--cool); }
+  .bar i.up { background:var(--gold); }
+  .bar b { position:absolute; top:-2px; bottom:-2px; left:50%; width:1px;
+           background:var(--muted); }
+
+  .step { display:grid; grid-template-columns:7rem 1fr; gap:.2rem .9rem;
+          font-size:.88rem; margin:1rem 0; }
+  .step dt { font-family:var(--figure); color:var(--gold-deep); }
+  .step dd { margin:0; color:var(--ink-soft); }
+
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.9rem; }
+  .bad { border-left-color:var(--hot); }
+  .nums { font-family:var(--figure); font-size:.82rem; color:var(--ink-soft);
+          letter-spacing:.02em; }
+  footer { margin-top:4rem; padding-top:1.2rem; border-top:1px solid var(--line);
+           font-size:.8rem; color:var(--muted); }
+  @media (max-width:600px){ .step{grid-template-columns:1fr} .wrap{padding:2rem 1rem 4rem} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>사(沙) 검정 보고서</h1>
+  <div class="sub">로또 6/45 · 앱의 열한 화면이 만드는 «사»를 전부 재본 결과 · 1239회차까지</div>
+</header>
+
+<p class="lede">
+  이 보고서는 한 가지 질문에 답합니다 —
+  <strong>45개보다 적은 번호 묶음(«사»)을 잘 만들면, 당첨번호를 더 많이 담을 수 있는가?</strong>
+</p>
+<p>
+  앱의 열한 화면은 저마다 다른 방식으로 사를 만듭니다. 온도, 구간, 친구, 제외번호…
+  그 사들을 <strong>839회차</strong>에 걸쳐 하나씩 재봤습니다. 아래가 그 결과입니다.
+</p>
+
+<h2>1. 답 — 13.3 %</h2>
+
+<div class="big">
+  <div class="card hero">
+    <span class="v">13.3 %</span>
+    <span class="k">어떤 사를 만들어도, 그 안의 당첨번호 비율</span>
+  </div>
+  <div class="card">
+    <span class="v">14</span>
+    <span class="k">잰 사의 개수</span>
+  </div>
+  <div class="card">
+    <span class="v">5위 / 14</span>
+    <span class="k">아무것도 안 읽는 «무작위 사»의 순위</span>
+  </div>
+</div>
+
+<p>
+  <strong>T개짜리 사를 추첨 전에 만들면, 그 안에는 언제나 6 × T / 45 개의 당첨번호가
+  들어 있습니다.</strong> 비율로 쓰면 6/45 = 13.3 % — <em>T가 약분되어 사라집니다.</em>
+  10개짜리든 20개든 36개든, 사의 «품질»은 같습니다. 크기만 다릅니다.
+</p>
+<p>
+  오라클(당첨번호를 미리 본 사)의 사는 50 %입니다. 그 차이가 전부입니다 —
+  그리고 그 차이는 기법이 아니라 <strong>정보</strong>입니다.
+</p>
+
+<h2>2. 표 읽는 법 — 한 줄이면 충분합니다</h2>
+<p><code>구간 꺼진 구간</code>을 예로 듭니다.</p>
+
+<dl class="step">
+  <dt>크기 12.8</dt><dd><strong>회차당</strong> 사 안에 든 번호 개수, 45번 중 —
+      <strong>평균</strong>입니다 (최소 6번 ~ 최대 29번 사이를 오갑니다)</dd>
+  <dt>총 적중 1544</dt><dd><strong>839회차를 전부 합쳐서</strong> 1544개 — 한 회차 얘기가 아닙니다.
+      <em>합</em>이라서 «최소~최대»가 없습니다 : 회차마다 나오는 값이 아니라, 그 값들을
+      더한 하나의 숫자입니다. 그래서 2.040 × 839 = 1544 로 아래 열과 같은 이야기입니다.
+      증거의 양을 보여주려고 남겨 둔 열입니다</dd>
+  <dt>회차당 2.04</dt><dd>1544 ÷ 839 = 한 회차에 평균 2개 —
+      실제로는 <strong>0개인 회차도 6개인 회차도</strong> 있습니다</dd>
+  <dt>기대 1.99</dt><dd>담았어야 할 개수 = 7 × 크기 / 45 —
+      이것도 <strong>평균</strong>입니다. 크기가 6번인 회차에는 0.93,
+      29번인 회차에는 4.51을 기대합니다</dd>
+  <dt>비율 1.023</dt><dd>기대보다 2.3 % 많음</dd>
+  <dt>±잡음 2.0 %</dt><dd>이 크기의 사는 그냥 ±2 % 씩 흔들린다</dd>
+  <dt>z 1.13</dt><dd><strong>흔들림 한 칸 — 아무 일도 아님</strong></dd>
+</dl>
+
+<div class="note">
+  <strong>볼 것은 두 열뿐입니다.</strong><br>
+  <em>비율</em> — 1.00이면 정확히 우연.<br>
+  <em>z</em> — 2 미만이면 저절로 생길 수 있는 차이.<br>
+  «크기»와 «총 적중»은 사의 크기가 다르기 때문에 다를 뿐입니다. 큰 사가 더 많이
+  담는 것은 당연합니다. <strong>줄끼리 비교할 수 있는 것은 «비율»뿐입니다.</strong>
+</div>
+
+<h2>3. 열네 개의 사와 그 여집합 — 839회차, 6개 + 보너스 기준</h2>
+<p>
+  맨 위 파란 두 줄은 <strong>기준자</strong>입니다 — 당첨번호 2개를 사 안에 넣고
+  나머지를 채운 «당첨 2개 + 채움». 정보가 완전할 때 사가 어디까지 가는지 보여줍니다.
+  나머지 줄은 그 정보 없이 만들어진 사들입니다.
+</p>
+<p>
+  <em>여집합 ▸</em> 로 시작하는 줄은 <strong>그 사에 안 든 번호들</strong>로 만든
+  사입니다 — 화면이 버린 쪽. 스물여덟 줄이 <strong>비율 순</strong>으로 섞여 있습니다.
+</p>
+
+<table>
+<thead><tr>
+  <th>사<span class="hint">어느 화면이 만들었나</span></th>
+  <th class="n">회차당 크기 (45번 중)<span class="unit">평균 (최소~최대)</span><span class="hint">사 안에 든 번호 개수<br>회차마다 달라짐</span></th>
+  <th class="n">총 적중<span class="unit">839회 합계</span><span class="hint"><b>합이라 최소~최대 없음</b><br>회차당 × 839 일 뿐</span></th>
+  <th class="n">회차당 적중<span class="unit">평균 (최소~최대)</span><span class="hint">실제로 담은 개수<br>합계 ÷ 839</span></th>
+  <th class="n">기대<span class="unit">평균 (최소~최대)</span><span class="hint">담았어야 할 개수<br>7 × 크기 / 45</span></th>
+  <th class="n">비율<span class="unit">관측 ÷ 기대</span><span class="hint"><b>1.00 = 우연</b><br>볼 것은 이 열</span></th>
+  <th>1.00<span class="unit">±5 %</span><span class="hint">금색 = 기대 이상<br>파란색 = 이하</span></th>
+  <th class="n">z<span class="unit">흔들림 칸수</span><span class="hint"><b>2 미만 = 우연</b><br>14개면 2.30까지 정상</span></th>
+</tr></thead>
+<tbody>
+<tr class="oracle"><td>당첨 2개 + 채움 15</td><td class="n">15 (고정)</td><td class="n">2952</td><td class="n">3.518 (2~7)</td><td class="n">2.333 (고정)</td><td class="n">1.508</td><td><span class="over">＋51 % ▸ 범위 밖</span></td><td class="n">29.6</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 20</td><td class="n">20 (고정)</td><td class="n">3427</td><td class="n">4.085 (2~7)</td><td class="n">3.111 (고정)</td><td class="n">1.313</td><td><span class="over">＋31 % ▸ 범위 밖</span></td><td class="n">23.1</td></tr>
+<tr><td>차뜨 cold (gap 11~19)</td><td class="n">6.4 (1~15)</td><td class="n">867</td><td class="n">1.033 (0~5)</td><td class="n">1.002 (0.16~2.33)</td><td class="n">1.031</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:31%"></i></div></td><td class="n">1.04</td></tr>
+<tr><td>제외번호 직전10회 미출현</td><td class="n">8.2 (3~16)</td><td class="n">1089</td><td class="n">1.298 (0~5)</td><td class="n">1.269 (0.47~2.49)</td><td class="n">1.023</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:23%"></i></div></td><td class="n">0.89</td></tr>
+<tr><td>구간 꺼진 구간</td><td class="n">12.8 (6~29)</td><td class="n">1544</td><td class="n">2.040 (0~6)</td><td class="n">1.994 (0.93~4.51)</td><td class="n">1.023</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:23%"></i></div></td><td class="n">1.13</td></tr>
+<tr><td>리스트 가족 전체 (짝수)</td><td class="n">22 (고정)</td><td class="n">2915</td><td class="n">3.474 (0~7)</td><td class="n">3.422 (고정)</td><td class="n">1.015</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:15%"></i></div></td><td class="n">1.23</td></tr>
+<tr class="comp"><td>여집합 ▸ 친구 친구3</td><td class="n">28.7 (24~33)</td><td class="n">3796</td><td class="n">4.524 (1~7)</td><td class="n">4.462 (3.73~5.13)</td><td class="n">1.014</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:14%"></i></div></td><td class="n">1.58</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 hot</td><td class="n">19.2 (14~25)</td><td class="n">2542</td><td class="n">3.030 (0~7)</td><td class="n">2.994 (2.18~3.89)</td><td class="n">1.012</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:12%"></i></div></td><td class="n">0.86</td></tr>
+<tr class="witness"><td>대조군 — 무작위 20개</td><td class="n">20 (고정)</td><td class="n">2633</td><td class="n">3.138 (0~7)</td><td class="n">3.111 (고정)</td><td class="n">1.009</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:9%"></i></div></td><td class="n">0.64</td></tr>
+<tr class="comp"><td>여집합 ▸ 테이블 gap 1~3열</td><td class="n">27.1 (24~31)</td><td class="n">3567</td><td class="n">4.251 (1~7)</td><td class="n">4.217 (3.73~4.82)</td><td class="n">1.008</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:8%"></i></div></td><td class="n">0.80</td></tr>
+<tr><td>차뜨 midle (6~10)</td><td class="n">11.1 (4~18)</td><td class="n">1453</td><td class="n">1.732 (0~6)</td><td class="n">1.725 (0.62~2.80)</td><td class="n">1.004</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:4%"></i></div></td><td class="n">0.19</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 최다 출현 12</td><td class="n">33 (고정)</td><td class="n">4315</td><td class="n">5.143 (2~7)</td><td class="n">5.133 (고정)</td><td class="n">1.002</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:2%"></i></div></td><td class="n">0.26</td></tr>
+<tr class="comp"><td>여집합 ▸ 당첨위치 최다3</td><td class="n">26.2 (25~27)</td><td class="n">3429</td><td class="n">4.087 (1~7)</td><td class="n">4.083 (3.89~4.20)</td><td class="n">1.001</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:1.4%"></i></div></td><td class="n">0.10</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 dead</td><td class="n">43.0 (40~44)</td><td class="n">4811</td><td class="n">6.691 (4~7)</td><td class="n">6.689 (6.22~6.84)</td><td class="n">1.000</td><td><div class="bar"><b></b><i class="up" style="left:50%;width:0.4%"></i></div></td><td class="n">0.10</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 midle</td><td class="n">33.9 (27~41)</td><td class="n">4420</td><td class="n">5.268 (1~7)</td><td class="n">5.273 (4.20~6.38)</td><td class="n">0.999</td><td><div class="bar"><b></b><i style="left:49.3%;width:0.7%"></i></div></td><td class="n">−0.19</td></tr>
+<tr><td>당첨위치 자리별 최다3</td><td class="n">18.8 (18~20)</td><td class="n">2444</td><td class="n">2.913 (0~6)</td><td class="n">2.917 (2.80~3.11)</td><td class="n">0.999</td><td><div class="bar"><b></b><i style="left:48.6%;width:1.4%"></i></div></td><td class="n">−0.10</td></tr>
+<tr><td>제외번호 직전10회 출현</td><td class="n">36.8 (29~42)</td><td class="n">4784</td><td class="n">5.702 (2~7)</td><td class="n">5.731 (4.51~6.53)</td><td class="n">0.995</td><td><div class="bar"><b></b><i style="left:45%;width:5%"></i></div></td><td class="n">−0.89</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 cold</td><td class="n">38.6 (30~44)</td><td class="n">5006</td><td class="n">5.967 (2~7)</td><td class="n">5.997 (4.67~6.84)</td><td class="n">0.995</td><td><div class="bar"><b></b><i style="left:45%;width:5%"></i></div></td><td class="n">−1.05</td></tr>
+<tr><td>리스트 최다 출현 12 (짝수)</td><td class="n">12 (고정)</td><td class="n">1558</td><td class="n">1.857 (0~5)</td><td class="n">1.867 (고정)</td><td class="n">0.995</td><td><div class="bar"><b></b><i style="left:45%;width:5%"></i></div></td><td class="n">−0.26</td></tr>
+<tr><td>차뜨 dead (20+)</td><td class="n">2.0 (1~5)</td><td class="n">222</td><td class="n">0.309 (0~3)</td><td class="n">0.311 (0.16~0.78)</td><td class="n">0.994</td><td><div class="bar"><b></b><i style="left:44%;width:6%"></i></div></td><td class="n">−0.10</td></tr>
+<tr class="comp"><td>여집합 ▸ 대조군 무작위 20개</td><td class="n">25 (고정)</td><td class="n">3240</td><td class="n">3.862 (0~7)</td><td class="n">3.889 (고정)</td><td class="n">0.993</td><td><div class="bar"><b></b><i style="left:43%;width:7%"></i></div></td><td class="n">−0.64</td></tr>
+<tr><td>차뜨 hot (gap ≤ 5)</td><td class="n">25.8 (20~31)</td><td class="n">3331</td><td class="n">3.970 (0~7)</td><td class="n">4.006 (3.11~4.82)</td><td class="n">0.991</td><td><div class="bar"><b></b><i style="left:41%;width:9%"></i></div></td><td class="n">−0.86</td></tr>
+<tr><td>구간 켜진 구간</td><td class="n">32.2 (16~39)</td><td class="n">3755</td><td class="n">4.960 (1~7)</td><td class="n">5.006 (2.49~6.07)</td><td class="n">0.991</td><td><div class="bar"><b></b><i style="left:41%;width:9%"></i></div></td><td class="n">−1.13</td></tr>
+<tr><td>테이블 gap 1~3열</td><td class="n">17.9 (14~21)</td><td class="n">2306</td><td class="n">2.749 (0~6)</td><td class="n">2.782 (2.18~3.27)</td><td class="n">0.988</td><td><div class="bar"><b></b><i style="left:38%;width:12%"></i></div></td><td class="n">−0.80</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 가족 전체 (홀수)</td><td class="n">23 (고정)</td><td class="n">2958</td><td class="n">3.526 (0~7)</td><td class="n">3.578 (고정)</td><td class="n">0.985</td><td><div class="bar"><b></b><i style="left:35%;width:15%"></i></div></td><td class="n">−1.23</td></tr>
+<tr><td>친구 직전7개의 친구3</td><td class="n">16.3 (12~21)</td><td class="n">2077</td><td class="n">2.476 (0~6)</td><td class="n">2.540 (1.87~3.27)</td><td class="n">0.975</td><td><div class="bar"><b></b><i style="left:25%;width:25%"></i></div></td><td class="n">−1.57</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 20</td><td class="n">25 (고정)</td><td class="n">2446</td><td class="n">2.915 (0~5)</td><td class="n">3.889 (고정)</td><td class="n">0.750</td><td><span class="over">－25 % ▸ 범위 밖</span></td><td class="n">−23.1</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 15</td><td class="n">30 (고정)</td><td class="n">2921</td><td class="n">3.482 (0~5)</td><td class="n">4.667 (고정)</td><td class="n">0.746</td><td><span class="over">－25 % ▸ 범위 밖</span></td><td class="n">−29.6</td></tr>
+</tbody>
+</table>
+
+<p class="sub">막대는 1.00을 가운데 두고 ±5 %. 금색 = 기대 이상, 파란색 = 기대 이하.</p>
+
+<div class="note">
+  <strong>«크기»는 평균이지, 고정된 개수가 아닙니다.</strong> 사는 회차마다 다시
+  만들어지고 크기도 달라집니다. <code>구간 꺼진 구간</code>은 <strong>6개일 때도,
+  29개일 때도</strong> 있습니다 — 직전 회차에 어느 구간이 꺼졌느냐에 따라서요.
+  실제로 1237회 직전에는 15개, 1238회 직전에는 19개, 1239회 직전에는 <em>0개</em>였고,
+  1240회에는 6개(40~45)입니다. 12.8이라는 크기의 사는 <em>한 번도 나온 적이 없습니다.</em>
+  <br><br>
+  계산은 회차마다 그 회차의 크기로 «기대»를 따로 구해서 더합니다. 표의 «크기» 열은
+  대략의 규모를 보여줄 뿐입니다. <strong>«고정»이라 적힌 셋만 매번 같은 크기입니다.</strong>
+  <br><br>
+  <span class="sub">평균은 <em>쓸 수 있었던 회차</em>만으로 냈습니다. 사가 비거나
+  45개 전부가 되면 그 회차는 뺐습니다 — 구간 두 줄은 82회차, 차뜨 dead는 120회차가
+  그렇습니다.</span>
+</div>
+
+<div class="note">
+  <strong>|z| 최대 1.57.</strong> 14개를 재면 자연스럽게 나오는 최댓값은 <strong>2.30</strong>입니다.
+  <strong>2를 넘은 줄은 하나도 없습니다.</strong> 그리고 아무 화면도 읽지 않는 대조군이
+  <strong>14개 중 5위</strong>입니다 — 앱의 아홉 개 사가 동전 던지기보다 못합니다.
+</div>
+
+<div class="note">
+  <strong>«여집합» 줄 — 사에 <em>안 든</em> 번호들.</strong>
+  각 사마다, 45개 중 그 사가 <strong>버린 번호</strong>로 사를 하나 더 만들어
+  똑같이 쟀습니다. 화면이 «고른» 것이 값어치가 있다면, 화면이 «버린» 것도
+  값어치가 있어야 합니다 — 반대 방향으로.
+  <br><br>
+  <strong>이미 표 안에 여집합 쌍이 두 개 있었습니다</strong> :
+  제외번호 미출현(8.2) ↔ 출현(36.8), 구간 꺼진(12.8) ↔ 켜진(32.2).
+  45개를 둘로 가른 것이니 서로가 서로의 여집합입니다. 그래서 새로 넣은 줄은
+  열두 개입니다.
+  <br><br>
+  <strong>당첨번호 7개는 사 안에 있거나 밖에 있거나 둘 중 하나입니다.</strong>
+  그래서 <code>여집합 적중 = 7 − 사 적중</code>이 매 회차 자동으로 성립하고,
+  z는 부호만 뒤집힙니다. 하지만 <em>비율</em>은 진짜 새 측정입니다 — 크기가
+  달라지면 기대도 달라지기 때문입니다.
+</div>
+
+<div class="note bad">
+  <strong>결과 : 여집합 줄들이 원래 줄들 사이에 그냥 섞여 들어갔습니다.</strong>
+  1.014 · 1.012 · 1.008 · 1.002 · 1.001 · 1.000 · 0.999 · 0.995 · 0.993 · 0.985.
+  버린 번호로 만든 사가 고른 번호로 만든 사와 <strong>구별되지 않습니다</strong>.
+  스물여덟 줄 중 2를 넘은 |z|는 <em>여전히 하나도 없습니다</em>.
+  <br><br>
+  <strong>딱 두 줄만 다릅니다</strong> — 맨 아래 파란 두 줄, 0.750과 0.746.
+  당첨번호 2개를 사 안에 넣었으니 여집합에는 그 2개가 <strong>확실히 없습니다</strong>.
+  정보가 있으면 여집합도 움직인다는 뜻이고, 나머지 스물여섯 줄이 안 움직인다는 것은
+  <strong>거기에 정보가 없다는 뜻입니다.</strong>
+</div>
+
+<h3>«최대»는 한 번일 수도 있고 백 번일 수도 있다 — 낱낱이 세본 것</h3>
+<p>
+  위 표의 <em>(0~7)</em>은 가장 좋았던 회차 하나만 말해줍니다. <strong>3개, 4개,
+  5개, 6개, 7개를 각각 몇 회차나 담았는지</strong> 세야 사가 실제로 무엇을 하는지
+  보입니다. 아래가 그 전수 집계입니다 — 사 크기 순으로 정렬했습니다.
+</p>
+
+<div class="note">
+  <strong>이 표의 칸은 «담은 번호 개수»가 아니라 «회차 수»입니다.</strong>
+  <code>당첨 2개 + 채움 15</code> 줄의 «0개» 칸에 있는 <strong>—</strong>는
+  <em>0개를 담았다</em>가 아니라 <strong>0개를 담은 회차가 한 번도 없었다</strong>는
+  뜻입니다. 당첨번호 2개가 들어 있으니 최소가 2개이고, «0개»와 «1개» 칸은
+  영원히 비어 있습니다. 첫 숫자가 «2개» 칸의 <strong>124회</strong>인 것이
+  그 증거입니다 — 채움 13개가 하나도 못 맞힌 회차가 124번 있었다는 뜻이지요.
+</div>
+
+<table data-zero>
+<thead><tr>
+  <th rowspan="2">사<span class="hint">크기 순</span></th>
+  <th class="n" rowspan="2">회차당 크기<span class="unit">평균 (최소~최대)</span><span class="hint">사 안에 든 번호 개수<br>회차마다 달라짐</span></th>
+  <th class="n grp" colspan="8">담은 개수별 <b>회차 수</b><span class="unit">839회를 여덟 칸에 나눈 것 — 합이 839</span></th>
+  <th class="n" rowspan="2">3개 이상<span class="unit">회차 수</span><span class="hint"><b>몇 «회차»나</b><br>3개 넘게 담았나</span></th>
+  <th class="n" rowspan="2">확률법<span class="unit">기대 회차 수</span><span class="hint"><b>같은 크기 무작위</b><br>여야 할 값</span></th>
+</tr>
+<tr>
+  <th class="n sm">0개</th><th class="n sm">1개</th><th class="n sm">2개</th><th class="n sm">3개</th>
+  <th class="n sm">4개</th><th class="n sm">5개</th><th class="n sm">6개</th><th class="n sm">7개</th>
+</tr></thead>
+<tbody>
+<tr><td>차뜨 dead (20+) <span class="sub">719회</span></td><td class="n">2.0 (1~5)</td><td class="n dim">519</td><td class="n dim">180</td><td class="n dim">18</td><td class="n">2</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n hi">2</td><td class="n exp">1</td></tr>
+<tr><td>차뜨 cold (gap 11~19)</td><td class="n">6.4 (1~15)</td><td class="n dim">269</td><td class="n dim">346</td><td class="n dim">159</td><td class="n">58</td><td class="n">6</td><td class="n">1</td><td class="n">0</td><td class="n">0</td><td class="n hi">65</td><td class="n exp">53</td></tr>
+<tr><td>제외번호 직전10회 미출현</td><td class="n">8.2 (3~16)</td><td class="n dim">193</td><td class="n dim">333</td><td class="n dim">206</td><td class="n">87</td><td class="n">17</td><td class="n">3</td><td class="n">0</td><td class="n">0</td><td class="n hi">107</td><td class="n exp">93</td></tr>
+<tr><td>차뜨 midle (6~10)</td><td class="n">11.1 (4~18)</td><td class="n dim">104</td><td class="n dim">284</td><td class="n dim">252</td><td class="n">141</td><td class="n">49</td><td class="n">8</td><td class="n">1</td><td class="n">0</td><td class="n hi">199</td><td class="n exp">194</td></tr>
+<tr><td>리스트 최다 출현 12 (짝수)</td><td class="n">12 (고정)</td><td class="n dim">64</td><td class="n dim">263</td><td class="n dim">300</td><td class="n">157</td><td class="n">51</td><td class="n">4</td><td class="n">0</td><td class="n">0</td><td class="n hi">212</td><td class="n exp">225</td></tr>
+<tr><td>구간 꺼진 구간 <span class="sub">757회</span></td><td class="n">12.8 (6~29)</td><td class="n dim">78</td><td class="n dim">203</td><td class="n dim">231</td><td class="n">138</td><td class="n">76</td><td class="n">25</td><td class="n">6</td><td class="n">0</td><td class="n hi">245</td><td class="n exp">247</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 15</td><td class="n">15 (고정)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">124</td><td class="n">302</td><td class="n">284</td><td class="n">113</td><td class="n">15</td><td class="n">1</td><td class="n hi">715</td><td class="n exp">360</td></tr>
+<tr><td>친구 직전7개의 친구3</td><td class="n">16.3 (12~21)</td><td class="n dim">32</td><td class="n dim">148</td><td class="n dim">267</td><td class="n">221</td><td class="n">127</td><td class="n">40</td><td class="n">4</td><td class="n">0</td><td class="n hi">392</td><td class="n exp">420</td></tr>
+<tr><td>테이블 gap 1~3열</td><td class="n">17.9 (14~21)</td><td class="n dim">24</td><td class="n dim">101</td><td class="n dim">247</td><td class="n">236</td><td class="n">162</td><td class="n">59</td><td class="n">10</td><td class="n">0</td><td class="n hi">467</td><td class="n exp">489</td></tr>
+<tr><td>당첨위치 자리별 최다3</td><td class="n">18.8 (18~20)</td><td class="n dim">18</td><td class="n dim">88</td><td class="n dim">203</td><td class="n">257</td><td class="n">199</td><td class="n">61</td><td class="n">13</td><td class="n">0</td><td class="n hi">530</td><td class="n exp">527</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 hot</td><td class="n">19.2 (14~25)</td><td class="n dim">15</td><td class="n dim">82</td><td class="n dim">202</td><td class="n">233</td><td class="n">198</td><td class="n">90</td><td class="n">18</td><td class="n">1</td><td class="n hi">540</td><td class="n exp">544</td></tr>
+<tr class="witness"><td>대조군 — 무작위 20개</td><td class="n">20 (고정)</td><td class="n dim">2</td><td class="n dim">63</td><td class="n dim">189</td><td class="n">265</td><td class="n">226</td><td class="n">73</td><td class="n">19</td><td class="n">2</td><td class="n hi">585</td><td class="n exp">578</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 20</td><td class="n">20 (고정)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">44</td><td class="n">197</td><td class="n">319</td><td class="n">213</td><td class="n">55</td><td class="n">11</td><td class="n hi">795</td><td class="n exp">578</td></tr>
+<tr><td>리스트 가족 전체 (짝수)</td><td class="n">22 (고정)</td><td class="n dim">6</td><td class="n dim">34</td><td class="n dim">136</td><td class="n">260</td><td class="n">237</td><td class="n">122</td><td class="n">37</td><td class="n">7</td><td class="n hi">663</td><td class="n exp">650</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 가족 (홀수)</td><td class="n">23 (고정)</td><td class="n dim">7</td><td class="n dim">37</td><td class="n dim">122</td><td class="n">237</td><td class="n">260</td><td class="n">136</td><td class="n">34</td><td class="n">6</td><td class="n hi">673</td><td class="n exp">681</td></tr>
+<tr class="comp"><td>여집합 ▸ 대조군 무작위 20개</td><td class="n">25 (고정)</td><td class="n dim">2</td><td class="n dim">19</td><td class="n dim">73</td><td class="n">226</td><td class="n">265</td><td class="n">189</td><td class="n">63</td><td class="n">2</td><td class="n hi">745</td><td class="n exp">734</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 20</td><td class="n">25 (고정)</td><td class="n dim">11</td><td class="n dim">55</td><td class="n dim">213</td><td class="n">319</td><td class="n">197</td><td class="n">44</td><td class="n">0</td><td class="n">0</td><td class="n hi">560</td><td class="n exp">734</td></tr>
+<tr><td>차뜨 hot (gap ≤ 5)</td><td class="n">25.8 (20~31)</td><td class="n dim">1</td><td class="n dim">18</td><td class="n dim">90</td><td class="n">198</td><td class="n">233</td><td class="n">202</td><td class="n">82</td><td class="n">15</td><td class="n hi">730</td><td class="n exp">744</td></tr>
+<tr class="comp"><td>여집합 ▸ 당첨위치 최다3</td><td class="n">26.2 (25~27)</td><td class="n dim">0</td><td class="n dim">13</td><td class="n dim">61</td><td class="n">199</td><td class="n">257</td><td class="n">203</td><td class="n">88</td><td class="n">18</td><td class="n hi">765</td><td class="n exp">759</td></tr>
+<tr class="comp"><td>여집합 ▸ 테이블 gap 1~3열</td><td class="n">27.1 (24~31)</td><td class="n dim">0</td><td class="n dim">10</td><td class="n dim">59</td><td class="n">162</td><td class="n">236</td><td class="n">247</td><td class="n">101</td><td class="n">24</td><td class="n hi">770</td><td class="n exp">773</td></tr>
+<tr class="comp"><td>여집합 ▸ 친구 친구3</td><td class="n">28.7 (24~33)</td><td class="n dim">0</td><td class="n dim">4</td><td class="n dim">40</td><td class="n">127</td><td class="n">221</td><td class="n">267</td><td class="n">148</td><td class="n">32</td><td class="n hi">795</td><td class="n exp">795</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 15</td><td class="n">30 (고정)</td><td class="n dim">1</td><td class="n dim">15</td><td class="n dim">113</td><td class="n">284</td><td class="n">302</td><td class="n">124</td><td class="n">0</td><td class="n">0</td><td class="n hi">710</td><td class="n exp">812</td></tr>
+<tr><td>구간 켜진 구간 <span class="sub">757회</span></td><td class="n">32.2 (16~39)</td><td class="n dim">0</td><td class="n dim">6</td><td class="n dim">25</td><td class="n">76</td><td class="n">138</td><td class="n">231</td><td class="n">203</td><td class="n">78</td><td class="n hi">726</td><td class="n exp">725</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 최다 출현 12</td><td class="n">33 (고정)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">4</td><td class="n">51</td><td class="n">157</td><td class="n">300</td><td class="n">263</td><td class="n">64</td><td class="n hi">835</td><td class="n exp">831</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 midle</td><td class="n">33.9 (27~41)</td><td class="n dim">0</td><td class="n dim">1</td><td class="n dim">8</td><td class="n">49</td><td class="n">141</td><td class="n">252</td><td class="n">284</td><td class="n">104</td><td class="n hi">830</td><td class="n exp">831</td></tr>
+<tr><td>제외번호 직전10회 출현</td><td class="n">36.8 (29~42)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">3</td><td class="n">17</td><td class="n">87</td><td class="n">206</td><td class="n">333</td><td class="n">193</td><td class="n hi">836</td><td class="n exp">837</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 cold</td><td class="n">38.6 (30~44)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">1</td><td class="n">6</td><td class="n">58</td><td class="n">159</td><td class="n">346</td><td class="n">269</td><td class="n hi">838</td><td class="n exp">838</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 dead <span class="sub">719회</span></td><td class="n">43.0 (40~44)</td><td class="n dim">0</td><td class="n dim">0</td><td class="n dim">0</td><td class="n">0</td><td class="n">2</td><td class="n">18</td><td class="n">180</td><td class="n">519</td><td class="n hi">719</td><td class="n exp">719</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+  <strong>두 열만 비교하십시오 — «3개 이상»과 «확률법».</strong>
+  열네 개의 사는 전부 붙어 있습니다 : 차뜨 hot 730 대 744, 구간 켜진 726 대 725,
+  제외번호 출현 836 대 837, 당첨위치 530 대 527. 가장 벌어진 것이 친구(392 대 420)와
+  테이블(467 대 489)인데, <strong>둘 다 기대보다 «적습니다»</strong>.
+  <br><br>
+  <strong>크기 20에서 두 줄을 나란히 놓으면 끝납니다.</strong> 대조군 무작위 20개는
+  585회, 당첨 2개를 넣은 20개는 795회 — 기대는 <em>둘 다 578</em>입니다.
+  같은 크기, 같은 확률법, 210회차 차이. 그 210이 «정보»의 값입니다.
+</div>
+
+<div class="note">
+  <strong>7개를 통째로 담은 회차.</strong> 제외번호 출현(36.8개) 193회,
+  구간 켜진(32.2개) 78회, 차뜨 hot(25.8개) 15회, 리스트 가족(22개) 7회,
+  대조군(20개) 2회. <strong>순서가 정확히 크기 순입니다</strong> — 화면 순이
+  아니라. 큰 사가 더 담는 것은 재주가 아니라 크기입니다. 크기 2.0의 차뜨 dead는
+  839회차 동안 <strong>3개를 담은 적이 두 번</strong>뿐입니다.
+</div>
+
+<div class="note">
+  <strong>여집합 줄은 원래 줄의 거울입니다.</strong> <code>차뜨 hot</code>은
+  1·18·90·198·233·202·82·15, <code>여집합 ▸ 차뜨 hot</code>은
+  15·82·202·233·198·90·18·1 — <em>같은 숫자를 뒤집은 것</em>입니다. 당연합니다 :
+  당첨번호 7개 중 사가 1개를 담았으면 나머지 6개는 밖에 있으니까요.
+  <br><br>
+  거울이 아닌 것은 <strong>«확률법» 열</strong>입니다. 크기가 달라지면 기대도
+  달라지니까요. 그리고 바로 거기서 <code>여집합 ▸ 당첨 2개 + 채움 15</code>가
+  드러납니다 — 관측 710, 기대 812. <strong>6개와 7개 칸이 완전히 비어 있습니다</strong>
+  (0회·0회). 30개나 되는 큰 사인데도요. 당첨번호 2개가 반대편에 잡혀 있으니
+  <em>구조적으로 불가능</em>합니다. 나머지 여집합 줄에는 그런 구멍이 없습니다.
+</div>
+
+<h3>보너스도 마찬가지</h3>
+<p>
+  사가 보너스 번호를 담은 비율(관측 / 기대) : 테이블 39.7 % / 39.7 % · 차뜨 hot 56.6 % / 57.2 % ·
+  제외번호 출현 80.8 % / 81.9 %. <strong>보너스는 다른 번호와 똑같이 행동합니다.</strong>
+</p>
+
+<h3>최근 회차만 보면 달라지는가?</h3>
+<p>
+  당연한 의심입니다 — 기계가 바뀌었거나 참여자가 늘었다면, 최근이 옛날과 다를
+  것입니다. 같은 14개 사를 다섯 개의 창으로 다시 쟀습니다.
+</p>
+
+<table>
+<thead><tr>
+  <th>사</th>
+  <th class="n">최근100</th><th class="n">z</th>
+  <th class="n">최근200</th><th class="n">z</th>
+  <th class="n">최근300</th><th class="n">z</th>
+  <th class="n">최근500</th><th class="n">z</th>
+  <th class="n">전체839</th><th class="n">z</th>
+</tr></thead>
+<tbody>
+<tr class="oracle"><td>당첨 2개 + 채움 15</td><td class="n">1.479</td><td class="n">9.6</td><td class="n">1.498</td><td class="n">14.2</td><td class="n">1.504</td><td class="n">17.6</td><td class="n">1.503</td><td class="n">22.6</td><td class="n">1.508</td><td class="n">29.6</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 20</td><td class="n">1.315</td><td class="n">8.0</td><td class="n">1.305</td><td class="n">11.0</td><td class="n">1.319</td><td class="n">14.1</td><td class="n">1.327</td><td class="n">18.6</td><td class="n">1.313</td><td class="n">23.1</td></tr>
+<tr><td>차뜨 dead</td><td class="n">1.286</td><td class="n">1.4</td><td class="n">1.020</td><td class="n">0.2</td><td class="n">1.123</td><td class="n">1.2</td><td class="n">1.083</td><td class="n">1.0</td><td class="n">0.994</td><td class="n">−0.1</td></tr>
+<tr><td>제외 미출현</td><td class="n">1.129</td><td class="n">1.6</td><td class="n">1.006</td><td class="n">0.1</td><td class="n">1.015</td><td class="n">0.4</td><td class="n">1.033</td><td class="n">1.0</td><td class="n">1.023</td><td class="n">0.9</td></tr>
+<tr><td>차뜨 cold</td><td class="n">1.096</td><td class="n">1.1</td><td class="n">1.001</td><td class="n">0.0</td><td class="n">0.988</td><td class="n">−0.2</td><td class="n">1.020</td><td class="n">0.5</td><td class="n">1.031</td><td class="n">1.0</td></tr>
+<tr class="witness"><td>대조군 무작위20</td><td class="n">1.077</td><td class="n">2.0</td><td class="n">1.051</td><td class="n">1.8</td><td class="n">1.043</td><td class="n">1.9</td><td class="n">1.030</td><td class="n">1.7</td><td class="n">1.009</td><td class="n">0.6</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 hot</td><td class="n">1.061</td><td class="n">1.5</td><td class="n">1.011</td><td class="n">0.4</td><td class="n">1.024</td><td class="n">1.0</td><td class="n">1.030</td><td class="n">1.6</td><td class="n">1.012</td><td class="n">0.9</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 홀수전체</td><td class="n">1.037</td><td class="n">1.1</td><td class="n">0.994</td><td class="n">−0.3</td><td class="n">0.991</td><td class="n">−0.4</td><td class="n">0.983</td><td class="n">−1.1</td><td class="n">0.985</td><td class="n">−1.2</td></tr>
+<tr class="comp"><td>여집합 ▸ 테이블 gap1~3</td><td class="n">1.034</td><td class="n">1.2</td><td class="n">1.007</td><td class="n">0.4</td><td class="n">1.010</td><td class="n">0.6</td><td class="n">1.016</td><td class="n">1.3</td><td class="n">1.008</td><td class="n">0.8</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 최다12</td><td class="n">1.029</td><td class="n">1.3</td><td class="n">1.008</td><td class="n">0.5</td><td class="n">0.999</td><td class="n">−0.1</td><td class="n">1.002</td><td class="n">0.2</td><td class="n">1.002</td><td class="n">0.3</td></tr>
+<tr><td>구간 꺼진</td><td class="n">1.027</td><td class="n">0.5</td><td class="n">1.022</td><td class="n">0.5</td><td class="n">1.037</td><td class="n">1.1</td><td class="n">1.042</td><td class="n">1.6</td><td class="n">1.023</td><td class="n">1.1</td></tr>
+<tr><td>차뜨 midle</td><td class="n">1.017</td><td class="n">0.3</td><td class="n">1.015</td><td class="n">0.3</td><td class="n">1.030</td><td class="n">0.9</td><td class="n">1.028</td><td class="n">1.0</td><td class="n">1.004</td><td class="n">0.2</td></tr>
+<tr class="comp"><td>여집합 ▸ 당첨위치 최다3</td><td class="n">1.006</td><td class="n">0.2</td><td class="n">1.019</td><td class="n">0.9</td><td class="n">1.015</td><td class="n">0.9</td><td class="n">1.009</td><td class="n">0.7</td><td class="n">1.001</td><td class="n">0.1</td></tr>
+<tr><td>친구 친구3</td><td class="n">1.005</td><td class="n">0.1</td><td class="n">1.003</td><td class="n">0.1</td><td class="n">1.002</td><td class="n">0.1</td><td class="n">0.974</td><td class="n">−1.2</td><td class="n">0.975</td><td class="n">−1.6</td></tr>
+<tr class="comp"><td>여집합 ▸ 친구 친구3</td><td class="n">0.997</td><td class="n">−0.1</td><td class="n">0.998</td><td class="n">−0.1</td><td class="n">0.999</td><td class="n">−0.1</td><td class="n">1.015</td><td class="n">1.2</td><td class="n">1.014</td><td class="n">1.6</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 midle</td><td class="n">0.994</td><td class="n">−0.3</td><td class="n">0.995</td><td class="n">−0.3</td><td class="n">0.990</td><td class="n">−0.9</td><td class="n">0.991</td><td class="n">−1.0</td><td class="n">0.999</td><td class="n">−0.2</td></tr>
+<tr><td>당첨위치 최다3</td><td class="n">0.992</td><td class="n">−0.2</td><td class="n">0.975</td><td class="n">−0.9</td><td class="n">0.979</td><td class="n">−0.9</td><td class="n">0.987</td><td class="n">−0.7</td><td class="n">0.999</td><td class="n">−0.1</td></tr>
+<tr><td>구간 켜진</td><td class="n">0.989</td><td class="n">−0.5</td><td class="n">0.991</td><td class="n">−0.5</td><td class="n">0.985</td><td class="n">−1.1</td><td class="n">0.983</td><td class="n">−1.6</td><td class="n">0.991</td><td class="n">−1.1</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 dead</td><td class="n">0.989</td><td class="n">−1.4</td><td class="n">0.999</td><td class="n">−0.2</td><td class="n">0.994</td><td class="n">−1.2</td><td class="n">0.996</td><td class="n">−1.0</td><td class="n">1.000</td><td class="n">0.1</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 cold</td><td class="n">0.985</td><td class="n">−1.1</td><td class="n">1.000</td><td class="n">0.0</td><td class="n">1.002</td><td class="n">0.2</td><td class="n">0.997</td><td class="n">−0.5</td><td class="n">0.995</td><td class="n">−1.0</td></tr>
+<tr><td>제외 출현</td><td class="n">0.974</td><td class="n">−1.6</td><td class="n">0.999</td><td class="n">−0.1</td><td class="n">0.997</td><td class="n">−0.4</td><td class="n">0.993</td><td class="n">−1.0</td><td class="n">0.995</td><td class="n">−0.9</td></tr>
+<tr><td>리스트 짝수전체</td><td class="n">0.961</td><td class="n">−1.1</td><td class="n">1.007</td><td class="n">0.3</td><td class="n">1.009</td><td class="n">0.4</td><td class="n">1.018</td><td class="n">1.1</td><td class="n">1.015</td><td class="n">1.2</td></tr>
+<tr><td>차뜨 hot</td><td class="n">0.956</td><td class="n">−1.5</td><td class="n">0.992</td><td class="n">−0.4</td><td class="n">0.982</td><td class="n">−1.0</td><td class="n">0.978</td><td class="n">−1.6</td><td class="n">0.991</td><td class="n">−0.9</td></tr>
+<tr><td>테이블 gap1~3</td><td class="n">0.948</td><td class="n">−1.2</td><td class="n">0.989</td><td class="n">−0.4</td><td class="n">0.984</td><td class="n">−0.6</td><td class="n">0.976</td><td class="n">−1.3</td><td class="n">0.988</td><td class="n">−0.8</td></tr>
+<tr class="comp witness"><td>여집합 ▸ 대조군 무작위20</td><td class="n">0.939</td><td class="n">−2.0</td><td class="n">0.959</td><td class="n">−1.8</td><td class="n">0.966</td><td class="n">−1.9</td><td class="n">0.976</td><td class="n">−1.7</td><td class="n">0.993</td><td class="n">−0.6</td></tr>
+<tr><td>리스트 최다12</td><td class="n">0.921</td><td class="n">−1.3</td><td class="n">0.978</td><td class="n">−0.5</td><td class="n">1.004</td><td class="n">0.1</td><td class="n">0.994</td><td class="n">−0.2</td><td class="n">0.995</td><td class="n">−0.3</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 15</td><td class="n">0.761</td><td class="n">−9.6</td><td class="n">0.751</td><td class="n">−14.2</td><td class="n">0.748</td><td class="n">−17.6</td><td class="n">0.749</td><td class="n">−22.6</td><td class="n">0.746</td><td class="n">−29.6</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 20</td><td class="n">0.748</td><td class="n">−8.0</td><td class="n">0.756</td><td class="n">−11.0</td><td class="n">0.745</td><td class="n">−14.1</td><td class="n">0.738</td><td class="n">−18.6</td><td class="n">0.750</td><td class="n">−23.1</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+  <strong>140칸 (28 줄 × 5 창) · 앱의 사에서 |z| 최대 1.6 · 자연스러운 최댓값 2.91.</strong><br>
+  여집합은 원래 줄의 부호를 뒤집은 것이라 <em>새로운 검정이 아닙니다</em> — 실질
+  검정 수는 그대로 70입니다.
+  최근이 옛날과 다르지 않습니다. 창을 바꿔도 깨어나는 사도, 꺼지는 사도 없습니다.
+  줄들은 움직이지만 <em>방향 없이</em> 움직입니다.
+  <br><br>
+  <strong>2를 넘은 칸은 딱 하나 — 대조군입니다.</strong> 아무 화면도 읽지 않는
+  무작위 20개가 최근100회차에서 <strong>1.077, z = 2.0</strong>을 냅니다.
+  앱의 열네 개 사 중에는 2에 닿은 것이 하나도 없습니다. <em>동전 던지기가
+  앱보다 «강한 신호»를 낸 것입니다</em> — 그리고 그 신호는 창이 길어지자
+  1.077 → 1.051 → 1.043 → 1.030 → 1.009 으로 사라집니다.
+  <br><br>
+  <strong>파란 두 줄은 창을 바꿔도 꿈쩍하지 않습니다</strong> — 1.479 · 1.498 · 1.504 ·
+  1.503 · 1.508. 다섯 창 모두 같은 값입니다. 나머지 열네 줄이 창마다 흔들리는 것이
+  바로 «그 흔들림이 전부»라는 증거입니다.
+</div>
+
+<h3>짧은 창의 함정 — 이 보고서에서 가장 쓸모 있는 부분</h3>
+<p>
+  <code>차뜨 dead</code>의 최근 100회차를 보세요 : <strong>1.286</strong>. +29 %,
+  눈에 확 띕니다. 그런데 z는 <strong>1.4</strong>, 아무것도 아닙니다.
+  창이 짧으면 잡음이 커지기 때문입니다.
+</p>
+<table>
+<thead><tr><th>창</th><th class="n">±잡음 (사 20개 기준)</th><th class="n">z = 2 가 되려면</th></tr></thead>
+<tbody>
+<tr><td>최근 100회차</td><td class="n">±3.9 %</td><td class="n">비율 1.079</td></tr>
+<tr><td>최근 200회차</td><td class="n">±2.8 %</td><td class="n">비율 1.056</td></tr>
+<tr><td>최근 300회차</td><td class="n">±2.3 %</td><td class="n">비율 1.045</td></tr>
+<tr><td>최근 500회차</td><td class="n">±1.8 %</td><td class="n">비율 1.035</td></tr>
+<tr><td>전체 839회차</td><td class="n">±1.4 %</td><td class="n">비율 1.027</td></tr>
+</tbody>
+</table>
+<p>
+  <strong>창이 짧을수록 숫자는 화려해지고, 뜻하는 바는 줄어듭니다.</strong>
+  100회차의 1.286은 500회차의 1.042보다 <em>덜</em> 의미 있습니다.
+</p>
+<p>
+  증거는 대조군 줄에 있습니다 : 아무것도 읽지 않는 무작위 사가
+  1.077 → 1.051 → 1.043 → 1.030 → 1.009 으로 «나빠집니다». 성질이 바뀐 게 아니라,
+  창이 길어지며 잡음이 가라앉았을 뿐입니다. 진짜 줄들도 똑같이 움직입니다.
+  <br><br>
+  <strong>이 표에서 가장 중요한 한 줄이 그것입니다.</strong> 최근 100회차만 보면
+  대조군이 <em>표 전체에서 가장 센 z</em>(2.0)를 냅니다 — 순전한 제비뽑기가.
+  최근 100회차의 화려한 숫자를 보고 «이 화면이 살아났다»고 말하려 할 때마다,
+  이 줄을 보십시오.
+</p>
+
+<h2>4. 사의 «모양» — 크기가 전부입니다</h2>
+<p>839회차 동안, 사가 7개 중 몇 개를 담았는지 센 표입니다.</p>
+
+<table data-zero>
+<thead><tr><th>사<span class="hint">아래 숫자는 전부 «회차 수»</span></th><th class="n">0개</th><th class="n">1개</th><th class="n">2개</th><th class="n">3개</th><th class="n">4개</th><th class="n">5개</th><th class="n">6개</th><th class="n">7개</th></tr></thead>
+<tbody>
+<tr><td>차뜨 dead (2.0개)</td><td class="n">519</td><td class="n">180</td><td class="n">18</td><td class="n">2</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>차뜨 cold (6.4개)</td><td class="n">269</td><td class="n">346</td><td class="n">159</td><td class="n">58</td><td class="n">6</td><td class="n">1</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>제외번호 미출현 (8.2개)</td><td class="n">193</td><td class="n">333</td><td class="n">206</td><td class="n">87</td><td class="n">17</td><td class="n">3</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>차뜨 midle (11.1개)</td><td class="n">104</td><td class="n">284</td><td class="n">252</td><td class="n">141</td><td class="n">49</td><td class="n">8</td><td class="n">1</td><td class="n">0</td></tr>
+<tr><td>리스트 최다 출현 12 (12개)</td><td class="n">64</td><td class="n">263</td><td class="n">300</td><td class="n">157</td><td class="n">51</td><td class="n">4</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>구간 꺼진 구간 (12.8개)</td><td class="n">78</td><td class="n">203</td><td class="n">231</td><td class="n">138</td><td class="n">76</td><td class="n">25</td><td class="n">6</td><td class="n">0</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 (15개)</td><td class="n">0</td><td class="n">0</td><td class="n">124</td><td class="n">302</td><td class="n">284</td><td class="n">113</td><td class="n">15</td><td class="n">1</td></tr>
+<tr><td>친구 친구3 (16.3개)</td><td class="n">32</td><td class="n">148</td><td class="n">267</td><td class="n">221</td><td class="n">127</td><td class="n">40</td><td class="n">4</td><td class="n">0</td></tr>
+<tr><td>테이블 gap 1~3열 (17.9개)</td><td class="n">24</td><td class="n">101</td><td class="n">247</td><td class="n">236</td><td class="n">162</td><td class="n">59</td><td class="n">10</td><td class="n">0</td></tr>
+<tr><td>당첨위치 최다3 (18.8개)</td><td class="n">18</td><td class="n">88</td><td class="n">203</td><td class="n">257</td><td class="n">199</td><td class="n">61</td><td class="n">13</td><td class="n">0</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 hot (19.2개)</td><td class="n">15</td><td class="n">82</td><td class="n">202</td><td class="n">233</td><td class="n">198</td><td class="n">90</td><td class="n">18</td><td class="n">1</td></tr>
+<tr class="witness"><td>대조군 무작위 (20개)</td><td class="n">2</td><td class="n">63</td><td class="n">189</td><td class="n">265</td><td class="n">226</td><td class="n">73</td><td class="n">19</td><td class="n">2</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 (20개)</td><td class="n">0</td><td class="n">0</td><td class="n">44</td><td class="n">197</td><td class="n">319</td><td class="n">213</td><td class="n">55</td><td class="n">11</td></tr>
+<tr><td>리스트 짝수 (22개)</td><td class="n">6</td><td class="n">34</td><td class="n">136</td><td class="n">260</td><td class="n">237</td><td class="n">122</td><td class="n">37</td><td class="n">7</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 짝수 = 홀수 (23개)</td><td class="n">7</td><td class="n">37</td><td class="n">122</td><td class="n">237</td><td class="n">260</td><td class="n">136</td><td class="n">34</td><td class="n">6</td></tr>
+<tr class="comp witness"><td>여집합 ▸ 대조군 (25개)</td><td class="n">2</td><td class="n">19</td><td class="n">73</td><td class="n">226</td><td class="n">265</td><td class="n">189</td><td class="n">63</td><td class="n">2</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 20 (25개)</td><td class="n">11</td><td class="n">55</td><td class="n">213</td><td class="n">319</td><td class="n">197</td><td class="n">44</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>차뜨 hot (25.8개)</td><td class="n">1</td><td class="n">18</td><td class="n">90</td><td class="n">198</td><td class="n">233</td><td class="n">202</td><td class="n">82</td><td class="n">15</td></tr>
+<tr class="comp"><td>여집합 ▸ 당첨위치 최다3 (26.2개)</td><td class="n">0</td><td class="n">13</td><td class="n">61</td><td class="n">199</td><td class="n">257</td><td class="n">203</td><td class="n">88</td><td class="n">18</td></tr>
+<tr class="comp"><td>여집합 ▸ 테이블 gap 1~3열 (27.1개)</td><td class="n">0</td><td class="n">10</td><td class="n">59</td><td class="n">162</td><td class="n">236</td><td class="n">247</td><td class="n">101</td><td class="n">24</td></tr>
+<tr class="comp"><td>여집합 ▸ 친구 친구3 (28.7개)</td><td class="n">0</td><td class="n">4</td><td class="n">40</td><td class="n">127</td><td class="n">221</td><td class="n">267</td><td class="n">148</td><td class="n">32</td></tr>
+<tr class="comp oracle"><td>여집합 ▸ 당첨 2개 + 채움 15 (30개)</td><td class="n">1</td><td class="n">15</td><td class="n">113</td><td class="n">284</td><td class="n">302</td><td class="n">124</td><td class="n">0</td><td class="n">0</td></tr>
+<tr><td>구간 켜진 구간 (32.2개)</td><td class="n">0</td><td class="n">6</td><td class="n">25</td><td class="n">76</td><td class="n">138</td><td class="n">231</td><td class="n">203</td><td class="n">78</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 최다 출현 12 (33개)</td><td class="n">0</td><td class="n">0</td><td class="n">4</td><td class="n">51</td><td class="n">157</td><td class="n">300</td><td class="n">263</td><td class="n">64</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 midle (33.9개)</td><td class="n">0</td><td class="n">1</td><td class="n">8</td><td class="n">49</td><td class="n">141</td><td class="n">252</td><td class="n">284</td><td class="n">104</td></tr>
+<tr><td>제외번호 출현 (36.8개)</td><td class="n">0</td><td class="n">0</td><td class="n">3</td><td class="n">17</td><td class="n">87</td><td class="n">206</td><td class="n">333</td><td class="n">193</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 cold (38.6개)</td><td class="n">0</td><td class="n">0</td><td class="n">1</td><td class="n">6</td><td class="n">58</td><td class="n">159</td><td class="n">346</td><td class="n">269</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 dead (43.0개)</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">2</td><td class="n">18</td><td class="n">180</td><td class="n">519</td></tr>
+</tbody>
+</table>
+
+<p>
+  <strong>대조군(20개)과 리스트 짝수(22개)를 나란히 보세요.</strong> 거의 같은 모양입니다.
+  하나는 앱의 가족이고, 하나는 제비뽑기입니다. 사의 모양은 <em>크기로만</em> 결정되고,
+  어느 화면이 만들었는지는 아무 흔적도 남기지 않습니다.
+</p>
+<p>
+  <strong>단 하나의 예외가 파란 두 줄입니다.</strong> 20개짜리 두 줄을 겹쳐 보세요 :
+  대조군은 0개가 2회·1개가 63회로 시작하는데, 당첨 2개를 넣은 쪽은
+  <strong>2개 밑으로 내려간 적이 아예 없습니다</strong> (0개 0회, 1개 0회).
+  15개짜리는 대조군보다 다섯 개나 작은데도 3개 이상을 더 자주 담습니다.
+  크기가 아니라 <em>안에 무엇이 들었는지</em>가 모양을 바꾼 유일한 경우입니다.
+</p>
+<p>
+  <strong>맨 첫 줄과 맨 끝 줄을 보십시오.</strong> 차뜨 dead는
+  519 · 180 · 18 · 2, 그 여집합은 2 · 18 · 180 · 519 — <em>같은 숫자를 거꾸로
+  쓴 것</em>입니다. 사가 0개를 담은 519회차는, 여집합이 7개를 담은 519회차와
+  같은 회차니까요. 여집합 줄이 새로 말해주는 것은 «모양»이 아니라 <strong>그
+  모양이 크기에 맞는가</strong>뿐입니다.
+</p>
+<p>
+  <strong>구간 꺼진(12.8) ↔ 구간 켜진(32.2)</strong>도 이미 서로의 여집합입니다 —
+  78·203·231·138·76·25·6·0 과 0·6·25·76·138·231·203·78. 표 안에 처음부터
+  거울 한 쌍이 들어 있었던 셈입니다.
+</p>
+<div class="note bad">
+  <strong>여집합에서 유일하게 «구멍»이 있는 줄.</strong>
+  <code>여집합 ▸ 당첨 2개 + 채움 15</code>는 <strong>30개</strong>짜리 큰 사인데
+  <em>6개 칸과 7개 칸이 완전히 비어 있습니다</em>. 22개짜리 리스트 짝수도,
+  23개짜리 홀수도, 25개짜리 대조군 여집합도 7개를 담은 적이 있는데 말이지요.
+  당첨번호 2개가 반대편에 잡혀 있으니 구조적으로 불가능한 것입니다.
+  <strong>이것이 «정보가 들어 있다»는 것의 모습입니다</strong> — 나머지 어떤
+  여집합 줄에도 이런 구멍은 없습니다.
+</div>
+
+<h2>5. 교차 검정 — 번호의 «성격»으로 가를 수 있는가</h2>
+<p>
+  여기까지는 사를 하나씩 쟀습니다. 이번에는 <strong>사끼리 겹쳐</strong> 봅니다.
+  한 번호가 여러 사에 동시에 들어 있다면, 그 번호는 특별한가? 그리고
+  <strong>버릴 번호</strong>를 그렇게 찾을 수 있는가?
+</p>
+<div class="note">
+  <strong>표마다 줄이 다른 이유.</strong> 3·4장과 아래 «제외의 값» 표는
+  <strong>스물여덟 개의 사</strong>를 그대로 씁니다 — 같은 목록, 같은 순서.
+  <br><br>
+  ①②③⑤⑥은 사 하나하나를 재는 표가 아닙니다. ①은 <em>중복도</em>(0~9개)로,
+  ②는 <em>교집합 129가지</em>로, ③은 <em>성격 52가지</em>로, ⑤⑥은
+  <em>기간</em>으로 줄이 만들어집니다. 여기에 스물여덟 줄을 넣을 자리는 없습니다 —
+  세는 단위 자체가 다르기 때문입니다.
+</div>
+
+<h3>제외의 값 — 꽝 하나를 지우는 데 당첨 몇 개를 버리나</h3>
+<p>
+  제외를 재는 단위를 먼저 정합니다. 어떤 리스트를 버리면, 그 안에는 꽝번호도
+  당첨번호도 들어 있습니다. <strong>버린 꽝 ÷ 잃은 당첨</strong> — 이것이 제외의
+  «값»입니다. 높을수록 좋습니다.
+</p>
+<table>
+<thead><tr>
+  <th>제외한 리스트</th><th class="n">제외 개수</th>
+  <th class="n">잃은 당첨</th><th class="n">없앤 꽝</th>
+  <th class="n">꽝 / 당첨<span class="unit">높을수록 좋음</span></th>
+</tr></thead>
+<tbody>
+<tr><td>친구 직전7개의 친구3</td><td class="n">16.3</td><td class="n">2.48</td><td class="n">13.85</td><td class="n hi">5.60</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 가족 전체 (짝수)</td><td class="n">23.0</td><td class="n">3.53</td><td class="n">19.47</td><td class="n hi">5.52</td></tr>
+<tr><td>테이블 gap 1~3열</td><td class="n">17.9</td><td class="n">2.75</td><td class="n">15.13</td><td class="n hi">5.51</td></tr>
+<tr><td>구간 켜진 구간</td><td class="n">32.2</td><td class="n">4.96</td><td class="n">27.22</td><td class="n hi">5.49</td></tr>
+<tr><td>차뜨 hot (gap ≤ 5)</td><td class="n">25.8</td><td class="n">3.97</td><td class="n">21.78</td><td class="n hi">5.49</td></tr>
+<tr class="witness"><td>여집합 ▸ 대조군 — 무작위 20개</td><td class="n">25.0</td><td class="n">3.86</td><td class="n">21.14</td><td class="n hi">5.47</td></tr>
+<tr><td>차뜨 dead (20+)</td><td class="n">2.0</td><td class="n">0.31</td><td class="n">1.69</td><td class="n hi">5.47</td></tr>
+<tr><td>리스트 최다 출현 12 (짝수)</td><td class="n">12.0</td><td class="n">1.86</td><td class="n">10.14</td><td class="n hi">5.46</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 cold (gap 11~19)</td><td class="n">38.6</td><td class="n">5.97</td><td class="n">32.59</td><td class="n hi">5.46</td></tr>
+<tr><td>제외번호 직전10회 출현</td><td class="n">36.8</td><td class="n">5.70</td><td class="n">31.14</td><td class="n hi">5.46</td></tr>
+<tr><td>당첨위치 자리별 최다3</td><td class="n">18.8</td><td class="n">2.91</td><td class="n">15.84</td><td class="n hi">5.44</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 midle (6~10)</td><td class="n">33.9</td><td class="n">5.27</td><td class="n">28.64</td><td class="n hi">5.44</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 dead (20+)</td><td class="n">43.0</td><td class="n">6.69</td><td class="n">36.31</td><td class="n hi">5.43</td></tr>
+<tr class="comp"><td>여집합 ▸ 당첨위치 자리별 최다3</td><td class="n">26.2</td><td class="n">4.09</td><td class="n">22.16</td><td class="n hi">5.42</td></tr>
+<tr class="comp"><td>여집합 ▸ 리스트 최다 출현 12 (짝수)</td><td class="n">33.0</td><td class="n">5.14</td><td class="n">27.86</td><td class="n hi">5.42</td></tr>
+<tr><td>차뜨 midle (6~10)</td><td class="n">11.1</td><td class="n">1.73</td><td class="n">9.36</td><td class="n hi">5.40</td></tr>
+<tr class="comp"><td>여집합 ▸ 테이블 gap 1~3열</td><td class="n">27.1</td><td class="n">4.25</td><td class="n">22.87</td><td class="n hi">5.38</td></tr>
+<tr class="witness"><td>대조군 — 무작위 20개</td><td class="n">20.0</td><td class="n">3.14</td><td class="n">16.86</td><td class="n hi">5.37</td></tr>
+<tr class="comp"><td>여집합 ▸ 차뜨 hot (gap ≤ 5)</td><td class="n">19.2</td><td class="n">3.03</td><td class="n">16.22</td><td class="n hi">5.35</td></tr>
+<tr class="comp"><td>여집합 ▸ 친구 직전7개의 친구3</td><td class="n">28.7</td><td class="n">4.52</td><td class="n">24.15</td><td class="n hi">5.34</td></tr>
+<tr><td>리스트 가족 전체 (짝수)</td><td class="n">22.0</td><td class="n">3.47</td><td class="n">18.53</td><td class="n hi">5.33</td></tr>
+<tr><td>구간 꺼진 구간</td><td class="n">12.8</td><td class="n">2.04</td><td class="n">10.78</td><td class="n hi">5.28</td></tr>
+<tr><td>제외번호 직전10회 미출현</td><td class="n">8.2</td><td class="n">1.30</td><td class="n">6.86</td><td class="n hi">5.28</td></tr>
+<tr><td>차뜨 cold (gap 11~19)</td><td class="n">6.4</td><td class="n">1.03</td><td class="n">5.41</td><td class="n hi">5.24</td></tr>
+<tr class="oracle"><td>여집합 ▸ 당첨 2개 + 채움 15</td><td class="n">30.0</td><td class="n">3.48</td><td class="n">26.52</td><td class="n hi">7.62</td></tr>
+<tr class="oracle"><td>여집합 ▸ 당첨 2개 + 채움 20</td><td class="n">25.0</td><td class="n">2.92</td><td class="n">22.08</td><td class="n hi">7.58</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 20</td><td class="n">20.0</td><td class="n">4.08</td><td class="n">15.92</td><td class="n hi">3.90</td></tr>
+<tr class="oracle"><td>당첨 2개 + 채움 15</td><td class="n">15.0</td><td class="n">3.52</td><td class="n">11.48</td><td class="n hi">3.26</td></tr>
+</tbody>
+</table>
+<div class="note">
+  <strong>스물네 줄이 5.24에서 5.60 사이에 전부 들어 있습니다.</strong>
+  제외 개수는 2.0개부터 43.0개까지 <strong>스무 배</strong> 차이가 나는데 값은 같습니다.
+  이것은 화면의 성질이 아니라 나눗셈입니다 — <strong>꽝 38개 ÷ 당첨 7개 = 5.43</strong>.
+  <br><br>
+  1위가 <code>친구 직전7개의 친구3</code>(5.60), 꼴찌가 <code>차뜨 cold</code>(5.24).
+  그 사이에 <strong>대조군</strong>이 앉아 있습니다 — 아무 화면도 읽지 않는
+  제비뽑기가 24줄 중 <strong>6위</strong>입니다.
+  <br><br>
+  <strong>파란 네 줄만 다릅니다.</strong> 당첨번호 2개를 <em>버리는 쪽</em>에 두면
+  7.62와 7.58 — 기준을 크게 넘습니다. 반대로 그 2개를 <em>남기는 쪽</em>에 두고
+  나머지를 버리면 <strong>3.90과 3.26</strong>, 기준을 크게 밑돕니다.
+  정보가 있으면 위로도 아래로도 움직입니다. 나머지 스물네 줄은 어느 쪽으로도
+  움직이지 않았습니다.
+</div>
+
+<h3>① 중복도 — 여러 사에 동시에 든 번호는 다른가</h3>
+<p>
+  아홉 개의 사를 겹쳐, 45개 번호 각각이 <strong>몇 개의 사에 들어 있는지</strong>
+  셌습니다. 839회차 × 45번 = <strong>37,755칸</strong>.
+</p>
+<table>
+<thead><tr><th class="n">들어 있는 사 개수</th><th class="n">칸 수</th><th class="n">그중 당첨</th><th class="n">당첨률</th><th class="n">비율</th><th class="n">z</th></tr></thead>
+<tbody>
+<tr><td class="n">3개</td><td class="n">130</td><td class="n">17</td><td class="n">13.08 %</td><td class="n">0.841</td><td class="n">−0.78</td></tr>
+<tr><td class="n">4개</td><td class="n">1,109</td><td class="n">173</td><td class="n">15.60 %</td><td class="n">1.003</td><td class="n">0.04</td></tr>
+<tr><td class="n">5개</td><td class="n">4,859</td><td class="n">740</td><td class="n">15.23 %</td><td class="n">0.979</td><td class="n">−0.63</td></tr>
+<tr><td class="n">6개</td><td class="n">9,812</td><td class="n">1,568</td><td class="n">15.98 %</td><td class="n">1.027</td><td class="n">1.16</td></tr>
+<tr><td class="n">7개</td><td class="n">11,816</td><td class="n">1,818</td><td class="n">15.39 %</td><td class="n">0.989</td><td class="n">−0.51</td></tr>
+<tr><td class="n">8개</td><td class="n">8,368</td><td class="n">1,293</td><td class="n">15.45 %</td><td class="n">0.993</td><td class="n">−0.26</td></tr>
+<tr><td class="n">9개</td><td class="n">1,661</td><td class="n">264</td><td class="n">15.89 %</td><td class="n">1.022</td><td class="n">0.38</td></tr>
+</tbody>
+</table>
+<p class="sub">기준 : 7 ÷ 45 = <strong>15.56 %</strong></p>
+<div class="note">
+  3개에 든 번호가 13.1 %, 9개에 든 번호가 15.9 %, 6개에 든 번호가 16.0 %.
+  <strong>올라가지도 내려가지도 않습니다.</strong> 가장 벌어진 3개 줄은 130칸뿐이고
+  z는 −0.78입니다. 여러 사에 겹쳐 든다고 해서 번호가 달라지지 않습니다.
+</div>
+
+<h3>② 129가지 교차 — 단일 · 쌍 · 삼중</h3>
+<p>
+  아홉 사의 <strong>모든 조합</strong>을 교집합으로 만들어 각각을 쟀습니다 :
+  단일 9 · 쌍 36 · 삼중 84 = <strong>129가지</strong>.
+</p>
+<table>
+<thead><tr><th>교차</th><th class="n">차수</th><th class="n">평균 크기</th><th class="n">비율</th><th class="n">z</th></tr></thead>
+<tbody>
+<tr><td>여집합 테이블 ∩ 여집합 친구 ∩ 여집합 리스트12</td><td class="n">3</td><td class="n">14.1</td><td class="n">1.032</td><td class="n hi">1.78</td></tr>
+<tr><td>여집합 테이블 ∩ 여집합 친구</td><td class="n">2</td><td class="n">17.6</td><td class="n">1.026</td><td class="n">1.69</td></tr>
+<tr><td>여집합 친구</td><td class="n">1</td><td class="n">28.7</td><td class="n">1.014</td><td class="n">1.58</td></tr>
+<tr><td class="sub" colspan="5">…</td></tr>
+<tr><td>구간 켜진 ∩ 여집합 midle ∩ 여집합 cold</td><td class="n">3</td><td class="n">21.0</td><td class="n">0.980</td><td class="n">−1.60</td></tr>
+<tr><td>구간 켜진 ∩ 여집합 midle ∩ 제외 출현</td><td class="n">3</td><td class="n">19.8</td><td class="n">0.978</td><td class="n">−1.60</td></tr>
+</tbody>
+</table>
+<div class="note">
+  <strong>|z| 최대 1.78 · 129가지를 재면 저절로 나오는 최댓값 2.46 · 2를 넘은 교차 0가지.</strong><br>
+  겹쳐도, 세 겹으로 겹쳐도 아무것도 올라오지 않습니다. 최고 기록(1.78)이
+  <em>무작위 129가지에서 기대되는 최고 기록보다 낮습니다.</em>
+</div>
+
+<h3>③ 성격 — 당첨번호와 같은 «캐릭터»를 가진 번호는 몇 개인가</h3>
+<p>
+  아홉 사를 9비트로 읽으면 번호마다 <strong>성격</strong>이 하나씩 나옵니다
+  (2<sup>9</sup> = 512가지 중 실제로는 80가지가 나타납니다). 회차마다 45개 번호가
+  평균 <strong>28개의 무리</strong>로 갈립니다.
+</p>
+<div class="big">
+  <div class="card"><span class="v">2.30개</span><span class="k">당첨번호와 같은 성격을 가진 번호 수</span></div>
+  <div class="card"><span class="v">2.32개</span><span class="k">아무 번호나 골랐을 때의 무리 크기</span></div>
+</div>
+<p>
+  <strong>당첨번호는 뭉치지 않습니다.</strong> 다른 번호들과 똑같은 크기의 무리에
+  흩어져 있습니다.
+</p>
+<p>
+  그래도 성격별 당첨률을 전부 쟀습니다 — 200칸 이상인 <strong>52가지</strong>.
+  자연 한계는 |z| = 2.12. 한 줄이 넘었습니다.
+</p>
+<table>
+<thead><tr><th>성격</th><th class="n">칸수</th><th class="n">당첨</th><th class="n">당첨률</th><th class="n">비율</th><th class="n">z</th></tr></thead>
+<tbody>
+<tr class="witness"><td>테이블+구간+리스트+제외+cold+dead</td><td class="n">752</td><td class="n">139</td><td class="n">18.48 %</td><td class="n">1.188</td><td class="n">2.22</td></tr>
+<tr><td>위치+테이블+친구+리스트+midle+dead</td><td class="n">550</td><td class="n">102</td><td class="n">18.55 %</td><td class="n">1.192</td><td class="n">1.93</td></tr>
+<tr><td class="sub" colspan="6">…</td></tr>
+<tr><td>리스트+midle+제외+cold+dead</td><td class="n">364</td><td class="n">46</td><td class="n">12.64 %</td><td class="n">0.812</td><td class="n">−1.54</td></tr>
+<tr><td>테이블+구간+리스트+midle+dead</td><td class="n">421</td><td class="n">54</td><td class="n">12.83 %</td><td class="n">0.825</td><td class="n">−1.54</td></tr>
+</tbody>
+</table>
+<p>
+  그 성격을 말로 풀면 : <strong>6~10회차 전에 나왔고</strong>, 어느 자리의 최다3에
+  들며, 직전 회차의 친구3에 들고, 켜진 구간에 있고, 최다 출현 짝수 12개에는
+  들지 않는 번호.
+</p>
+
+<h3>④ 그 성격을 처음 보는 회차에 걸어보기</h3>
+<p>
+  839회차 전체를 보고 <em>골라낸</em> 성격이므로, 그대로 믿으면 안 됩니다.
+  반으로 잘라 각각 따로 쟀습니다.
+</p>
+<table>
+<thead><tr><th>구간</th><th class="n">칸수</th><th class="n">당첨</th><th class="n">당첨률</th><th class="n">비율</th><th class="n">z</th></tr></thead>
+<tbody>
+<tr><td>전반 401~820</td><td class="n">364</td><td class="n">65</td><td class="n">17.86 %</td><td class="n">1.148</td><td class="n">1.21</td></tr>
+<tr><td>후반 821~1239</td><td class="n">388</td><td class="n">74</td><td class="n">19.07 %</td><td class="n">1.226</td><td class="n">1.91</td></tr>
+<tr><td>최근 200회차</td><td class="n">188</td><td class="n">34</td><td class="n">18.09 %</td><td class="n">1.163</td><td class="n">0.96</td></tr>
+</tbody>
+</table>
+<div class="note">
+  <strong>두 반쪽 모두에서 버팁니다</strong> — 1.148과 1.226. 이 보고서에서
+  전반·후반이 <em>같이</em> 1을 넘은 것은 이 줄이 처음입니다.
+  <br><br>
+  그렇지만 정직하게 : 2.22는 한계 2.12를 <strong>0.10</strong> 넘었을 뿐이고,
+  반쪽 어느 쪽도 혼자서는 2를 넘지 못합니다. 그리고 이 52가지는
+  167 · 21,304 · 70 · 129가지를 잰 <em>다음에</em> 잰 것입니다. 이쯤 되면 2.22 하나쯤은
+  나오게 되어 있습니다.
+</div>
+
+<h3>⑤ 진짜 시험 — 성격으로 «제외»해 보기</h3>
+<p>
+  가장 실전에 가까운 시험입니다. <strong>전반 401~820에서만</strong> 성격별
+  당첨률을 배우고, 비율이 1 미만인 성격 <strong>36가지</strong>를 «나쁜 성격»으로
+  정했습니다. 그리고 그 규칙으로 제외합니다.
+</p>
+<table>
+<thead><tr>
+  <th>구간</th><th class="n">제외<span class="unit">회차당</span></th>
+  <th class="n">잃은 당첨</th><th class="n">없앤 꽝</th>
+  <th class="n">꽝 / 당첨</th><th class="n">같은 크기 무작위</th>
+</tr></thead>
+<tbody>
+<tr><td>전반 — <em>규칙을 고른 곳</em></td><td class="n">24.1개</td><td class="n">3.47</td><td class="n">20.67</td><td class="n hi">5.96</td><td class="n exp">5.44</td></tr>
+<tr class="witness"><td>후반 — <em>처음 보는 곳</em></td><td class="n">24.2개</td><td class="n">3.78</td><td class="n">20.44</td><td class="n hi">5.40</td><td class="n exp">5.54</td></tr>
+<tr><td>최근 200회차</td><td class="n">24.3개</td><td class="n">3.83</td><td class="n">20.51</td><td class="n hi">5.35</td><td class="n exp">5.46</td></tr>
+</tbody>
+</table>
+<div class="note bad">
+  <strong>5.96 → 5.40.</strong> 규칙을 고른 반쪽에서는 기준(5.43)을 넘고,
+  처음 보는 반쪽에서는 정확히 기준으로 돌아옵니다. 그리고 같은 개수를 무작위로
+  제외하면 <strong>5.54</strong> — 규칙보다 낫습니다.
+  <br><br>
+  이 보고서에서 세 번째로 보는 같은 붕괴입니다 : 1.0858 → 0.9719,
+  그리고 5.96 → 5.40. <strong>0.53의 이득은 지식이 아니라 암기였습니다.</strong>
+  <br><br>
+  덧붙여 : 후반 419회차 중 이 제외가 당첨번호를 하나도 버리지 않은 회차는
+  <strong>0.2 %</strong>입니다. 나머지 99.8 %는 매번 당첨번호를 버렸습니다.
+</div>
+
+<h3>⑥ 최근 10회차만 떼어보면</h3>
+<p>같은 규칙(401~820에서 배운 것)을 최근 10회차에 그대로 적용한 것입니다.</p>
+<table>
+<thead><tr><th class="n">회차</th><th class="n">제외</th><th class="n">그중 당첨</th><th class="n">없앤 꽝</th><th>버린 당첨번호</th></tr></thead>
+<tbody>
+<tr><td class="n">1230</td><td class="n">22</td><td class="n">1</td><td class="n">21</td><td class="nums">28</td></tr>
+<tr><td class="n">1231</td><td class="n">29</td><td class="n">4</td><td class="n">25</td><td class="nums">4 13 18 31</td></tr>
+<tr><td class="n">1232</td><td class="n">22</td><td class="n">2</td><td class="n">20</td><td class="nums">3 12</td></tr>
+<tr><td class="n">1233</td><td class="n">25</td><td class="n">4</td><td class="n">21</td><td class="nums">7 20 25 29</td></tr>
+<tr><td class="n">1234</td><td class="n">23</td><td class="n">2</td><td class="n">21</td><td class="nums">19 31</td></tr>
+<tr><td class="n">1235</td><td class="n">31</td><td class="n">5</td><td class="n">26</td><td class="nums">6 7 15 20 43</td></tr>
+<tr><td class="n">1236</td><td class="n">26</td><td class="n">3</td><td class="n">23</td><td class="nums">29 34 38</td></tr>
+<tr><td class="n">1237</td><td class="n">27</td><td class="n">5</td><td class="n">22</td><td class="nums">10 23 34 36 40</td></tr>
+<tr><td class="n">1238</td><td class="n">23</td><td class="n">2</td><td class="n">21</td><td class="nums">18 42</td></tr>
+<tr><td class="n">1239</td><td class="n">28</td><td class="n">4</td><td class="n">24</td><td class="nums">11 22 32 36</td></tr>
+<tr class="witness"><td class="n">합계</td><td class="n">256</td><td class="n">32</td><td class="n">224</td><td><strong>꽝/당첨 = 7.00</strong></td></tr>
+</tbody>
+</table>
+<div class="note">
+  <strong>10회차만 보면 7.00입니다 — 기준 5.43을 훌쩍 넘습니다.</strong> 같은 규칙,
+  같은 «처음 보는» 회차인데 419회차로 재면 5.40입니다.
+  <br><br>
+  잃은 당첨번호가 32개뿐일 때 이 값은 5.4에서 7.0 사이를 아무렇지 않게 오갑니다.
+  <strong>«최근 10회차에서 잘 됐다»는 문장은 아무것도 말해주지 않습니다</strong> —
+  최근 100회차의 함정과 같은 것이고, 이번에는 열 배 더 짧습니다.
+  <br><br>
+  그리고 오른쪽 열 : <strong>10회차 전부</strong>, 최소 한 개의 당첨번호를
+  버렸습니다. 1235회와 1237회에는 다섯 개씩.
+</div>
+
+<h3>⑦ 1240회에 이 규칙을 적용하면</h3>
+<div class="note">
+  <strong>제외 25개</strong>
+  <div class="nums">2 4 5 6 7 8 10 11 12 14 15 16 18 21 22 23 24 25 26 29 32 36 37 39 44</div>
+  <br>
+  <strong>남는 풀 20개</strong>
+  <div class="nums">1 3 9 13 17 19 20 27 28 30 31 33 34 35 38 40 41 42 43 45</div>
+  <br>
+  이 20개 안에 6개 당첨번호가 전부 들어 있을 확률 : <strong>2.2 %</strong>
+  — 46회차에 한 번. 그리고 이 풀에서 100조합을 사도 1등 확률은
+  <strong>1 / 81,451</strong>, 45개 전체에서 사는 것과 같습니다.
+</div>
+
+<h2>6. 오늘 잰 것 전부</h2>
+<table>
+<thead><tr><th>무엇을</th><th class="n">규모</th><th>결과</th></tr></thead>
+<tbody>
+<tr><td>앱의 방법 전수 검정</td><td class="n">167가지</td><td>|z| 최대 2.29 (잡음 한계 2.55) · <strong>난수가 8위</strong></td></tr>
+<tr><td>방법끼리 교차</td><td class="n">21,304가지</td><td>|z| 최대 4.14 — 넘은 둘은 모두 <strong>음수</strong> · 총합 0.9990배</td></tr>
+<tr><td>전반으로 고르고 후반 채점</td><td class="n">상위 20</td><td>1.0858배 → <strong>0.9719배</strong> · 20개 중 1개만 생존</td></tr>
+<tr><td>화면별 사 (이 보고서)</td><td class="n">14가지</td><td>0.975 ~ 1.031 · |z| 최대 1.57</td></tr>
+<tr><td>화면별 사 × 최근 창 5개</td><td class="n">70가지</td><td>앱의 사 |z| 최대 1.6 (잡음 한계 2.91) · <strong>2를 넘은 것은 대조군뿐</strong></td></tr>
+<tr><td>사의 여집합 (버린 번호)</td><td class="n">12줄 추가</td><td>0.985 ~ 1.014 · <strong>원래 줄들과 구별되지 않음</strong></td></tr>
+<tr><td>중복도 (몇 개의 사에 겹치나)</td><td class="n">37,755칸</td><td>3개 0.841 ~ 9개 1.022 · <strong>방향 없음</strong> · |z| 최대 1.16</td></tr>
+<tr><td>사끼리 교차 (단일·쌍·삼중)</td><td class="n">129가지</td><td>|z| 최대 1.78 (잡음 한계 2.46) · <strong>2를 넘은 것 0가지</strong></td></tr>
+<tr><td>번호의 «성격» 512가지 중 실측</td><td class="n">52가지</td><td>|z| 최대 2.22 (한계 2.12) · 전반 1.148 / 후반 1.226</td></tr>
+<tr><td>성격으로 제외 — 전반에서 배워 후반에 적용</td><td class="n">36가지 성격</td><td>꽝/당첨 5.96 → <strong>5.40</strong> · 무작위는 5.54 · 기준 5.43</td></tr>
+<tr><td>고정수 2개</td><td class="n">1,039회차</td><td>나올 때 2.27배 — 하지만 무작위 번호도 <strong>2.26배</strong></td></tr>
+<tr><td>2단계 절차 (100조합 → 50조합)</td><td class="n">1,038주</td><td>1.0017배 · 무작위 풀 대조군은 1.0405배</td></tr>
+<tr><td>사 크기별 전량 매입</td><td class="n">T = 7 ~ 14</td><td>한 장당 기대 <strong>512원, 전부 동일</strong></td></tr>
+</tbody>
+</table>
+
+<div class="note bad">
+  <strong>가장 중요한 한 줄.</strong> 매번 «대조군»(아무 정보도 쓰지 않는 무작위)을 함께
+  넣었고, 매번 한가운데나 그 위에 자리 잡았습니다. 어떤 방법도 동전 던지기를
+  이기지 못했습니다.
+</div>
+
+<h2>7. 사를 좁혀도 소용없는 이유 — 산수 한 줄</h2>
+<table>
+<thead><tr><th class="n">T</th><th class="n">조합 C(T,6)</th><th class="n">전부 사면</th><th class="n">6개가 안에 들 확률</th><th class="n">1등 1회당 비용</th></tr></thead>
+<tbody>
+<tr><td class="n">45</td><td class="n">8,145,060</td><td class="n">8,145,060,000원</td><td class="n">1 / 1</td><td class="n">81.5억</td></tr>
+<tr><td class="n">20</td><td class="n">38,760</td><td class="n">38,760,000원</td><td class="n">1 / 210</td><td class="n">81.5억</td></tr>
+<tr><td class="n">14</td><td class="n">3,003</td><td class="n">3,003,000원</td><td class="n">1 / 2,712</td><td class="n">81.5억</td></tr>
+<tr><td class="n">9</td><td class="n">84</td><td class="n">84,000원</td><td class="n">1 / 96,965</td><td class="n">81.5억</td></tr>
+<tr><td class="n">6</td><td class="n">1</td><td class="n">1,000원</td><td class="n">1 / 8,145,060</td><td class="n">81.5억</td></tr>
+</tbody>
+</table>
+<p>
+  <strong>마지막 열이 모든 줄에서 같습니다.</strong> 사를 좁히면 비용이 줄지만,
+  확률이 <em>정확히 같은 비율로</em> 줄어듭니다. 좁히는 것은 확률을 모으는 일이
+  아니라, 확률과 비용을 같이 줄이는 일입니다.
+</p>
+
+<h2>8. 그래도 사실인 것 세 가지</h2>
+
+<h3>① 분배 — 유일하게 살아남은 효과</h3>
+<p>
+  9 이하 번호 없음 · 등호 21 이상 · 연속 쌍 1~2개 → 분배 지표 <strong>0.857</strong>
+  (무작위는 0.985). 당첨 확률은 그대로지만, <strong>당첨됐을 때의 몫이 약 +15 %</strong>입니다.
+  네 개 구간으로 나눠 검증했고, 표본 밖에서도 유지됐습니다.
+  1·2·3등은 <em>나눠 갖는</em> 등수이므로, 높은 등수를 노릴수록 이것이 중요해집니다.
+</p>
+
+<h3>② 휠 — 계산으로 증명되는 보장</h3>
+<p>
+  6개가 사 안에 들면 반드시 한 등수를 맞추는 조합 묶음. 전수 검증 통과 :
+  <strong>12개 사 · 4개 보장 = 8조합 (8,000원)</strong>, 924조합 대신.
+  <strong>14개 사 · 4개 보장 = 17조합</strong>, 3,003조합 대신.
+  확률은 안 바꾸지만, «만약»이 왔을 때 값이 158배 싸집니다.
+</p>
+
+<h3>③ 조합 수 — 진짜 지렛대는 이것뿐</h3>
+<p>
+  1등 확률 = 조합 수 / 8,145,060. 필터도 고정수도 이월도 이 식에 들어가지 않습니다.
+  100조합/주 = 연 520만원 지출, 약 94만원 회수, <strong>회수율 18 %</strong>.
+  검정한 어떤 방법도 이 18 %를 움직이지 못했습니다.
+</p>
+
+<h2>9. 1240회를 위한 각 화면의 사</h2>
+<table>
+<thead><tr><th>화면</th><th class="n">개수</th><th>번호</th></tr></thead>
+<tbody>
+<tr><td>차뜨 hot (gap ≤ 5)</td><td class="n">25</td><td class="nums">2 6 7 8 10 11 12 13 15 18 20 21 22 23 29 32 33 34 36 37 38 39 40 42 43</td></tr>
+<tr><td>차뜨 midle</td><td class="n">13</td><td class="nums">1 3 4 9 14 19 24 25 27 28 31 35 45</td></tr>
+<tr><td>차뜨 cold</td><td class="n">6</td><td class="nums">16 17 26 30 41 44</td></tr>
+<tr><td>차뜨 dead</td><td class="n">1</td><td class="nums">5</td></tr>
+<tr><td>구간 꺼진 구간</td><td class="n">6</td><td class="nums">40 41 42 43 44 45</td></tr>
+<tr><td>당첨위치 자리별 최다3</td><td class="n">19</td><td class="nums">1 2 3 4 7 10 12 18 19 20 26 27 31 34 37 39 43 44 45</td></tr>
+<tr><td>테이블 gap 1~3열</td><td class="n">17</td><td class="nums">2 8 10 11 13 18 20 22 23 32 33 34 36 37 38 40 42</td></tr>
+<tr><td>리스트 짝수 전체</td><td class="n">22</td><td class="nums">2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44</td></tr>
+<tr><td>리스트 최다 출현 12</td><td class="n">12</td><td class="nums">4 6 12 14 16 18 20 24 26 34 38 40</td></tr>
+<tr><td>친구 직전7개의 친구3</td><td class="n">15</td><td class="nums">3 4 5 7 10 13 17 18 21 25 27 31 33 39 40</td></tr>
+<tr><td>제외번호 직전10회 미출현</td><td class="n">7</td><td class="nums">5 16 17 26 30 41 44</td></tr>
+</tbody>
+</table>
+<p class="sub">
+  번호를 내놓지 않는 화면 : <strong>필터</strong> (총합·AC값 같은 «값»만 냄) ·
+  <strong>패밀리</strong> (familyNext는 평균만 돌려줌) ·
+  <strong>패턴</strong> (마지막 회차에서는 common이 전부 0).
+</p>
+
+<h2>10. 결론</h2>
+<p class="lede">
+  열한 화면은 서로 다른 방식으로 사를 만들고, <strong>모두 13.3 %를 담습니다.</strong>
+  화면을 읽어서 그 숫자를 올릴 방법은 없습니다 — 21,652번 확인했습니다.
+</p>
+<p>
+  <strong>버리는 쪽으로 돌려봐도 같습니다.</strong> 여집합도, 중복도도, 쌍·삼중 교차도,
+  번호의 «성격»도 — 꽝번호 하나를 지우는 값은 언제나 <strong>5.43</strong>이었습니다.
+  전반에서 배운 규칙이 5.96을 냈다가 후반에서 5.40으로 돌아왔을 때, 그 0.53이
+  어디서 왔는지는 분명합니다.
+</p>
+<p>
+  바꿀 수 있는 것은 두 가지뿐입니다 : <strong>몇 조합을 사느냐</strong>(확률),
+  그리고 <strong>어떤 모양의 조합을 사느냐</strong>(분배와 당첨 빈도의 형태).
+  전자는 돈이 결정하고, 후자는 공짜입니다.
+</p>
+<p>
+  이 앱의 가치는 번호를 맞히는 데 있지 않습니다. <strong>어떤 주장이든 한 시간 안에
+  무너뜨릴 수 있다는 데</strong> 있습니다 — 오늘 그 대상에는 제가 낸 제안도 두 번
+  포함됐습니다.
+</p>
+
+<footer>
+  측정 구간 401~1239회차 (839회차), 최근 100·200·300·500회차 창으로도 재측정 ·
+  전진 방식 : 각 회차의 사는 그 이전 회차만 보고 구성 ·
+  초기하 분포 + 유한모집단 보정 · 대조군 포함 · 2026-09-03
+</footer>
+
+</div>
+
+<script>
+  // Un comptage nul devient «—».
+  //
+  // Ce n'est pas de la decoration : dans un tableau dont les colonnes
+  // s'appellent 0개, 1개, 2개…, un « 0 » ecrit dans la colonne « 0개 » se lit
+  // comme un resultat (« le sac n'a rien attrape ») alors que c'est un nombre
+  // de 회차 (« ce cas n'est jamais arrive »). Le tiret leve l'ambiguite.
+  for (const table of document.querySelectorAll('table[data-zero]')) {
+    for (const cell of table.querySelectorAll('td.n')) {
+      if (cell.textContent.trim() === '0') {
+        cell.textContent = '—'
+        cell.classList.add('never')
+      }
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>거리 보고서 — 맞히는 줄은 어디에서 오는가</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:940px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:70ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:70ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1rem 1.1rem; margin:1rem 0; overflow-x:auto; }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  tr.law td { color:var(--muted); }
+  tr.kept { background:var(--gold-wash); }
+  .scroll { overflow-x:auto; }
+  svg { display:block; max-width:100%; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head><body><div class="wrap">
+<h1>거리 보고서 — 맞히는 줄은 어디에서 오는가</h1>
+<div class="sub">
+  당첨이월의 줄은 저마다 과거의 한 회차입니다. 당첨 회차까지의 <strong>거리</strong>를 재고,
+  3개 이상 맞힌 줄이 특정한 거리에 몰려 있는지 묻습니다.
+  기준 200~1240회 · 줄 539,740개 · 2026-09-18.
+</div>
+<div class="note">
+  이 보고서는 번호를 고르지 않습니다. 묻는 것은 하나 — <strong>거리라는 틀이 존재하는가</strong>.
+  네 단계로 답합니다 : 거리별 비율, 앞뒤 절반 교차 검증, 무작위 대조군, 그리고 사람 쪽(수동·자동).
+</div>
+<h2>0. 재료</h2>
+<p>기준 회차 하나마다 그 7개 번호를 가진 과거 회차를 모아 중복을 지웁니다. 200회부터
+1240회까지 되풀이하면 <strong>539,740줄</strong>. 각 줄에 두 가지를 붙입니다 —
+<em>거리</em> (당첨 회차 − 줄의 회차) 와 <em>판정</em> (그 줄의 7개 중 몇 개가 당첨 회차에 나왔는가).</p>
+<div class="scroll"><table>
+<tr><th>판정</th><th class="n">줄</th><th class="n">비율</th><th>뜻</th></tr>
+<tr><td>3개 이상</td><td class="n">34,857</td><td class="n">6.46 %</td><td>맞힌 줄</td></tr>
+<tr><td>0개</td><td class="n">150,138</td><td class="n">27.82 %</td><td>꽝</td></tr>
+<tr class="law"><td>1~2개</td><td class="n">354,745</td><td class="n">65.73 %</td><td>대부분</td></tr>
+</table></div>
+<h2>1. 거리별 비율 — 선은 평평한가</h2>
+<p>25회차 단위로 묶어, 그 구간의 줄 가운데 몇 %가 3개 이상 맞혔는지 셉니다.
+어떤 거리가 특별하다면 그 막대가 솟아야 합니다. 점선은 전체 평균 6.46 %입니다.</p>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="56" y1="212.0" x2="864" y2="212.0" stroke="#f0ebe1"/>
+<text x="50" y="215.0" font-size="10" text-anchor="end" fill="#8b8375">5.5 %</text>
+<line x1="56" y1="162.5" x2="864" y2="162.5" stroke="#f0ebe1"/>
+<text x="50" y="165.5" font-size="10" text-anchor="end" fill="#8b8375">6.0 %</text>
+<line x1="56" y1="113.0" x2="864" y2="113.0" stroke="#f0ebe1"/>
+<text x="50" y="116.0" font-size="10" text-anchor="end" fill="#8b8375">6.5 %</text>
+<line x1="56" y1="63.5" x2="864" y2="63.5" stroke="#f0ebe1"/>
+<text x="50" y="66.5" font-size="10" text-anchor="end" fill="#8b8375">7.0 %</text>
+<line x1="56" y1="14.0" x2="864" y2="14.0" stroke="#f0ebe1"/>
+<text x="50" y="17.0" font-size="10" text-anchor="end" fill="#8b8375">7.5 %</text>
+<line x1="56" y1="117.1" x2="864" y2="117.1" stroke="#3a6b8a" stroke-dasharray="4 3"/>
+<text x="864" y="112.1" font-size="10" text-anchor="end" fill="#3a6b8a">전체 6.46 %</text>
+<rect x="59.3" y="103.6" width="9.9" height="13.5" fill="#b8912f"/>
+<text x="64.2" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1</text>
+<rect x="75.8" y="117.1" width="9.9" height="3.0" fill="#d9d3c6"/>
+<rect x="92.3" y="108.7" width="9.9" height="8.4" fill="#b8912f"/>
+<rect x="108.8" y="117.1" width="9.9" height="21.0" fill="#d9d3c6"/>
+<rect x="125.3" y="108.4" width="9.9" height="8.8" fill="#b8912f"/>
+<rect x="141.7" y="57.4" width="9.9" height="59.7" fill="#b8912f"/>
+<rect x="158.2" y="94.0" width="9.9" height="23.1" fill="#b8912f"/>
+<text x="163.2" y="227" font-size="10" text-anchor="middle" fill="#8b8375">151</text>
+<rect x="174.7" y="99.7" width="9.9" height="17.4" fill="#b8912f"/>
+<rect x="191.2" y="117.1" width="9.9" height="43.6" fill="#d9d3c6"/>
+<rect x="207.7" y="83.7" width="9.9" height="33.4" fill="#b8912f"/>
+<rect x="224.2" y="99.0" width="9.9" height="18.2" fill="#b8912f"/>
+<rect x="240.7" y="117.1" width="9.9" height="5.8" fill="#d9d3c6"/>
+<rect x="257.2" y="117.1" width="9.9" height="39.4" fill="#d9d3c6"/>
+<text x="262.1" y="227" font-size="10" text-anchor="middle" fill="#8b8375">301</text>
+<rect x="273.7" y="117.1" width="9.9" height="38.9" fill="#d9d3c6"/>
+<rect x="290.2" y="92.3" width="9.9" height="24.9" fill="#b8912f"/>
+<rect x="306.6" y="110.8" width="9.9" height="6.3" fill="#b8912f"/>
+<rect x="323.1" y="104.3" width="9.9" height="12.8" fill="#b8912f"/>
+<rect x="339.6" y="113.1" width="9.9" height="4.0" fill="#b8912f"/>
+<rect x="356.1" y="117.1" width="9.9" height="21.6" fill="#d9d3c6"/>
+<text x="361.1" y="227" font-size="10" text-anchor="middle" fill="#8b8375">451</text>
+<rect x="372.6" y="88.4" width="9.9" height="28.7" fill="#b8912f"/>
+<rect x="389.1" y="117.1" width="9.9" height="17.2" fill="#d9d3c6"/>
+<rect x="405.6" y="117.1" width="9.9" height="5.1" fill="#d9d3c6"/>
+<rect x="422.1" y="89.2" width="9.9" height="28.0" fill="#b8912f"/>
+<rect x="438.6" y="110.8" width="9.9" height="6.3" fill="#b8912f"/>
+<rect x="455.1" y="117.1" width="9.9" height="29.8" fill="#d9d3c6"/>
+<text x="460.0" y="227" font-size="10" text-anchor="middle" fill="#8b8375">601</text>
+<rect x="471.5" y="104.7" width="9.9" height="12.5" fill="#b8912f"/>
+<rect x="488.0" y="117.1" width="9.9" height="11.0" fill="#d9d3c6"/>
+<rect x="504.5" y="88.7" width="9.9" height="28.5" fill="#b8912f"/>
+<rect x="521.0" y="117.1" width="9.9" height="63.5" fill="#d9d3c6"/>
+<rect x="537.5" y="117.1" width="9.9" height="33.1" fill="#d9d3c6"/>
+<rect x="554.0" y="117.1" width="9.9" height="16.9" fill="#d9d3c6"/>
+<text x="558.9" y="227" font-size="10" text-anchor="middle" fill="#8b8375">751</text>
+<rect x="570.5" y="117.1" width="9.9" height="11.2" fill="#d9d3c6"/>
+<rect x="587.0" y="117.1" width="9.9" height="13.5" fill="#d9d3c6"/>
+<rect x="603.5" y="117.1" width="9.9" height="58.9" fill="#d9d3c6"/>
+<rect x="620.0" y="117.1" width="9.9" height="9.6" fill="#d9d3c6"/>
+<rect x="636.4" y="117.1" width="9.9" height="20.0" fill="#d9d3c6"/>
+<rect x="652.9" y="117.1" width="9.9" height="8.8" fill="#d9d3c6"/>
+<text x="657.9" y="227" font-size="10" text-anchor="middle" fill="#8b8375">901</text>
+<rect x="669.4" y="80.3" width="9.9" height="36.8" fill="#b8912f"/>
+<rect x="685.9" y="68.2" width="9.9" height="48.9" fill="#b8912f"/>
+<rect x="702.4" y="117.1" width="9.9" height="33.9" fill="#d9d3c6"/>
+<rect x="718.9" y="117.1" width="9.9" height="65.9" fill="#d9d3c6"/>
+<rect x="735.4" y="101.8" width="9.9" height="15.3" fill="#b8912f"/>
+<rect x="751.9" y="117.1" width="9.9" height="14.8" fill="#d9d3c6"/>
+<text x="756.8" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1051</text>
+<rect x="768.4" y="107.7" width="9.9" height="9.5" fill="#b8912f"/>
+<rect x="784.8" y="75.2" width="9.9" height="41.9" fill="#b8912f"/>
+<rect x="801.3" y="117.1" width="9.9" height="52.3" fill="#d9d3c6"/>
+<rect x="817.8" y="6.5" width="9.9" height="110.6" fill="#b8912f"/>
+<rect x="834.3" y="61.4" width="9.9" height="55.8" fill="#b8912f"/>
+<rect x="850.8" y="101.6" width="9.9" height="15.5" fill="#b8912f"/>
+<text x="855.8" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1201</text>
+</svg><div class="key">가로 : 당첨 회차로부터 몇 회차 전 · 세로 : 3개 이상 비율</div></div>
+<p>같은 그림을 꽝(0개) 쪽으로. 진짜 구간이라면 이쪽은 <em>반대로</em> 내려가야 합니다.</p>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="56" y1="212.0" x2="864" y2="212.0" stroke="#f0ebe1"/>
+<text x="50" y="215.0" font-size="10" text-anchor="end" fill="#8b8375">26.0 %</text>
+<line x1="56" y1="162.5" x2="864" y2="162.5" stroke="#f0ebe1"/>
+<text x="50" y="165.5" font-size="10" text-anchor="end" fill="#8b8375">27.0 %</text>
+<line x1="56" y1="113.0" x2="864" y2="113.0" stroke="#f0ebe1"/>
+<text x="50" y="116.0" font-size="10" text-anchor="end" fill="#8b8375">28.0 %</text>
+<line x1="56" y1="63.5" x2="864" y2="63.5" stroke="#f0ebe1"/>
+<text x="50" y="66.5" font-size="10" text-anchor="end" fill="#8b8375">29.0 %</text>
+<line x1="56" y1="14.0" x2="864" y2="14.0" stroke="#f0ebe1"/>
+<text x="50" y="17.0" font-size="10" text-anchor="end" fill="#8b8375">30.0 %</text>
+<line x1="56" y1="122.1" x2="864" y2="122.1" stroke="#3a6b8a" stroke-dasharray="4 3"/>
+<text x="864" y="117.1" font-size="10" text-anchor="end" fill="#3a6b8a">전체 27.82 %</text>
+<rect x="59.3" y="122.1" width="9.9" height="7.4" fill="#d9d3c6"/>
+<text x="64.2" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1</text>
+<rect x="75.8" y="122.1" width="9.9" height="7.1" fill="#d9d3c6"/>
+<rect x="92.3" y="122.1" width="9.9" height="7.0" fill="#d9d3c6"/>
+<rect x="108.8" y="122.1" width="9.9" height="1.1" fill="#d9d3c6"/>
+<rect x="125.3" y="122.1" width="9.9" height="10.5" fill="#d9d3c6"/>
+<rect x="141.7" y="122.1" width="9.9" height="22.6" fill="#d9d3c6"/>
+<rect x="158.2" y="122.1" width="9.9" height="22.1" fill="#d9d3c6"/>
+<text x="163.2" y="227" font-size="10" text-anchor="middle" fill="#8b8375">151</text>
+<rect x="174.7" y="111.9" width="9.9" height="10.1" fill="#4a6d8c"/>
+<rect x="191.2" y="92.4" width="9.9" height="29.7" fill="#4a6d8c"/>
+<rect x="207.7" y="122.1" width="9.9" height="9.8" fill="#d9d3c6"/>
+<rect x="224.2" y="122.1" width="9.9" height="26.7" fill="#d9d3c6"/>
+<rect x="240.7" y="115.0" width="9.9" height="7.1" fill="#4a6d8c"/>
+<rect x="257.2" y="96.2" width="9.9" height="25.9" fill="#4a6d8c"/>
+<text x="262.1" y="227" font-size="10" text-anchor="middle" fill="#8b8375">301</text>
+<rect x="273.7" y="90.5" width="9.9" height="31.5" fill="#4a6d8c"/>
+<rect x="290.2" y="122.1" width="9.9" height="17.4" fill="#d9d3c6"/>
+<rect x="306.6" y="111.8" width="9.9" height="10.3" fill="#4a6d8c"/>
+<rect x="323.1" y="122.1" width="9.9" height="5.5" fill="#d9d3c6"/>
+<rect x="339.6" y="122.1" width="9.9" height="26.8" fill="#d9d3c6"/>
+<rect x="356.1" y="122.1" width="9.9" height="21.7" fill="#d9d3c6"/>
+<text x="361.1" y="227" font-size="10" text-anchor="middle" fill="#8b8375">451</text>
+<rect x="372.6" y="122.1" width="9.9" height="8.7" fill="#d9d3c6"/>
+<rect x="389.1" y="86.4" width="9.9" height="35.7" fill="#4a6d8c"/>
+<rect x="405.6" y="122.1" width="9.9" height="12.2" fill="#d9d3c6"/>
+<rect x="422.1" y="91.2" width="9.9" height="30.9" fill="#4a6d8c"/>
+<rect x="438.6" y="94.2" width="9.9" height="27.9" fill="#4a6d8c"/>
+<rect x="455.1" y="122.1" width="9.9" height="8.3" fill="#d9d3c6"/>
+<text x="460.0" y="227" font-size="10" text-anchor="middle" fill="#8b8375">601</text>
+<rect x="471.5" y="106.9" width="9.9" height="15.2" fill="#4a6d8c"/>
+<rect x="488.0" y="116.1" width="9.9" height="6.0" fill="#4a6d8c"/>
+<rect x="504.5" y="122.1" width="9.9" height="17.4" fill="#d9d3c6"/>
+<rect x="521.0" y="119.1" width="9.9" height="3.0" fill="#4a6d8c"/>
+<rect x="537.5" y="115.8" width="9.9" height="6.2" fill="#4a6d8c"/>
+<rect x="554.0" y="119.3" width="9.9" height="2.8" fill="#4a6d8c"/>
+<text x="558.9" y="227" font-size="10" text-anchor="middle" fill="#8b8375">751</text>
+<rect x="570.5" y="122.1" width="9.9" height="41.0" fill="#d9d3c6"/>
+<rect x="587.0" y="122.1" width="9.9" height="15.1" fill="#d9d3c6"/>
+<rect x="603.5" y="99.1" width="9.9" height="23.0" fill="#4a6d8c"/>
+<rect x="620.0" y="122.1" width="9.9" height="2.5" fill="#d9d3c6"/>
+<rect x="636.4" y="101.6" width="9.9" height="20.5" fill="#4a6d8c"/>
+<rect x="652.9" y="118.3" width="9.9" height="3.8" fill="#4a6d8c"/>
+<text x="657.9" y="227" font-size="10" text-anchor="middle" fill="#8b8375">901</text>
+<rect x="669.4" y="122.1" width="9.9" height="1.1" fill="#d9d3c6"/>
+<rect x="685.9" y="113.6" width="9.9" height="8.5" fill="#4a6d8c"/>
+<rect x="702.4" y="91.2" width="9.9" height="30.9" fill="#4a6d8c"/>
+<rect x="718.9" y="41.0" width="9.9" height="81.1" fill="#4a6d8c"/>
+<rect x="735.4" y="122.1" width="9.9" height="52.9" fill="#d9d3c6"/>
+<rect x="751.9" y="122.1" width="9.9" height="18.1" fill="#d9d3c6"/>
+<text x="756.8" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1051</text>
+<rect x="768.4" y="122.1" width="9.9" height="36.5" fill="#d9d3c6"/>
+<rect x="784.8" y="122.1" width="9.9" height="8.0" fill="#d9d3c6"/>
+<rect x="801.3" y="98.1" width="9.9" height="24.0" fill="#4a6d8c"/>
+<rect x="817.8" y="41.9" width="9.9" height="80.2" fill="#4a6d8c"/>
+<rect x="834.3" y="56.1" width="9.9" height="65.9" fill="#4a6d8c"/>
+<rect x="850.8" y="102.6" width="9.9" height="19.5" fill="#4a6d8c"/>
+<text x="855.8" y="227" font-size="10" text-anchor="middle" fill="#8b8375">1201</text>
+</svg><div class="key">세로 : 0개(꽝) 비율 · 전체 평균 27.82 %</div></div>
+<div class="note ok">두 선 모두 평평합니다. 5회차 전의 줄과 800회차 전의 줄이 같은 확률로 맞힙니다.
+추첨은 130주 전에 무슨 일이 있었는지 기억하지 않습니다.</div>
+<h2>2. 앞에서 고르고, 뒤에서 확인</h2>
+<p>「가장 높은 구간」은 언제나 찾을 수 있습니다 — 50개를 보면 하나는 반드시 튑니다.
+그래서 <strong>앞 절반(기준 200~719회)에서만</strong> 가장 높은 네 구간을 고르고,
+고를 때 보지 않은 <strong>뒤 절반(720~1240회)</strong>에서 다시 잽니다.</p>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="90" y1="146.0" x2="810" y2="146.0" stroke="#e3ddd1" stroke-dasharray="4 3"/>
+<text x="84" y="150.0" font-size="11" text-anchor="end" fill="#8b8375">z 0</text>
+<text x="84" y="70.0" font-size="11" text-anchor="end" fill="#c9c2b4">+2</text>
+<text x="84" y="110.0" font-size="11" text-anchor="end" fill="#c9c2b4">+1</text>
+<text x="84" y="190.0" font-size="11" text-anchor="end" fill="#c9c2b4">-1</text>
+<text x="210" y="16" font-size="11" text-anchor="middle" fill="#8b8375">앞 절반 — 고른 곳</text>
+<text x="690" y="16" font-size="11" text-anchor="middle" fill="#8b8375">뒤 절반 — 확인</text>
+<line x1="210" y1="26" x2="210" y2="206" stroke="#f0ebe1"/>
+<line x1="690" y1="26" x2="690" y2="206" stroke="#f0ebe1"/>
+<line x1="210" y1="55.2" x2="690" y2="53.3" stroke="#b8912f" stroke-width="2.6"/>
+<circle cx="210" cy="55.2" r="5" fill="#b8912f"/>
+<circle cx="690" cy="53.3" r="5" fill="#b8912f"/>
+<text x="198" y="59.2" font-size="11" text-anchor="end" fill="#8a6a1c">126~150  +2.27</text>
+<text x="702" y="57.3" font-size="11" fill="#8a6a1c">+2.32</text>
+<line x1="210" y1="83.9" x2="690" y2="173.1" stroke="#b4432f" stroke-width="1.6"/>
+<circle cx="210" cy="83.9" r="3.5" fill="#b4432f"/>
+<circle cx="690" cy="173.1" r="3.5" fill="#b4432f"/>
+<text x="198" y="87.9" font-size="11" text-anchor="end" fill="#8b8375">1~25  +1.55</text>
+<text x="702" y="177.1" font-size="11" fill="#b4432f">-0.68</text>
+<line x1="210" y1="95.6" x2="690" y2="147.7" stroke="#b4432f" stroke-width="1.6"/>
+<circle cx="210" cy="95.6" r="3.5" fill="#b4432f"/>
+<circle cx="690" cy="147.7" r="3.5" fill="#b4432f"/>
+<text x="198" y="99.6" font-size="11" text-anchor="end" fill="#8b8375">176~200  +1.26</text>
+<text x="702" y="151.7" font-size="11" fill="#b4432f">-0.04</text>
+<line x1="210" y1="109.4" x2="690" y2="162.2" stroke="#b4432f" stroke-width="1.6"/>
+<circle cx="210" cy="109.4" r="3.5" fill="#b4432f"/>
+<circle cx="690" cy="162.2" r="3.5" fill="#b4432f"/>
+<text x="198" y="113.4" font-size="11" text-anchor="end" fill="#8b8375">51~75  +0.91</text>
+<text x="702" y="166.2" font-size="11" fill="#b4432f">-0.40</text>
+</svg><div class="key">3개 이상 · 왼쪽 = 고른 곳의 z, 오른쪽 = 확인한 z</div></div>
+<div class="scroll"><table>
+<tr><th>구간</th><th class="n">앞 절반</th><th class="n">z</th><th class="n">뒤 절반</th><th class="n">z</th></tr>
+<tr class="kept"><td>126~150회차 전</td><td class="n">7.12 %</td><td class="n">+2.27</td><td class="n">7.01 %</td><td class="n">+2.32</td></tr>
+<tr><td>1~25회차 전</td><td class="n">6.94 %</td><td class="n">+1.55</td><td class="n">6.25 %</td><td class="n">−0.68</td></tr>
+<tr><td>176~200회차 전</td><td class="n">6.86 %</td><td class="n">+1.26</td><td class="n">6.41 %</td><td class="n">−0.04</td></tr>
+<tr><td>51~75회차 전</td><td class="n">6.77 %</td><td class="n">+0.91</td><td class="n">6.32 %</td><td class="n">−0.40</td></tr>
+<tr class="law"><td>전체 평균</td><td class="n">6.54 %</td><td></td><td class="n">6.42 %</td><td></td></tr>
+</table></div>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="90" y1="146.0" x2="810" y2="146.0" stroke="#e3ddd1" stroke-dasharray="4 3"/>
+<text x="84" y="150.0" font-size="11" text-anchor="end" fill="#8b8375">z 0</text>
+<text x="84" y="70.0" font-size="11" text-anchor="end" fill="#c9c2b4">+2</text>
+<text x="84" y="110.0" font-size="11" text-anchor="end" fill="#c9c2b4">+1</text>
+<text x="84" y="190.0" font-size="11" text-anchor="end" fill="#c9c2b4">-1</text>
+<text x="210" y="16" font-size="11" text-anchor="middle" fill="#8b8375">앞 절반 — 고른 곳</text>
+<text x="690" y="16" font-size="11" text-anchor="middle" fill="#8b8375">뒤 절반 — 확인</text>
+<line x1="210" y1="26" x2="210" y2="206" stroke="#f0ebe1"/>
+<line x1="690" y1="26" x2="690" y2="206" stroke="#f0ebe1"/>
+<line x1="210" y1="50.0" x2="690" y2="133.3" stroke="#b9b1a2" stroke-width="1.6"/>
+<circle cx="210" cy="50.0" r="3.5" fill="#b9b1a2"/>
+<circle cx="690" cy="133.3" r="3.5" fill="#b9b1a2"/>
+<text x="198" y="54.0" font-size="11" text-anchor="end" fill="#8b8375">201~225  +2.40</text>
+<text x="702" y="137.3" font-size="11" fill="#8b8375">+0.32</text>
+<line x1="210" y1="83.5" x2="690" y2="101.2" stroke="#b9b1a2" stroke-width="1.6"/>
+<circle cx="210" cy="83.5" r="3.5" fill="#b9b1a2"/>
+<circle cx="690" cy="101.2" r="3.5" fill="#b9b1a2"/>
+<text x="198" y="87.5" font-size="11" text-anchor="end" fill="#8b8375">326~350  +1.56</text>
+<text x="702" y="105.2" font-size="11" fill="#8b8375">+1.12</text>
+<line x1="210" y1="98.2" x2="690" y2="204.4" stroke="#b4432f" stroke-width="1.6"/>
+<circle cx="210" cy="98.2" r="3.5" fill="#b4432f"/>
+<circle cx="690" cy="204.4" r="3.5" fill="#b4432f"/>
+<text x="198" y="102.2" font-size="11" text-anchor="end" fill="#8b8375">526~550  +1.20</text>
+<text x="702" y="208.4" font-size="11" fill="#b4432f">-1.46</text>
+<line x1="210" y1="98.6" x2="690" y2="89.9" stroke="#b9b1a2" stroke-width="1.6"/>
+<circle cx="210" cy="98.6" r="3.5" fill="#b9b1a2"/>
+<circle cx="690" cy="89.9" r="3.5" fill="#b9b1a2"/>
+<text x="198" y="102.6" font-size="11" text-anchor="end" fill="#8b8375">501~525  +1.19</text>
+<text x="702" y="93.9" font-size="11" fill="#8b8375">+1.40</text>
+</svg><div class="key">0개(꽝) · 같은 절차</div></div>
+<div class="scroll"><table>
+<tr><th>구간</th><th class="n">앞 절반</th><th class="n">z</th><th class="n">뒤 절반</th><th class="n">z</th></tr>
+<tr><td>201~225회차 전</td><td class="n">28.82 %</td><td class="n">+2.40</td><td class="n">28.02 %</td><td class="n">+0.32</td></tr>
+<tr><td>326~350회차 전</td><td class="n">28.53 %</td><td class="n">+1.56</td><td class="n">28.40 %</td><td class="n">+1.12</td></tr>
+<tr><td>526~550회차 전</td><td class="n">28.62 %</td><td class="n">+1.20</td><td class="n">27.21 %</td><td class="n">−1.46</td></tr>
+<tr><td>501~525회차 전</td><td class="n">28.56 %</td><td class="n">+1.19</td><td class="n">28.53 %</td><td class="n">+1.40</td></tr>
+<tr class="law"><td>전체 평균</td><td class="n">27.69 %</td><td></td><td class="n">27.88 %</td><td></td></tr>
+</table></div>
+<div class="note">꽝 쪽은 네 구간 모두 0 근처로 주저앉습니다.
+3개 이상 쪽은 <strong>126~150</strong> 하나만 버팁니다 —
+7.12 % 다음 7.01 %. 고른 뒤에도 남은 유일한 구간입니다.</div>
+<h2>3. 대조군 — 같은 절차를 무작위에 돌리면</h2>
+<p>2장을 통과했다고 끝이 아닙니다. <strong>그 절차 자체가</strong> 살아남는 구간을 만들어낼 수 있기
+때문입니다. 확인하는 방법은 하나 — 같은 줄, 같은 거리를 두고 <em>당첨 번호만 무작위 7개로 바꿔</em>
+전부 다시 돌립니다. 구간 고르기도, 뒤 절반 확인도 똑같이. 40번 반복했습니다.</p>
+<div class="scroll"><table>
+<tr><th></th><th class="n">뒤 절반의 최고 z</th></tr>
+<tr class="kept"><td>실제 자료</td><td class="n">2.32</td></tr>
+<tr><td>무작위 40번 중 최대</td><td class="n">2.50</td></tr>
+<tr><td>무작위 중앙값</td><td class="n">1.07</td></tr>
+<tr class="law"><td>무작위 상위 8개</td><td class="n">2.50 · 2.34 · 2.33 · 2.07 · 1.88 · 1.64 · 1.62 · 1.59</td></tr>
+</table></div>
+<div class="note bad">무작위도 3번은 실제만큼 잘합니다 — <strong>p = 0.075</strong>.
+실제는 소음 더미의 위쪽에 있지만, 더미 <em>밖</em>에 있지 않습니다. 1.09배의 차이는 우연과 구별되지 않습니다.</div>
+<h2>4. 사람 쪽 — 지난 회차를 베끼는가</h2>
+<p>추첨에 틀이 없어도 <strong>사람</strong>에게는 있을 수 있습니다. 많은 이가 지난 당첨번호를 적어 냅니다.
+그렇다면 어떤 회차가 과거와 닮았을 때 <em>수동</em> 당첨자가 늘어야 합니다.
+1등 가운데 수동의 비율은 회차 수가 늘어도 저절로 정규화되므로 시대 효과가 섞이지 않습니다.
+표본 950회차, 평균 28.24 %.</p>
+<div class="scroll"><table>
+<tr><th>과거와 최대 몇 개 겹치는가</th><th class="n">회차</th><th class="n">수동 비율</th><th class="n">z</th></tr>
+<tr><td>3개</td><td class="n">383</td><td class="n">27.10 %</td><td class="n">−1.11</td></tr>
+<tr><td>4개</td><td class="n">547</td><td class="n">29.01 %</td><td class="n">+0.94</td></tr>
+<tr><td>5개</td><td class="n">20</td><td class="n">28.81 %</td><td class="n">+0.14</td></tr>
+</table></div>
+<div class="scroll"><table>
+<tr><th>바로 앞 회차와 겹침 (이월)</th><th class="n">회차</th><th class="n">수동 비율</th><th class="n">z</th></tr>
+<tr><td>0개</td><td class="n">374</td><td class="n">28.99 %</td><td class="n">+0.75</td></tr>
+<tr><td>1개</td><td class="n">403</td><td class="n">28.42 %</td><td class="n">+0.18</td></tr>
+<tr><td>2개</td><td class="n">153</td><td class="n">26.31 %</td><td class="n">−1.31</td></tr>
+<tr><td>3개</td><td class="n">19</td><td class="n">24.18 %</td><td class="n">−0.86</td></tr>
+</table></div>
+<div class="scroll"><table>
+<tr><th>과거와 가장 닮은 그림 (닮은꼴)</th><th class="n">회차</th><th class="n">수동 비율</th><th class="n">z</th></tr>
+<tr><td>3/6</td><td class="n">21</td><td class="n">21.59 %</td><td class="n">−1.37</td></tr>
+<tr><td>4/6</td><td class="n">832</td><td class="n">28.26 %</td><td class="n">+0.04</td></tr>
+<tr><td>5/6</td><td class="n">97</td><td class="n">29.45 %</td><td class="n">+0.63</td></tr>
+</table></div>
+<div class="note ok">전부 |z| 1.4 아래. 과거와 닮은 회차라고 수동 당첨자가 늘지 않습니다 —
+사람들이 지난 당첨번호를 베낀다 해도, 그 흔적이 당첨자 구성에는 남지 않습니다.</div>
+<h2>5. 결론 — 틀은 두 가지가 있다</h2>
+<p><strong>추첨이 따르는 틀</strong>은 없습니다. 거리 50개 구간, 양쪽 판정, 교차 검증, 대조군 —
+전부 같은 답입니다. 「몇 회차 전을 보라」는 규칙은 자료에 없습니다.</p>
+<p><strong>당신이 놓는 틀</strong>은 있습니다. 용지의 7×7, 당첨이월의 일곱 자리, 이 보고서의 거리,
+닮은꼴의 그림 — 이것들은 추첨을 구속하지 않고 <em>시선을 정리합니다</em>. 그리고 그 쓸모는 예측이 아니라
+<strong>배분</strong>입니다 : 90장의 정답 개수(주당 72개)는 바뀌지 않지만, 그것이 어떻게 흩어지는지는 틀이 정합니다.</p>
+<div class="scroll"><table>
+<tr><th>틀</th><th>바꾸는 것</th><th>검증</th></tr>
+<tr><td>거리 · 닮은꼴 · 주기 · 패턴</td><td>아무것도</td><td>lift 0.95~1.09 · 이 보고서</td></tr>
+<tr class="kept"><td>분배 (모양으로 계산)</td><td>당첨 시 <strong>나누는 사람 수</strong></td><td>실제 당첨자 수에 적합</td></tr>
+<tr class="kept"><td>90장의 고른 퍼뜨림</td><td>72개 정답의 <strong>흩어짐</strong></td><td>조합론 · 0인 주가 줄고 5등이 는다</td></tr>
+</table></div>
+<div class="note cool">한 줄로 : <strong>추첨에는 틀이 없다. 당신은 틀을 놓을 수 있고, 그것은 확률이 아니라
+결과의 분포를 정한다.</strong> 이 프로젝트에서 살아남은 틀은 분배와 퍼뜨림, 둘뿐입니다.</div>
+<p>이 문서는 그 결론을 못 박아 두기 위한 것입니다 — 여섯 달 뒤에 같은 길을 다시 걷지 않도록.
+화면의 <strong>테이블 › 당첨이월 › 거리</strong> 칸은 이 계산을 회차마다 보여 주고,
+126~150 구간을 금색 점선으로 표시합니다 — 규칙이라서가 아니라,
+지켜보라고.</p>
+<footer>기준 200~1240회 · 줄 539,740개 · 수동 표본 950회차 · 2026-09-18<br>
+재현 : <code>node --experimental-sqlite tools/rapport-distance.mjs</code>
+(대조군 40회는 한 번 측정해 고정)</footer>
+</div></body></html>

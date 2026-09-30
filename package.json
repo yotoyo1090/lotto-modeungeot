@@ -1,0 +1,24 @@
+{
+  "name": "lotto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "test": "node --test --experimental-sqlite \"test/**/*.test.js\"",
+    "import": "node --experimental-sqlite tools/import-legacy.js",
+    "crawl": "node --experimental-sqlite tools/crawl.js",
+    "doctor": "node --experimental-sqlite tools/doctor.js",
+    "mcp": "node --experimental-sqlite tools/mcp.js",
+    "bench": "node tools/bench.js",
+    "oracle": "python3 tools/oracle.py",
+    "build:data": "node --experimental-sqlite tools/build.js",
+    "update": "npm run crawl -- since && npm run crawl -- since --product pension && npm run crawl -- hogi && npm run crawl -- order && npm run build:data",
+    "web": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "web:preview": "npm --prefix web run preview",
+    "admin": "node --experimental-sqlite tools/admin.js"
+  }
+}

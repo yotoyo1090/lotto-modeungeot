@@ -1,0 +1,187 @@
+/* Les jetons de design — clair, minimal, or.
+ *
+ * Une seule couleur d'accent, tenue de bout en bout. Le reste est du papier,
+ * de l'encre et des filets. Pas d'ombres portées : ce qui sépare deux blocs,
+ * c'est le blanc entre eux, pas un relief.
+ *
+ * Les cinq couleurs de 구간 ne sont pas décoratives — ce sont les tranches de
+ * dizaines, l'une des analyses. Elles reprennent le code couleur des boules
+ * coréennes, désaturé pour cohabiter avec l'or.
+ */
+
+:root {
+  --paper:      #FBFAF7;
+  --surface:    #FFFFFF;
+  --ink:        #17150F;
+  --ink-soft:   #57534A;
+  --muted:      #8E887A;
+  --line:       #E9E5DB;
+  --line-soft:  #F3F0E8;
+
+  --gold:       #A8801E;
+  --gold-bright:#C9A227;
+  --gold-wash:  #FAF4E2;
+  --gold-soft:  #EBDFBC;   /* le filet sous la barre des sous-catégories */
+  --gold-deep:  #7A5C12;   /* du texte sur le fond clair, assez foncé pour se lire */
+
+  /* 차뜨 — quatre bandes ordonnées, pas quatre couleurs arbitraires. L'or
+     marque ce qui vient de sortir, l'ardoise ce qui manque depuis longtemps :
+     les deux extrémités se distinguent d'un coup d'œil, et le milieu
+     s'efface, ce qui est exactement son rôle. */
+  --t-hot:   #A8801E;
+  --t-mid:   #DDCA94;
+  --t-cold:  #AEBECD;
+  --t-dead:  #4A6D8C;
+  /* Une teinte d'aplat ne fait pas un texte lisible : le 미들 pâle, écrit
+     sur blanc, disparaissait. Chaque bande a donc deux valeurs — celle du
+     filet, et celle du chiffre. */
+  --t-hot-text:  #8F6B14;
+  --t-mid-text:  #8A6F27;
+  --t-cold-text: #5C7691;
+  --t-dead-text: #35566F;
+
+  /* 당첨 · 이월 — les deux événements de la matrice 흐름 et du graphique
+     전부 흐름. Un aplat, comme l'ancienne plateforme : c'est le choix retenu.
+     Les deux teintes sont assez foncées pour porter du blanc, et assez
+     éloignées l'une de l'autre pour qu'on ne les confonde pas d'un coup
+     d'œil sur 1 350 cases. */
+  --hit-bg:    #C0392B;   /* 당첨 — sorti après une attente */
+  --carry-bg:  #2166A5;   /* 이월 — sorti deux fois de suite */
+  --on-fill:   #FFFFFF;
+
+  --s1: #C9A227;   /* 1–9    */
+  --s2: #4A6D8C;   /* 10–19  */
+  --s3: #A8544A;   /* 20–29  */
+  --s4: #6E6B62;   /* 30–39  */
+  --s5: #4E7A5E;   /* 40–45  */
+
+  --font: 'Pretendard', system-ui, -apple-system, 'Segoe UI',
+          'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --figure: Georgia, 'Times New Roman', 'Batang', serif;
+
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius: 3px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+
+/* --- structure ---------------------------------------------------------- */
+
+/* La colonne du site. Elle était bornée à 1120px ; elle va maintenant d'un
+   bord à l'autre — les tableaux larges (번호 패턴 et ses 45 colonnes, 흐름,
+   회차별 번호) tiennent enfin sans se replier. */
+.wrap {
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.1rem, 2.5vw, 1.75rem);
+}
+
+.panel + .panel { margin-top: 1.25rem; }
+
+/* Le titre d'une section : un mot coréen, sa traduction en petit à côté.
+ *
+ * Sur un téléphone, « 전체 분포 » se coupait entre les deux syllabes pour
+ * laisser de la place à la glose. Le titre refuse maintenant de se couper,
+ * et c'est la ligne qui passe à la suivante. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.head h2 { font-size: 1.0625rem; white-space: nowrap; }
+.head .gloss { color: var(--muted); font-size: 0.8125rem; }
+.head .right { margin-left: auto; color: var(--muted); font-size: 0.8125rem; }
+
+.grid { display: grid; gap: 1.25rem; }
+@media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } }
+
+/* --- chiffres ----------------------------------------------------------- */
+
+.figure {
+  font-family: var(--figure);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dim { color: var(--muted); }
+.soft { color: var(--ink-soft); }
+
+/* --- tableaux ----------------------------------------------------------- */
+
+table { border-collapse: collapse; width: 100%; font-size: 0.8125rem; }
+th, td { padding: 0.4rem 0.5rem; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+tbody tr + tr td { border-top: 1px solid var(--line-soft); }
+
+.scroll { overflow-x: auto; }
+
+/* Un tableau étroit se comprime jusqu'à écrire ses cellules à la verticale —
+   « 당첨자 » finissait en trois lignes d'une lettre. Les cellules refusent de
+   se couper, le tableau prend la largeur qu'il lui faut, et c'est le
+   conteneur qui défile. */
+.scroll > table { min-width: 100%; }
+.scroll > table th,
+.scroll > table td { white-space: nowrap; }
+
+/* --- contrôles ---------------------------------------------------------- */
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: border-color .12s, background .12s, color .12s;
+}
+button:hover { border-color: var(--gold-bright); }
+button[aria-pressed='true'], button.on {
+  border-color: var(--gold);
+  background: var(--gold-wash);
+  color: var(--gold);
+}
+button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }

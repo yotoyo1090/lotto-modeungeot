@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>상위 30 · 하위 20 — 백테스트</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:820px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.4rem; margin:0 0 .3rem; }
+  .sub { color:var(--muted); font-size:.88rem; }
+  h2 { font-size:1rem; margin:2.4rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:66ch; }
+  strong { color:var(--ink); }
+  em { font-style:normal; color:var(--gold-deep); }
+  .nums { font-family:var(--figure); font-size:.84rem; color:var(--ink-soft); }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+
+  /* Le graphe : une ligne verticale a 1.00, un point par liste. */
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1.2rem 1.4rem; margin:1rem 0; }
+  .band { display:grid; grid-template-columns:12rem 1fr 4.5rem; gap:.6rem;
+          align-items:center; margin:.55rem 0; }
+  .band .who { font-size:.82rem; color:var(--ink-soft); text-align:right; }
+  .band .who b { display:block; font-size:.7rem; color:var(--muted); font-weight:400; }
+  .track { position:relative; height:22px; }
+  .track .grid { position:absolute; inset:0; }
+  .track .grid i { position:absolute; top:0; bottom:0; width:1px; background:var(--line-soft); }
+  .track .par { position:absolute; top:-3px; bottom:-3px; width:1px; background:var(--hot); }
+  .track .bar { position:absolute; top:9px; height:4px; border-radius:2px;
+                background:rgba(184,145,47,.28); }
+  .track .dot { position:absolute; top:5px; width:12px; height:12px; margin-left:-6px;
+                border-radius:50%; background:var(--gold); border:2px solid var(--surface); }
+  .track .dot.w { background:var(--cool); width:9px; height:9px; top:6.5px; margin-left:-4.5px; }
+  .band .val { font-family:var(--figure); font-size:.82rem; text-align:right; }
+  .scale { display:grid; grid-template-columns:12rem 1fr 4.5rem; gap:.6rem;
+           font-family:var(--figure); font-size:.7rem; color:var(--muted); margin-top:.5rem; }
+  .scale .ticks { position:relative; height:1rem; }
+  .scale .ticks span { position:absolute; transform:translateX(-50%); }
+  .key { font-size:.78rem; color:var(--muted); margin-top:.9rem; }
+  .key i { display:inline-block; width:10px; height:10px; border-radius:50%;
+           vertical-align:-1px; margin-right:.25rem; }
+  .key .g { background:var(--gold); } .key .b { background:var(--cool); }
+  .key .r { width:2px; height:11px; border-radius:0; background:var(--hot); }
+
+  table { width:100%; border-collapse:collapse; font-size:.84rem; margin:1rem 0; }
+  th { text-align:left; font-size:.74rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.4rem .5rem; white-space:nowrap; }
+  td { padding:.3rem .5rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>상위 30 · 하위 20 — 백테스트</h1>
+<div class="sub">
+  성격 점수를 <strong>401~820회차에서만</strong> 배우고, 그 점수로 45개 번호를 매 회차
+  줄 세워 <strong>821~1239회차(419회차)</strong>에서 채점했습니다 — 점수가 한 번도
+  보지 못한 구간입니다.
+</div>
+
+<div class="note">
+  <strong>30 + 20 = 50입니다.</strong> 번호는 45개뿐이라 두 목록은 <em>5개가 겹칩니다</em>.
+  그래서 요청하신 30/20 외에, 겹치지 않는 두 분할 <strong>30/15</strong>와
+  <strong>25/20</strong>도 함께 쟀습니다.
+</div>
+
+<h2>결과 — 비율 (관측 ÷ 기대)</h2>
+<p>
+  가로선의 가운데가 <em>1.00</em>, 곧 «우연». 금색 점이 각 목록, 파란 점이
+  <strong>같은 크기의 무작위 목록</strong>. 옅은 띠는 ±2 표준편차 — 그 안이면 잡음입니다.
+</p>
+
+<div class="chart">
+  <!-- echelle : 0.90 a 1.10, donc 1.00 est a 50 % -->
+  <div class="band">
+    <div class="who">상위 30<b>가능성 목록</b></div>
+    <div class="track">
+      <div class="grid"><i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i></div>
+      <div class="par" style="left:50%"></div>
+      <div class="bar" style="left:37.9%;width:24.3%"></div>
+      <div class="dot" style="left:43.3%" title="0.9865"></div>
+      <div class="dot w" style="left:53.5%" title="무작위 1.0070"></div>
+    </div>
+    <div class="val">0.987</div>
+  </div>
+
+  <div class="band">
+    <div class="who">하위 20<b>제외 목록</b></div>
+    <div class="track">
+      <div class="grid"><i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i></div>
+      <div class="par" style="left:50%"></div>
+      <div class="bar" style="left:31.3%;width:37.4%"></div>
+      <div class="dot" style="left:51.3%" title="1.0026"></div>
+      <div class="dot w" style="left:53.3%" title="무작위 1.0065"></div>
+    </div>
+    <div class="val">1.003</div>
+  </div>
+
+  <div class="band">
+    <div class="who">하위 15<b>30/15 분할</b></div>
+    <div class="track">
+      <div class="grid"><i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i></div>
+      <div class="par" style="left:50%"></div>
+      <div class="bar" style="left:25.8%;width:48.4%"></div>
+      <div class="dot" style="left:63.5%" title="1.0269"></div>
+      <div class="dot w" style="left:53.3%" title="무작위 1.0065"></div>
+    </div>
+    <div class="val">1.027</div>
+  </div>
+
+  <div class="band">
+    <div class="who">상위 25<b>25/20 분할</b></div>
+    <div class="track">
+      <div class="grid"><i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i></div>
+      <div class="par" style="left:50%"></div>
+      <div class="bar" style="left:34.5%;width:31%"></div>
+      <div class="dot" style="left:48.9%" title="0.9979"></div>
+      <div class="dot w" style="left:58.8%" title="무작위 1.0175"></div>
+    </div>
+    <div class="val">0.998</div>
+  </div>
+
+  <div class="scale">
+    <div></div>
+    <div class="ticks">
+      <span style="left:0%">0.90</span><span style="left:25%">0.95</span>
+      <span style="left:50%">1.00</span><span style="left:75%">1.05</span>
+      <span style="left:100%">1.10</span>
+    </div>
+    <div></div>
+  </div>
+  <div class="key">
+    <i class="g"></i>목록 &nbsp; <i class="b"></i>같은 크기 무작위 &nbsp;
+    <i class="r"></i>1.00 = 우연 &nbsp; · &nbsp; 옅은 띠 = ±2 표준편차
+  </div>
+</div>
+
+<div class="note bad">
+  <strong>네 개의 점이 모두 띠 안에 있습니다.</strong> 그리고 «가능성 목록»으로 뽑은
+  상위 30이 <strong>0.987</strong> — 1보다 <em>아래</em>입니다. 무작위 30개는 1.007로
+  그보다 위입니다.
+  <br><br>
+  가장 높은 점은 <strong>하위 15(1.027)</strong>입니다. 버리려고 고른 목록이 가장
+  잘 담았습니다. |z| = 1.11로 잡음 안이지만, 방향이 정확히 반대라는 점은 남습니다.
+</div>
+
+<h2>숫자로</h2>
+<table>
+<thead><tr>
+  <th>목록</th><th class="n">크기</th><th class="n">총 적중</th><th class="n">회차당</th>
+  <th class="n">기대</th><th class="n">비율</th><th class="n">z</th><th class="n">무작위</th>
+</tr></thead>
+<tbody>
+<tr><td>상위 30 (가능성 목록)</td><td class="n">30</td><td class="n">1929</td><td class="n">4.604</td><td class="n">4.667</td><td class="n">0.9865</td><td class="n">−1.11</td><td class="n">1.0070</td></tr>
+<tr><td>하위 20 (제외 목록)</td><td class="n">20</td><td class="n">1307</td><td class="n">3.119</td><td class="n">3.111</td><td class="n">1.0026</td><td class="n">0.14</td><td class="n">1.0065</td></tr>
+<tr><td>하위 15 (30/15 분할)</td><td class="n">15</td><td class="n">1004</td><td class="n">2.396</td><td class="n">2.333</td><td class="n">1.0269</td><td class="n">1.11</td><td class="n">1.0065</td></tr>
+<tr><td>상위 25 (25/20 분할)</td><td class="n">25</td><td class="n">1626</td><td class="n">3.881</td><td class="n">3.889</td><td class="n">0.9979</td><td class="n">−0.14</td><td class="n">1.0175</td></tr>
+</tbody>
+</table>
+
+<h2>제외의 값 — 하위 목록을 버리면</h2>
+<table>
+<thead><tr><th>버린 목록</th><th class="n">개수</th><th class="n">잃은 당첨</th><th class="n">없앤 꽝</th><th class="n">꽝 / 당첨</th></tr></thead>
+<tbody>
+<tr><td>하위 20</td><td class="n">20</td><td class="n">3.12</td><td class="n">16.88</td><td class="n">5.41</td></tr>
+<tr><td>하위 15</td><td class="n">15</td><td class="n">2.40</td><td class="n">12.60</td><td class="n">5.26</td></tr>
+</tbody>
+</table>
+<p>기준은 <strong>꽝 38 ÷ 당첨 7 = 5.43</strong>. 두 줄 다 그 아래입니다.</p>
+
+<h2>6개가 전부 상위 목록에 들어간 회차</h2>
+<table>
+<thead><tr><th>상위 목록</th><th class="n">실측</th><th class="n">확률법</th></tr></thead>
+<tbody>
+<tr><td>상위 30개</td><td class="n">22 / 419 = 5.3 %</td><td class="n">7.3 %</td></tr>
+<tr><td>상위 25개</td><td class="n">6 / 419 = 1.4 %</td><td class="n">2.2 %</td></tr>
+</tbody>
+</table>
+<div class="note bad">
+  <strong>여기가 가장 아픕니다.</strong> 30개로 좁혀 놓고도 6개가 전부 들어간 회차는
+  <strong>419회차 중 22번(5.3 %)</strong>. 아무 30개나 골랐을 때가 <strong>7.3 %</strong>입니다.
+  고른 30개가 무작위 30개보다 <em>덜</em> 자주 여섯 개를 다 담았습니다.
+</div>
+
+<h2>1240회 목록</h2>
+<table>
+<thead><tr><th>목록</th><th class="n">개수</th><th>번호</th></tr></thead>
+<tbody>
+<tr><td>상위 30 (가능성)</td><td class="n">30</td><td class="nums">1 2 3 8 9 11 13 15 17 19 20 22 23 27 28 29 30 31 32 33 34 35 36 37 38 40 41 42 43 45</td></tr>
+<tr><td>하위 20 (제외)</td><td class="n">20</td><td class="nums">2 4 5 6 7 10 12 14 16 18 21 23 24 25 26 32 36 37 39 44</td></tr>
+<tr><td>겹치는 번호</td><td class="n">5</td><td class="nums">2 23 32 36 37</td></tr>
+<tr><td>하위 15 (겹침 없음)</td><td class="n">15</td><td class="nums">4 5 6 7 10 12 14 16 18 21 24 25 26 39 44</td></tr>
+</tbody>
+</table>
+
+<footer>
+  학습 401~820회차 (420회차, 성격 80가지 중 67가지에 점수) ·
+  채점 821~1239회차 (419회차) · 초기하 분포 + 유한모집단 보정 ·
+  대조군은 매 줄 같은 크기의 무작위 목록 · 2026-09-04
+</footer>
+</div>
+</body>
+</html>

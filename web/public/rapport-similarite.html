@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>패턴 닮은꼴 간격 보고서 — 같은 그림은 규칙적으로 돌아오는가</title>
+<style>
+  :root {
+    --paper:#faf8f4; --surface:#fff; --ink:#1c1a16; --ink-soft:#4a453c;
+    --muted:#8b8375; --line:#e3ddd1; --line-soft:#f0ebe1;
+    --gold:#b8912f; --gold-deep:#8a6a1c; --gold-wash:#fdf6e3;
+    --hot:#b4432f; --cool:#3a6b8a; --green:#4a7c59;
+    --figure:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif; }
+  .wrap { max-width:940px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+  h1 { font-size:1.45rem; margin:0 0 .35rem; }
+  .sub { color:var(--muted); font-size:.88rem; max-width:70ch; }
+  h2 { font-size:1rem; margin:2.6rem 0 .6rem; padding-top:1.4rem; border-top:1px solid var(--line); }
+  p { color:var(--ink-soft); font-size:.9rem; max-width:70ch; }
+  strong { color:var(--ink); } em { font-style:normal; color:var(--gold-deep); }
+  code { font-family:var(--figure); font-size:.85em; background:var(--gold-wash);
+         padding:.05em .3em; border-radius:3px; }
+  .note { background:var(--surface); border-left:3px solid var(--gold);
+          padding:.8rem 1rem; margin:1.2rem 0; font-size:.88rem; }
+  .note.bad { border-left-color:var(--hot); }
+  .note.ok { border-left-color:var(--green); }
+  .note.cool { border-left-color:var(--cool); }
+  .chart { background:var(--surface); border:1px solid var(--line);
+           border-radius:6px; padding:1rem 1.1rem; margin:1rem 0; overflow-x:auto; }
+  .key { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin:1rem 0; }
+  th { text-align:left; font-size:.71rem; font-weight:600; color:var(--ink);
+       border-bottom:1px solid var(--line); padding:.35rem .45rem; white-space:nowrap; }
+  td { padding:.28rem .45rem; border-bottom:1px solid var(--line-soft); white-space:nowrap; }
+  .n { font-family:var(--figure); text-align:right; }
+  .scroll { overflow-x:auto; }
+  svg { display:block; max-width:100%; }
+  footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
+           font-size:.76rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>패턴 닮은꼴 간격 보고서 — 같은 그림은 규칙적으로 돌아오는가</h1>
+<div class="sub">
+  용지 위에 같은 그림을 그리는 두 회차를 「닮은꼴」이라 부른다 (평행이동을 허용한 겹침 점수 4/6 이상).
+  그런 쌍이 7,757개 있다. 이 보고서가 묻는 것은 하나 — <strong>그 닮은꼴들은 규칙적인 간격으로 돌아오는가</strong>.
+  1~1,241회 · 2026-09-17.
+</div>
+<div class="note">
+  「모양 닮은꼴」 화면은 <em>어떤</em> 회차가 닮았는지를 보여준다. 여기서는 그 목록을 받아
+  <em>언제</em> 닮았는지만 본다. 네 가지 방법으로 간격을 재고, 매번 우연이 만드는 간격과 견준다.
+</div>
+<h2>0. 재료</h2>
+<p>1,241회차에서 만들 수 있는 쌍은 769,420개. 그중 점수 4/6 이상은 7,757개,
+곧 <strong>99쌍에 1쌍</strong>(1.01%)이다. 이 7,757개 쌍의
+두 회차 번호 차이가 이 보고서의 모든 자료다. 번호가 무엇이었는지는 더 이상 쓰이지 않는다.</p>
+<h2>1. 두 회차 사이의 거리</h2>
+<p>먼저 가장 단순한 것. 닮은꼴 쌍의 거리 <code>|a − b|</code>를 50 단위로 세었다.
+비교선은 <strong>삼각형</strong>이다 — 거리가 d인 쌍은 회차 축 위에 1,241−d 자리밖에 없으므로,
+아무 구조가 없어도 먼 거리일수록 쌍이 적어진다. 이 기울기는 구조가 아니다.</p>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="52" y1="210.0" x2="862" y2="210.0" stroke="#f0ebe1"/>
+<text x="46" y="213.0" font-size="10" text-anchor="end" fill="#8b8375">0</text>
+<line x1="52" y1="161.5" x2="862" y2="161.5" stroke="#f0ebe1"/>
+<text x="46" y="164.5" font-size="10" text-anchor="end" fill="#8b8375">169</text>
+<line x1="52" y1="113.0" x2="862" y2="113.0" stroke="#f0ebe1"/>
+<text x="46" y="116.0" font-size="10" text-anchor="end" fill="#8b8375">339</text>
+<line x1="52" y1="64.5" x2="862" y2="64.5" stroke="#f0ebe1"/>
+<text x="46" y="67.5" font-size="10" text-anchor="end" fill="#8b8375">508</text>
+<line x1="52" y1="16.0" x2="862" y2="16.0" stroke="#f0ebe1"/>
+<text x="46" y="19.0" font-size="10" text-anchor="end" fill="#8b8375">677</text>
+<rect x="57.2" y="30.4" width="22.0" height="179.6" fill="#b8912f"/>
+<text x="68.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1</text>
+<rect x="89.6" y="48.7" width="22.0" height="161.3" fill="#b8912f"/>
+<text x="100.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">51</text>
+<rect x="122.0" y="41.5" width="22.0" height="168.5" fill="#b8912f"/>
+<text x="133.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">101</text>
+<rect x="154.4" y="50.1" width="22.0" height="159.9" fill="#b8912f"/>
+<text x="165.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">151</text>
+<rect x="186.8" y="65.9" width="22.0" height="144.1" fill="#b8912f"/>
+<text x="197.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">201</text>
+<rect x="219.2" y="72.2" width="22.0" height="137.8" fill="#b8912f"/>
+<text x="230.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">251</text>
+<rect x="251.6" y="79.9" width="22.0" height="130.1" fill="#b8912f"/>
+<text x="262.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">301</text>
+<rect x="284.0" y="86.2" width="22.0" height="123.8" fill="#b8912f"/>
+<text x="295.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">351</text>
+<rect x="316.4" y="98.6" width="22.0" height="111.4" fill="#b8912f"/>
+<text x="327.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">401</text>
+<rect x="348.8" y="100.3" width="22.0" height="109.7" fill="#b8912f"/>
+<text x="359.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">451</text>
+<rect x="381.2" y="109.4" width="22.0" height="100.6" fill="#b8912f"/>
+<text x="392.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">501</text>
+<rect x="413.6" y="106.3" width="22.0" height="103.7" fill="#b8912f"/>
+<text x="424.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">551</text>
+<rect x="446.0" y="126.6" width="22.0" height="83.4" fill="#b8912f"/>
+<text x="457.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">601</text>
+<rect x="478.4" y="118.9" width="22.0" height="91.1" fill="#b8912f"/>
+<text x="489.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">651</text>
+<rect x="510.8" y="142.4" width="22.0" height="67.6" fill="#b8912f"/>
+<text x="521.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">701</text>
+<rect x="543.2" y="143.0" width="22.0" height="67.0" fill="#b8912f"/>
+<text x="554.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">751</text>
+<rect x="575.6" y="156.4" width="22.0" height="53.6" fill="#b8912f"/>
+<text x="586.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">801</text>
+<rect x="608.0" y="154.1" width="22.0" height="55.9" fill="#b8912f"/>
+<text x="619.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">851</text>
+<rect x="640.4" y="161.3" width="22.0" height="48.7" fill="#b8912f"/>
+<text x="651.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">901</text>
+<rect x="672.8" y="169.6" width="22.0" height="40.4" fill="#b8912f"/>
+<text x="683.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">951</text>
+<rect x="705.2" y="176.2" width="22.0" height="33.8" fill="#b8912f"/>
+<text x="716.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1001</text>
+<rect x="737.6" y="183.1" width="22.0" height="26.9" fill="#b8912f"/>
+<text x="748.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1051</text>
+<rect x="770.0" y="198.3" width="22.0" height="11.7" fill="#b8912f"/>
+<text x="781.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1101</text>
+<rect x="802.4" y="201.7" width="22.0" height="8.3" fill="#b8912f"/>
+<text x="813.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1151</text>
+<rect x="834.8" y="206.6" width="22.0" height="3.4" fill="#b8912f"/>
+<text x="845.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1201</text>
+<polyline points="68.2,34.5 100.6,41.7 133.0,48.9 165.4,56.1 197.8,63.3 230.2,70.6 262.6,77.8 295.0,85.0 327.4,92.2 359.8,99.5 392.2,106.7 424.6,113.9 457.0,121.1 489.4,128.3 521.8,135.6 554.2,142.8 586.6,150.0 619.0,157.2 651.4,164.4 683.8,171.7 716.2,178.9 748.6,186.1 781.0,193.3 813.4,200.5 845.8,207.6" fill="none" stroke="#3a6b8a" stroke-width="1.8" stroke-dasharray="4 3"/>
+</svg><div class="key">가로 : 두 회차의 거리 (회차) · 세로 : 쌍의 수 · 막대 = 실제, 점선 = 삼각형 기대값</div></div>
+<div class="note ok">χ² 28.1 / 자유도 24. 어느 거리대도 튀지 않는다.
+가까운 회차끼리 더 닮지도, 특정 거리에 몰리지도 않는다.</div>
+<h2>2. 연속된 닮은꼴 사이의 간격</h2>
+<p>한 회차를 기준으로 잡고, 그 닮은꼴들을 회차 순으로 늘어놓은 뒤 이웃한 둘 사이의 간격을 잰다.
+모든 기준을 합치면 간격 14,275개. <strong>규칙적이라면 이 간격들은 한 값 주위에 모여야 한다</strong> —
+즉 표준편차가 평균보다 훨씬 작아야 한다. 기억이 전혀 없다면 표준편차 = 평균(지수분포)이다.</p>
+<div class="chart"><svg viewBox="0 0 880 250" xmlns="http://www.w3.org/2000/svg">
+<line x1="52" y1="210.0" x2="862" y2="210.0" stroke="#f0ebe1"/>
+<text x="46" y="213.0" font-size="10" text-anchor="end" fill="#8b8375">0</text>
+<line x1="52" y1="161.5" x2="862" y2="161.5" stroke="#f0ebe1"/>
+<text x="46" y="164.5" font-size="10" text-anchor="end" fill="#8b8375">671</text>
+<line x1="52" y1="113.0" x2="862" y2="113.0" stroke="#f0ebe1"/>
+<text x="46" y="116.0" font-size="10" text-anchor="end" fill="#8b8375">1342</text>
+<line x1="52" y1="64.5" x2="862" y2="64.5" stroke="#f0ebe1"/>
+<text x="46" y="67.5" font-size="10" text-anchor="end" fill="#8b8375">2013</text>
+<line x1="52" y1="16.0" x2="862" y2="16.0" stroke="#f0ebe1"/>
+<text x="46" y="19.0" font-size="10" text-anchor="end" fill="#8b8375">2683</text>
+<rect x="62.0" y="196.6" width="42.4" height="13.4" fill="#b8912f"/>
+<text x="83.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">1</text>
+<rect x="124.3" y="196.0" width="42.4" height="14.0" fill="#b8912f"/>
+<text x="145.5" y="225" font-size="10" text-anchor="middle" fill="#8b8375">2</text>
+<rect x="186.6" y="181.6" width="42.4" height="28.4" fill="#b8912f"/>
+<text x="207.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">3-4</text>
+<rect x="248.9" y="168.4" width="42.4" height="41.6" fill="#b8912f"/>
+<text x="270.1" y="225" font-size="10" text-anchor="middle" fill="#8b8375">5-7</text>
+<rect x="311.2" y="152.3" width="42.4" height="57.7" fill="#b8912f"/>
+<text x="332.4" y="225" font-size="10" text-anchor="middle" fill="#8b8375">8-12</text>
+<rect x="373.5" y="122.0" width="42.4" height="88.0" fill="#b8912f"/>
+<text x="394.7" y="225" font-size="10" text-anchor="middle" fill="#8b8375">13-20</text>
+<rect x="435.8" y="92.4" width="42.4" height="117.6" fill="#b8912f"/>
+<text x="457.0" y="225" font-size="10" text-anchor="middle" fill="#8b8375">21-33</text>
+<rect x="498.1" y="56.2" width="42.4" height="153.8" fill="#b8912f"/>
+<text x="519.3" y="225" font-size="10" text-anchor="middle" fill="#8b8375">34-54</text>
+<rect x="560.4" y="40.4" width="42.4" height="169.6" fill="#b8912f"/>
+<text x="581.6" y="225" font-size="10" text-anchor="middle" fill="#8b8375">55-88</text>
+<rect x="622.7" y="52.2" width="42.4" height="157.8" fill="#b8912f"/>
+<text x="643.9" y="225" font-size="10" text-anchor="middle" fill="#8b8375">89-143</text>
+<rect x="685.0" y="98.1" width="42.4" height="111.9" fill="#b8912f"/>
+<text x="706.2" y="225" font-size="10" text-anchor="middle" fill="#8b8375">144-232</text>
+<rect x="747.4" y="149.7" width="42.4" height="60.3" fill="#b8912f"/>
+<text x="768.5" y="225" font-size="10" text-anchor="middle" fill="#8b8375">233-399</text>
+<rect x="809.7" y="191.9" width="42.4" height="18.1" fill="#b8912f"/>
+<text x="830.8" y="225" font-size="10" text-anchor="middle" fill="#8b8375">400+</text>
+<polyline points="83.2,198.2 145.5,198.3 207.8,187.0 270.1,176.4 332.4,156.6 394.7,130.7 457.0,95.8 519.3,58.2 581.6,30.4 643.9,34.4 706.2,82.9 768.5,149.5 830.8,199.7" fill="none" stroke="#3a6b8a" stroke-width="1.8" stroke-dasharray="4 3"/>
+</svg><div class="key">가로 : 간격 (회차, 로그 눈금의 구간) · 세로 : 간격의 수 · 막대 = 실제, 점선 = 기억 없음</div></div>
+<div class="scroll"><table>
+<tr><th>측도</th><th>실제</th><th>규칙적이라면</th><th>기억이 없다면</th></tr>
+<tr><td>평균 간격</td><td class="n">86.6회</td><td class="n">—</td><td class="n">86.6회</td></tr>
+<tr><td>표준편차</td><td class="n">97.5</td><td class="n">0 에 가깝게</td><td class="n">86.6</td></tr>
+<tr><td>표준편차 ÷ 평균</td><td class="n">1.126</td><td class="n">≈ 0</td><td class="n">1.000</td></tr>
+</table></div>
+<div class="note bad">비율 1.13 — 0 근처가 아니라 <strong>1보다 크다</strong>.
+간격은 규칙적이기는커녕 기억 없는 간격보다도 더 흩어져 있다.
+1~2회 간격과 400회 이상 간격이 동시에 많은 것은, 닮은꼴이 유난히 많은 회차와 거의 없는 회차가 섞여 있기 때문이다 —
+주기가 아니라 <em>불균등</em>이다.</div>
+<h2>3. 거리가 어떤 수의 배수인가</h2>
+<p>「닮은꼴은 k회마다 돌아온다」가 사실이라면, 거리를 k로 나눈 나머지가 0에 몰려야 한다.
+k = 2부터 120까지 각각 <code>거리 mod k</code>의 χ²를 구하고 z로 환산했다.
+(여기서도 기대값은 삼각형을 따른다. 균등으로 놓으면 가짜 신호가 나온다 — 처음 계산에서 z 5.4가 나온 것이 그 실수였다.)</p>
+<div class="chart"><svg viewBox="0 0 880 230" xmlns="http://www.w3.org/2000/svg">
+<rect x="52" y="59.5" width="810" height="87.0" fill="#b8912f" opacity="0.12"/>
+<line x1="52" y1="103.0" x2="862" y2="103.0" stroke="#e3ddd1"/>
+<text x="46" y="193.0" font-size="10" text-anchor="end" fill="#8b8375">-4</text>
+<text x="46" y="149.5" font-size="10" text-anchor="end" fill="#8b8375">-2</text>
+<text x="46" y="106.0" font-size="10" text-anchor="end" fill="#8b8375">0</text>
+<text x="46" y="62.5" font-size="10" text-anchor="end" fill="#8b8375">+2</text>
+<text x="46" y="19.0" font-size="10" text-anchor="end" fill="#8b8375">+4</text>
+<circle cx="52.0" cy="117.7" r="2.6" fill="#b8912f"/>
+<circle cx="58.9" cy="122.1" r="2.6" fill="#b8912f"/>
+<circle cx="65.7" cy="120.0" r="2.6" fill="#b8912f"/>
+<circle cx="72.6" cy="103.9" r="2.6" fill="#b8912f"/>
+<circle cx="79.5" cy="105.5" r="2.6" fill="#b8912f"/>
+<circle cx="86.3" cy="97.0" r="2.6" fill="#b8912f"/>
+<circle cx="93.2" cy="98.9" r="2.6" fill="#b8912f"/>
+<circle cx="100.1" cy="127.0" r="2.6" fill="#b8912f"/>
+<circle cx="106.9" cy="113.0" r="2.6" fill="#b8912f"/>
+<circle cx="113.8" cy="83.0" r="2.6" fill="#b8912f"/>
+<circle cx="120.6" cy="120.0" r="2.6" fill="#b8912f"/>
+<circle cx="127.5" cy="135.1" r="2.6" fill="#b8912f"/>
+<circle cx="134.4" cy="96.6" r="2.6" fill="#b8912f"/>
+<circle cx="141.2" cy="113.3" r="2.6" fill="#b8912f"/>
+<circle cx="148.1" cy="92.1" r="2.6" fill="#b8912f"/>
+<circle cx="155.0" cy="118.1" r="2.6" fill="#b8912f"/>
+<circle cx="161.8" cy="113.3" r="2.6" fill="#b8912f"/>
+<circle cx="168.7" cy="128.6" r="2.6" fill="#b8912f"/>
+<circle cx="175.6" cy="123.8" r="2.6" fill="#b8912f"/>
+<circle cx="182.4" cy="111.3" r="2.6" fill="#b8912f"/>
+<circle cx="189.3" cy="77.6" r="2.6" fill="#b8912f"/>
+<circle cx="196.2" cy="100.2" r="2.6" fill="#b8912f"/>
+<circle cx="203.0" cy="112.6" r="2.6" fill="#b8912f"/>
+<circle cx="209.9" cy="55.8" r="2.6" fill="#b8912f"/>
+<circle cx="216.7" cy="126.6" r="2.6" fill="#b8912f"/>
+<circle cx="223.6" cy="134.7" r="2.6" fill="#b8912f"/>
+<circle cx="230.5" cy="93.5" r="2.6" fill="#b8912f"/>
+<circle cx="237.3" cy="116.2" r="2.6" fill="#b8912f"/>
+<circle cx="244.2" cy="114.4" r="2.6" fill="#b8912f"/>
+<circle cx="251.1" cy="89.4" r="2.6" fill="#b8912f"/>
+<circle cx="257.9" cy="101.4" r="2.6" fill="#b8912f"/>
+<circle cx="264.8" cy="82.7" r="2.6" fill="#b8912f"/>
+<circle cx="271.7" cy="102.1" r="2.6" fill="#b8912f"/>
+<circle cx="278.5" cy="114.0" r="2.6" fill="#b8912f"/>
+<circle cx="285.4" cy="135.4" r="2.6" fill="#b8912f"/>
+<circle cx="292.3" cy="45.1" r="2.6" fill="#b8912f"/>
+<circle cx="299.1" cy="141.1" r="2.6" fill="#b8912f"/>
+<circle cx="306.0" cy="116.1" r="2.6" fill="#b8912f"/>
+<circle cx="312.8" cy="92.5" r="2.6" fill="#b8912f"/>
+<circle cx="319.7" cy="118.3" r="2.6" fill="#b8912f"/>
+<circle cx="326.6" cy="117.4" r="2.6" fill="#b8912f"/>
+<circle cx="333.4" cy="123.4" r="2.6" fill="#b8912f"/>
+<circle cx="340.3" cy="92.7" r="2.6" fill="#b8912f"/>
+<circle cx="347.2" cy="101.5" r="2.6" fill="#b8912f"/>
+<circle cx="354.0" cy="118.3" r="2.6" fill="#b8912f"/>
+<circle cx="360.9" cy="76.0" r="2.6" fill="#b8912f"/>
+<circle cx="367.8" cy="118.3" r="2.6" fill="#b8912f"/>
+<circle cx="374.6" cy="116.6" r="2.6" fill="#b8912f"/>
+<circle cx="381.5" cy="73.4" r="2.6" fill="#b8912f"/>
+<circle cx="388.4" cy="98.6" r="2.6" fill="#b8912f"/>
+<circle cx="395.2" cy="114.9" r="2.6" fill="#b8912f"/>
+<circle cx="402.1" cy="118.4" r="2.6" fill="#b8912f"/>
+<circle cx="408.9" cy="130.8" r="2.6" fill="#b8912f"/>
+<circle cx="415.8" cy="87.0" r="2.6" fill="#b8912f"/>
+<circle cx="422.7" cy="105.3" r="2.6" fill="#b8912f"/>
+<circle cx="429.5" cy="145.8" r="2.6" fill="#b8912f"/>
+<circle cx="436.4" cy="110.8" r="2.6" fill="#b8912f"/>
+<circle cx="443.3" cy="70.4" r="2.6" fill="#b8912f"/>
+<circle cx="450.1" cy="107.9" r="2.6" fill="#b8912f"/>
+<circle cx="457.0" cy="68.7" r="2.6" fill="#b8912f"/>
+<circle cx="463.9" cy="108.0" r="2.6" fill="#b8912f"/>
+<circle cx="470.7" cy="105.0" r="2.6" fill="#b8912f"/>
+<circle cx="477.6" cy="104.7" r="2.6" fill="#b8912f"/>
+<circle cx="484.5" cy="132.5" r="2.6" fill="#b8912f"/>
+<circle cx="491.3" cy="88.5" r="2.6" fill="#b8912f"/>
+<circle cx="498.2" cy="95.6" r="2.6" fill="#b8912f"/>
+<circle cx="505.1" cy="94.4" r="2.6" fill="#b8912f"/>
+<circle cx="511.9" cy="97.4" r="2.6" fill="#b8912f"/>
+<circle cx="518.8" cy="92.9" r="2.6" fill="#b8912f"/>
+<circle cx="525.6" cy="119.2" r="2.6" fill="#b8912f"/>
+<circle cx="532.5" cy="133.4" r="2.6" fill="#b8912f"/>
+<circle cx="539.4" cy="110.0" r="2.6" fill="#b8912f"/>
+<circle cx="546.2" cy="59.4" r="2.6" fill="#b8912f"/>
+<circle cx="553.1" cy="57.8" r="2.6" fill="#b8912f"/>
+<circle cx="560.0" cy="123.7" r="2.6" fill="#b8912f"/>
+<circle cx="566.8" cy="90.2" r="2.6" fill="#b8912f"/>
+<circle cx="573.7" cy="119.7" r="2.6" fill="#b8912f"/>
+<circle cx="580.6" cy="110.3" r="2.6" fill="#b8912f"/>
+<circle cx="587.4" cy="99.9" r="2.6" fill="#b8912f"/>
+<circle cx="594.3" cy="87.6" r="2.6" fill="#b8912f"/>
+<circle cx="601.2" cy="97.7" r="2.6" fill="#b8912f"/>
+<circle cx="608.0" cy="43.8" r="2.6" fill="#b8912f"/>
+<circle cx="614.9" cy="100.0" r="2.6" fill="#b8912f"/>
+<circle cx="621.7" cy="66.1" r="2.6" fill="#b8912f"/>
+<circle cx="628.6" cy="108.3" r="2.6" fill="#b8912f"/>
+<circle cx="635.5" cy="138.7" r="2.6" fill="#b8912f"/>
+<circle cx="642.3" cy="93.6" r="2.6" fill="#b8912f"/>
+<circle cx="649.2" cy="128.3" r="2.6" fill="#b8912f"/>
+<circle cx="656.1" cy="108.1" r="2.6" fill="#b8912f"/>
+<circle cx="662.9" cy="114.4" r="2.6" fill="#b8912f"/>
+<circle cx="669.8" cy="99.6" r="2.6" fill="#b8912f"/>
+<circle cx="676.7" cy="70.3" r="2.6" fill="#b8912f"/>
+<circle cx="683.5" cy="44.5" r="2.6" fill="#b8912f"/>
+<circle cx="690.4" cy="99.6" r="2.6" fill="#b8912f"/>
+<circle cx="697.3" cy="89.0" r="2.6" fill="#b8912f"/>
+<circle cx="704.1" cy="53.5" r="2.6" fill="#b8912f"/>
+<circle cx="711.0" cy="73.7" r="2.6" fill="#b8912f"/>
+<circle cx="717.8" cy="75.4" r="2.6" fill="#b8912f"/>
+<circle cx="724.7" cy="66.5" r="2.6" fill="#b8912f"/>
+<circle cx="731.6" cy="107.5" r="2.6" fill="#b8912f"/>
+<circle cx="738.4" cy="82.9" r="2.6" fill="#b8912f"/>
+<circle cx="745.3" cy="98.1" r="2.6" fill="#b8912f"/>
+<circle cx="752.2" cy="109.8" r="2.6" fill="#b8912f"/>
+<circle cx="759.0" cy="108.9" r="2.6" fill="#b8912f"/>
+<circle cx="765.9" cy="125.7" r="2.6" fill="#b8912f"/>
+<circle cx="772.8" cy="92.2" r="2.6" fill="#b8912f"/>
+<circle cx="779.6" cy="147.3" r="2.6" fill="#b8912f"/>
+<circle cx="786.5" cy="90.5" r="2.6" fill="#b8912f"/>
+<circle cx="793.4" cy="101.9" r="2.6" fill="#b8912f"/>
+<circle cx="800.2" cy="76.9" r="2.6" fill="#b8912f"/>
+<circle cx="807.1" cy="91.8" r="2.6" fill="#b8912f"/>
+<circle cx="813.9" cy="115.4" r="2.6" fill="#b8912f"/>
+<circle cx="820.8" cy="130.0" r="2.6" fill="#b8912f"/>
+<circle cx="827.7" cy="96.1" r="2.6" fill="#b8912f"/>
+<circle cx="834.5" cy="110.0" r="2.6" fill="#b8912f"/>
+<circle cx="841.4" cy="104.8" r="2.6" fill="#b8912f"/>
+<circle cx="848.3" cy="63.1" r="2.6" fill="#b8912f"/>
+<circle cx="855.1" cy="141.1" r="2.6" fill="#b8912f"/>
+<circle cx="862.0" cy="86.8" r="2.6" fill="#b8912f"/>
+<text x="52.0" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=2</text>
+<text x="175.6" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=20</text>
+<text x="312.8" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=40</text>
+<text x="450.1" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=60</text>
+<text x="587.4" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=80</text>
+<text x="724.7" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=100</text>
+<text x="862.0" y="218" font-size="10" text-anchor="middle" fill="#8b8375">k=120</text>
+<line x1="52" y1="43.8" x2="862" y2="43.8" stroke="#b4432f" stroke-dasharray="3 3"/>
+<text x="862" y="38.8" font-size="10" text-anchor="end" fill="#b4432f">최대 z 2.72 (k=83)</text>
+</svg><div class="key">가로 : k · 세로 : z · 띠 = ±2 (우연의 범위)</div></div>
+<div class="note ok">가장 높은 것은 k = 83에서 z 2.72.
+119번 시험하면 우연만으로도 최대 z가 <strong>2.7 근처</strong>에 온다. 정확히 그만큼 나왔다. 배수 구조는 없다.</div>
+<h2>4. 일정한 걸음으로 이어지는 사슬</h2>
+<p>앞의 세 검정은 전체를 본다. 이번에는 가장 좋은 한 곳만 본다 —
+어느 기준의 닮은꼴들이 <code>r, r+s, r+2s, …</code>처럼 같은 걸음으로 늘어서는 가장 긴 사슬은 얼마인가.
+그리고 같은 개수의 회차를 무작위로 뿌렸을 때 나오는 가장 긴 사슬과 비교한다.</p>
+<div class="scroll"><table>
+<tr><th>자료</th><th>가장 긴 사슬</th><th>내용</th></tr>
+<tr><td>실제 1,241회차</td><td class="n">4회차</td><td>기준 79회 · 걸음 36</td></tr>
+<tr><td>무작위 200회 재현</td><td class="n">최대 5회차</td><td>실제와 같거나 더 김 : <strong>200 / 200</strong></td></tr>
+</table></div>
+<div class="note bad">p = 1.000. 무작위가 <strong>매번</strong> 실제만큼 하거나 더 잘한다.
+실제 자료의 「사슬」은 우연이 저절로 만드는 것보다도 짧다. 규칙적인 걸음은 없다.</div>
+<h2>5. 1,241회의 경우</h2>
+<p>마지막 회차를 기준으로 실제 목록을 보자. 닮은꼴 10회차, 그 간격은 아래와 같다.</p>
+<div class="chart"><svg viewBox="0 0 880 120" xmlns="http://www.w3.org/2000/svg">
+<line x1="52" y1="62" x2="862" y2="62" stroke="#e3ddd1"/>
+<text x="52.7" y="86" font-size="10" text-anchor="middle" fill="#8b8375">1회</text>
+<text x="247.8" y="86" font-size="10" text-anchor="middle" fill="#8b8375">300회</text>
+<text x="443.6" y="86" font-size="10" text-anchor="middle" fill="#8b8375">600회</text>
+<text x="639.4" y="86" font-size="10" text-anchor="middle" fill="#8b8375">900회</text>
+<text x="862.0" y="86" font-size="10" text-anchor="middle" fill="#8b8375">1241회</text>
+<circle cx="65.1" cy="62" r="5" fill="#b8912f"/>
+<text x="65.1" y="49" font-size="10" text-anchor="middle" fill="#8b8375">20</text>
+<circle cx="266.1" cy="62" r="5" fill="#b8912f"/>
+<text x="266.1" y="49" font-size="10" text-anchor="middle" fill="#8b8375">328</text>
+<circle cx="317.6" cy="62" r="5" fill="#b8912f"/>
+<text x="317.6" y="49" font-size="10" text-anchor="middle" fill="#8b8375">407</text>
+<circle cx="373.8" cy="62" r="5" fill="#b8912f"/>
+<text x="373.8" y="49" font-size="10" text-anchor="middle" fill="#8b8375">493</text>
+<circle cx="465.2" cy="62" r="5" fill="#b8912f"/>
+<text x="465.2" y="49" font-size="10" text-anchor="middle" fill="#8b8375">633</text>
+<circle cx="469.1" cy="62" r="5" fill="#b8912f"/>
+<text x="469.1" y="49" font-size="10" text-anchor="middle" fill="#8b8375">639</text>
+<circle cx="578.1" cy="62" r="5" fill="#b8912f"/>
+<text x="578.1" y="49" font-size="10" text-anchor="middle" fill="#8b8375">806</text>
+<circle cx="691.6" cy="62" r="5" fill="#b8912f"/>
+<text x="691.6" y="49" font-size="10" text-anchor="middle" fill="#8b8375">980</text>
+<circle cx="721.7" cy="62" r="5" fill="#b8912f"/>
+<text x="721.7" y="49" font-size="10" text-anchor="middle" fill="#8b8375">1026</text>
+<circle cx="807.8" cy="62" r="5" fill="#b8912f"/>
+<text x="807.8" y="49" font-size="10" text-anchor="middle" fill="#8b8375">1158</text>
+<circle cx="862.0" cy="62" r="6" fill="#b4432f"/>
+<text x="862.0" y="47" font-size="10" text-anchor="end" fill="#b4432f">1241</text>
+</svg><div class="key">금색 = 1,241회의 닮은꼴 · 붉은색 = 기준 회차</div></div>
+<div class="scroll"><table>
+<tr><th>닮은꼴</th><td>20 · 328 · 407 · 493 · 633 · 639 · 806 · 980 · 1026 · 1158</td></tr>
+<tr><th>간격</th><td>308 · 79 · 86 · 140 · 6 · 167 · 174 · 46 · 132</td></tr>
+<tr><th>마지막 닮은꼴</th><td>83회 전 (1158회)</td></tr>
+</table></div>
+<div class="note">6부터 308까지. 다음 닮은꼴이 언제 올지 이 간격들로는 좁혀지지 않는다.</div>
+<h2>6. 결론 — 그리고 이 「없음」이 뜻하는 것</h2>
+<p>네 가지 검정이 모두 같은 답을 준다. <strong>닮은꼴 사이에 규칙적인 간격은 없다.</strong>
+닮은꼴은 회차 축 위에 무작위로 흩뿌려져 있고, 「다음 닮은꼴은 N회 뒤」라고 말할 근거가 자료에 없다.</p>
+<div class="scroll"><table>
+<tr><th>검정</th><th>겨냥하는 구조</th><th>결과</th></tr>
+<tr><td>1. 거리 분포</td><td>특정 거리에 몰림</td><td class="n">χ² 28.1 / 24</td></tr>
+<tr><td>2. 연속 간격</td><td>일정한 주기</td><td class="n">표준편차 ÷ 평균 = 1.13</td></tr>
+<tr><td>3. 거리 mod k</td><td>k의 배수</td><td class="n">최대 z 2.72 (119회 시험)</td></tr>
+<tr><td>4. 일정 걸음 사슬</td><td>등차 수열</td><td class="n">p = 1.000</td></tr>
+</table></div>
+<div class="note cool">이 결과는 「모양 닮은꼴」 화면의 다른 사실과 정확히 맞물린다 —
+1,241회차가 1,241개의 서로 다른 그림을 그렸고, 똑같은 모양이 두 번 나온 적은 한 번도 없다.
+닮음은 기하학의 사실이지 리듬이 아니다. 두 회차가 닮는 것은 <em>번호가 우연히 같은 자리에 떨어졌기</em> 때문이고,
+그 우연에는 달력이 없다.</div>
+<footer>1~1,241회 · 닮은꼴 기준 점수 4/6 이상 · 쌍 7,757개 · 2026-09-17<br>
+재현 : <code>node --experimental-sqlite tools/rapport-similarite.mjs 4</code></footer>
+</div>
+</body>
+</html>
