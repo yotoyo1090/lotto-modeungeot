@@ -46,6 +46,7 @@
   import SweepTest from './views/SweepTest.svelte'
   import Wheel from './views/Wheel.svelte'
   import SandTest from './views/SandTest.svelte'
+  import FilterBench from './views/FilterBench.svelte'
   import Report from './views/Report.svelte'
   import Guide from './views/Guide.svelte'
 
@@ -104,6 +105,7 @@
         { key: 'pool', label: '풀 검정', gloss: '이 묶음은 우연보다 나은가' },
         { key: 'sand', label: '사(沙) 검정', gloss: '화면의 28가지 묶음, 회차마다 다시 계산' },
         { key: 'sweep', label: '전체 검정', gloss: '167가지 방법을 한 번에, 대조군 포함' },
+        { key: 'fbench', label: '필터 조합 검정', gloss: '자동조합의 필터를 전부 섞어도, 우연을 넘는가' },
         { key: 'wheel', label: '휠', gloss: '무언가를 보장하는 유일한 화면' },
       ],
     },
@@ -148,7 +150,7 @@
 
   // Les écrans qui ne se découpent pas : ils ont leur propre sélecteur.
   const NO_RANGE = new Set(['guide', 'update', 'basics', 'fixed', 'pool', 'ftest', 'stest', 'ttest',
-                            'sweep', 'wheel', 'sand', 'rfixed', 'rlines', 'rmeth', 'rrandom', 'rshape', 'rdist', 'rsect', 'rcross',
+                            'sweep', 'fbench', 'wheel', 'sand', 'rfixed', 'rlines', 'rmeth', 'rrandom', 'rshape', 'rdist', 'rsect', 'rcross',
                             'phome', 'pflow', 'plists', 'ppages', 'pbasics',
                             'pauto', 'pmanual', 'presults',
                             'patterns', 'excluded', 'tables', 'hotcold', 'family', 'machine', 'order',
@@ -410,6 +412,8 @@
       <TableTest draws={all} />
     {:else if screen === 'sweep'}
       <SweepTest />
+    {:else if screen === 'fbench'}
+      <FilterBench />
     {:else if screen === 'wheel'}
       <Wheel />
     {:else if screen === 'sand'}

@@ -28,6 +28,7 @@
     FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, shuffleGrids, wonCounts,
   } from '../lib/pick.js'
   import { untrack } from 'svelte'
+  import BENCH from '../lib/filter-bench.json'
 
   import BadgeStrip from '../components/BadgeStrip.svelte'
   import PickControls from '../components/PickControls.svelte'
@@ -322,6 +323,15 @@
     cCarrySum = []; cCarryPos = []; cPrimeSum = []; cCompSum = []
     cM2Sum = []; cM3Sum = []; cM4Sum = []; cM5Sum = []
     cHeadRep = []; cTailRep = []; cHeadDigits = []; cTailDigits = []
+  }
+
+  // Le réglage de 팁 › 필터 조합 검정 : toutes les cases à ~80 %, apprises
+  // par `npm run bench:filters`. Il passe par `reopen`, comme une recherche
+  // enregistrée — ce qu'il n'écrit pas retombe à vide.
+  let benchLoaded = $state(false)
+  function loadBench() {
+    reopen({ name: '검정 설정 (각 80%)', rang: null, form: BENCH.all['0.8'].form })
+    benchLoaded = true
   }
 
   // --- le carnet de recherches ------------------------------------------
@@ -856,7 +866,9 @@
   <button class="go" onclick={run} disabled={status === 'running' || pool.length < 6}>
     {status === 'running' ? '계산 중…' : '조합 만들기'}
   </button>
-  <button onclick={reset}>초기화</button>
+  <button onclick={() => { reset(); benchLoaded = false }}>초기화</button>
+  <button onclick={loadBench}
+          title="팁 › 필터 조합 검정에서 쓴 설정 — 모든 필터에서 과거 약 80%를 덮는 값">검정 설정 불러오기 (각 80%)</button>
   <PickControls bind:mode={pickMode} bind:sort={sortKey} bind:dir={sortDir}
                 max={ENGINE_MAX} hide={hideWon} counts={false} />
   <span class="dim">
@@ -866,6 +878,13 @@
       통과한 조합을 모두 뽑습니다(최대 {num(ENGINE_MAX)}개). 500개씩 보이고 「더 보기」로 늘어납니다.
     {/if}
   </span>
+  {#if benchLoaded}
+    <p class="benchnote">
+      <strong>검정 설정 (각 80%)</strong>을 불러왔습니다 — 조합이 전체의 약
+      {(BENCH.all['0.8'].K * 100).toFixed(0)}%로 줄어듭니다(이월 조건 때문에 회차마다 조금 다릅니다). 하지만 과거 회차의 당첨번호도 약 {(BENCH.all['0.8'].te * 100).toFixed(0)}%만 이 안에
+      있었습니다 : 조합 수만 줄어들 뿐, 한 장의 당첨 확률은 그대로입니다 (팁 › 필터 조합 검정).
+    </p>
+  {/if}
 </section>
 
 {#if status === 'failed'}
@@ -1156,6 +1175,8 @@
   }
   .go:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
   .run .dim { font-size: 0.75rem; }
+  .benchnote { flex-basis: 100%; margin: 0; font-size: 0.75rem; line-height: 1.6; color: var(--ink-soft); }
+  .benchnote strong { color: var(--gold-deep); font-weight: 600; }
 
   .warn { color: var(--s3); font-size: 0.8125rem; margin: 0.6rem 0 0; }
 

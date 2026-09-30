@@ -13,6 +13,7 @@
     "doctor": "node --experimental-sqlite tools/doctor.js",
     "mcp": "node --experimental-sqlite tools/mcp.js",
     "bench": "node tools/bench.js",
+    "bench:filters": "node --experimental-sqlite tools/bench-filters.js",
     "oracle": "python3 tools/oracle.py",
     "build:data": "node --experimental-sqlite tools/build.js",
     "update": "npm run crawl -- since && npm run crawl -- since --product pension && npm run crawl -- hogi && npm run crawl -- order && npm run build:data",

@@ -5,7 +5,7 @@
 <p align="center">
   <img alt="무료" src="https://img.shields.io/badge/가격-무료-C9A227?style=for-the-badge">
   <img alt="조합 전수 계산" src="https://img.shields.io/badge/조합-8,145,060개_전수-17150F?style=for-the-badge">
-  <img alt="테스트" src="https://img.shields.io/badge/테스트-352개_통과-4A6D8C?style=for-the-badge">
+  <img alt="테스트" src="https://img.shields.io/badge/테스트-355개_통과-4A6D8C?style=for-the-badge">
   <img alt="Node" src="https://img.shields.io/badge/Node.js-22.5+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
   <img alt="Svelte" src="https://img.shields.io/badge/Svelte-5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white">
 </p>
@@ -31,7 +31,7 @@
 | 💰 **당첨금 「분배」 모델** | 확률은 누구도 못 바꿉니다. 하지만 **1등을 몇 명과 나눌지**는 조합의 모양에 따라 달라집니다. 실제 1,238회 당첨자 데이터로 만든 모델로, 남들이 덜 고르는 조합을 골라냅니다. |
 | 🎯 **27가지 조건 · 결과 필터** | 총합 · AC값 · 저고 · 홀짝 · 소수 · 합성수 · 배수 · 구간 · 앞/끝자리 합 · 앞쌍 · 끝쌍 · 앞/끝자리 숫자 · 이월 개수 · 이월합 · 이월 위치 · 소수합 · 합성수합 · 2~5배수합 · 분배 · 수동 인기 · 당첨 개수 · 고정수 · 제외수. 걸자마자 **전체 조합**에 다시 적용됩니다. |
 | 🎟️ **연금복권 720+까지** | 1,000,000개 번호 × 5개 조 = **5,000,000장** 전부를 0.06초에. 자리별 숫자, 반복 숫자, 전회차 대비까지. |
-| 🔬 **50개 화면 · 보고서** | 흐름·차뜨, 당첨 위치, 친구·중복, 패턴, 추첨기별, **공 나온 순서**, 용지 마킹, 모양 닮은꼴, CUSUM 감시 … 그리고 모든 규칙을 과거 데이터로 **직접 검정**하는 화면들. |
+| 🔬 **51개 화면 · 보고서** | 흐름·차뜨, 당첨 위치, 친구·중복, 패턴, 추첨기별, **공 나온 순서**, 용지 마킹, 모양 닮은꼴, CUSUM 감시 … 그리고 모든 규칙을 과거 데이터로 **직접 검정**하는 화면들. |
 | 🤖 **AI와 바로 연결** | MCP 서버 내장 — AI 비서에게 「1243회 분석해 줘」라고 말하면 도구 18개로 직접 계산해서 답합니다. |
 | 🔒 **내 PC에서, 내 데이터로** | 분석은 인터넷 없이 브라우저 안에서 돌아갑니다. 계정도, 로그인도, 수집되는 개인정보도 없습니다. |
 
@@ -127,7 +127,7 @@ npm run web                # http://localhost:5173
 
 | 명령 | 내용 |
 |---|---|
-| `npm test` | 테스트 (352개) |
+| `npm test` | 테스트 (355개) |
 | `npm run bench` | 속도 측정 — 위 그래프를 여러분 PC에서 |
 | `npm run update` | 추첨 · 추첨기 · 공 나온 순서 수집 후 데이터 생성 |
 | `npm run build:data` | 화면용 데이터 생성 |
