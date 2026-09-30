@@ -60,7 +60,7 @@
 <circle cx="880" cy="532" r="13" fill="none" stroke="#6B6557" stroke-width="1.5"/><path d="M875 527 l10 10 M885 527 l-10 10" stroke="#6B6557" stroke-width="2" stroke-linecap="round"/>
 <circle cx="1040" cy="532" r="13" fill="#C9A227"/><path d="M1034 532 l4.5 4.5 l8 -9" fill="none" stroke="#17150F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <line x1="56" y1="559.0" x2="1144" y2="559.0" stroke="#FBFAF7" stroke-opacity="0.07"/>
-<text x="56" y="584" class="k" font-size="17" fill="#FBFAF7">AI(Claude) 연동 도구 18개 (MCP)</text>
+<text x="56" y="584" class="k" font-size="17" fill="#FBFAF7">AI 연동 도구 18개 (MCP)</text>
 <circle cx="560" cy="578" r="13" fill="#C9A227"/><path d="M554 578 l4.5 4.5 l8 -9" fill="none" stroke="#17150F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="720" cy="578" r="13" fill="none" stroke="#6B6557" stroke-width="1.5"/><path d="M715 573 l10 10 M725 573 l-10 10" stroke="#6B6557" stroke-width="2" stroke-linecap="round"/>
 <circle cx="880" cy="578" r="13" fill="none" stroke="#6B6557" stroke-width="1.5"/><path d="M875 573 l10 10 M885 573 l-10 10" stroke="#6B6557" stroke-width="2" stroke-linecap="round"/>
