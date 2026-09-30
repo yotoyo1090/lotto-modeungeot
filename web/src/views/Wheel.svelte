@@ -205,7 +205,7 @@
       매주 산다면 약 <strong>{Math.round(wheel.oncePer / 52)}년</strong>에 한 번.
       <br />
       휠은 이 숫자를 바꾸지 않습니다. 어떤 번호 고르기 방법도 바꾸지 못합니다
-      (옆 탭 <strong>전체 검정</strong>의 21 304회 검정이 그 이야기입니다).
+      (옆 탭 <strong>전체 검정</strong>의 21,304회 검정이 그 이야기입니다).
       휠이 바꾸는 것은 <em>그 일이 일어났을 때의 값</em>뿐입니다 :
       {num(wheel.fullCost)}원이 아니라 {won(wheel.cost)}.
     </p>
