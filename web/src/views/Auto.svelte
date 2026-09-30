@@ -18,7 +18,7 @@
   import { sharing as shareOf } from '@core/sharing.js'
 
   import {
-    bandLabel, bandValues, choices, coveredRows, describe, SUM_MAX, SUM_MIN,
+    bandLabel, bandValues, choices, coveredRows, SUM_MAX, SUM_MIN,
   } from '../lib/combinaison.js'
   import { isSkipped, search } from '../lib/generator.js'
   import { day, num, rang as fmt } from '../lib/format.js'
@@ -28,13 +28,14 @@
     FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, shuffleGrids, wonCounts,
   } from '../lib/pick.js'
   import { untrack } from 'svelte'
+  import { describeRow } from '@core/row.js'
   import BENCH from '../lib/filter-bench.json'
 
   import BadgeStrip from '../components/BadgeStrip.svelte'
   import PickControls from '../components/PickControls.svelte'
   import RowFilter from '../components/RowFilter.svelte'
-  import Balls from '../components/Balls.svelte'
   import CheckSet from '../components/CheckSet.svelte'
+  import ComboTable from '../components/ComboTable.svelte'
   import NumberCheck from '../components/NumberCheck.svelte'
   import PatternBoard from '../components/PatternBoard.svelte'
   import TempBoard from '../components/TempBoard.svelte'
@@ -578,8 +579,9 @@
   })
 
   // Seul ce qui est affiché est décrit : 500, puis 500 de plus par 「더 보기」.
+  // Les lignes du tableau de 42 colonnes (`ComboTable`), comme au 일반조합.
   const shown = $derived(order.slice(0, listed).map((i, k) => ({
-    ...describe(gridAt(result.grids, i), { previous: result.previous, next: result.next }),
+    ...describeRow(gridAt(result.grids, i), { rang: result.at, previous: result.previous }),
     _i: i, _pos: k + 1,
   })))
 
@@ -974,51 +976,8 @@
     {:else if order.length === 0}
       <p class="dim">결과 필터를 통과한 조합이 없습니다.</p>
     {:else}
-      <div class="scroll tall">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th class="wide">조합</th>
-              <th>당첨</th><th>총합</th><th>이월</th><th>AC</th>
-              <th>저고</th><th>홀짝</th><th>앞</th><th>끝</th>
-              <th>소수</th><th>합성수</th><th>분배</th><th title="번호를 직접 고르는 사람들 사이에서 이 모양이 얼마나 자주 선택되는가 (1 = 평균)">수동</th>
-              {#each MULTIPLES as m (m)}<th>{m}배수</th>{/each}
-            </tr>
-          </thead>
-          <tbody>
-            {#each shown as r (r._i)}
-              {@const sh = shareOf([...r.grid])}
-              {@const on = checked.has(r._i)}
-              <tr class:checked={on}>
-                <td class="dim">
-                  <label class="pickrow">
-                    <input type="checkbox" checked={on} onchange={() => toggle(r._i)} />{r._pos}
-                  </label>
-                </td>
-                <td class="wide"><Balls numbers={r.grid} size={24}
-                                        highlight={new Set(r.carried)} /></td>
-                <td class:hit={r.won.length >= 3}>
-                  {r.hasNext ? r.won.length : '—'}
-                </td>
-                <td>{r.total}</td>
-                <td>{r.carried.length}</td>
-                <td>{r.ac}</td>
-                <td>{r.lowLabel}</td>
-                <td>{r.oddLabel}</td>
-                <td>{r.headSum}</td>
-                <td>{r.tailSum}</td>
-                <td>{r.primes.length}</td>
-                <td>{r.composites.length}</td>
-                <td class="share" class:rare={sh.band === 'rare'}
-                    title={`지표 ${sh.index.toFixed(3)} · 평균 대비 ${sh.share.toFixed(2)}배`}
-                >{sh.label}</td>
-                <td class="pop" title="수동 선택자 사이 인기 — 1 = 평균 모양">{sh.popularity.toFixed(1)}×</td>
-                {#each MULTIPLES as m (m)}<td>{r.multiples[m].length}</td>{/each}
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <ComboTable rows={shown} limit={shown.length} {checked} ontoggle={toggle}
+                  draw={result.next} counted />
       {#if order.length > listed}
         <button class="more" onclick={() => (listed += PAGE)}>
           더 보기 ({num(listed)} / {num(order.length)})
@@ -1095,13 +1054,11 @@
 </section>
 
 <style>
-  .pickrow { display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; }
   .more { margin: 0.6rem 0 0; padding: 0.3rem 1rem; font-size: 0.8125rem; }
   .wontally { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; align-items: baseline; font-size: 0.8125rem; margin: 0 0 0.7rem; }
   .wontally span { color: var(--muted); }
   .wontally span strong { color: var(--ink); font-family: var(--figure); }
   .wontally span.hit strong { color: var(--gold-deep); }
-  tr.checked td { background: var(--gold-wash); }
   .bar {
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 0.75rem;
@@ -1224,8 +1181,6 @@
   .sharing-pick button .n { font-size: 0.6875rem; color: var(--ink-soft); }
   .sharing-pick button .p { font-size: 0.6875rem; color: var(--muted); }
 
-  td.share { white-space: nowrap; color: var(--ink-soft); font-size: 0.75rem; }
-  td.share.rare { color: var(--ink); font-weight: 600; }
 
   .notice {
     margin: 1.35rem 0 0;
@@ -1266,8 +1221,4 @@
   .acts { white-space: nowrap; }
   .acts button { font-size: 0.6875rem; padding: 0.15rem 0.4rem; margin-left: 0.2rem; }
 
-  .tall { max-height: 30rem; overflow-y: auto; }
-  .tall thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
-  .wide { text-align: left; }
-  td.hit { color: var(--gold); font-weight: 600; }
 </style>

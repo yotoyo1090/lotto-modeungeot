@@ -27,10 +27,13 @@
   // passe (일반조합). Sans eux — 수동조합 — le tableau ne change pas. La
   // ligne porte alors `_i` (sa position dans le résultat) et `_pos` (son
   // rang dans la liste, toutes pages confondues).
+  // `counted` : une colonne 당첨 de plus (자동조합) — combien des sept
+  // numéros de `draw` la grille contient ; « — » tant que le 회차 n'est pas tiré.
   let {
     rows = [], limit = 200, onpick = null, picked = null, draw = null,
-    checked = null, ontoggle = null,
+    checked = null, ontoggle = null, counted = false,
   } = $props()
+  const wonOf = (cells) => (draw ? cells.slice(1, 7).filter((c) => draw.includes(Number(c))).length : null)
   const main = $derived(draw ? draw.slice(0, 6) : [])
   const bonus = $derived(draw ? draw[6] : null)
 
@@ -42,6 +45,7 @@
     <thead>
       <tr>
         <th class="idx">#</th>
+        {#if counted}<th title="고른 회차의 당첨번호 7개(보너스 포함)와 겹치는 개수">당첨</th>{/if}
         {#each COLUMNS as name, k (name)}
           <th>{name}</th>
           {#if k === AFTER}
@@ -68,6 +72,10 @@
               </label>
             {:else}{r._pos ?? i + 1}{/if}
           </td>
+          {#if counted}
+            {@const won = wonOf(cells)}
+            <td class:hit={won !== null && won >= 3}>{won ?? '—'}</td>
+          {/if}
           {#each cells as cell, k (k)}
             <td class:num={k >= 1 && k <= 7}
                 class:hit={k >= 1 && k <= 6 && !own && rowMain.includes(Number(cell))}
