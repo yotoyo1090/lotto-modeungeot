@@ -59,7 +59,8 @@
   const chartDraws = $derived(scoped(base, draws, chartSpan))
   const tableDraws = $derived(scoped(base, draws, tableSpan))
 
-  const stat = $derived(view ? null : filterSeries(statDraws, population, indicator))
+  // `base` : les 이월 cherchent le 회차 précédent dans tout l'historique.
+  const stat = $derived(view ? null : filterSeries(statDraws, population, indicator, base))
 
   // 관측 contre la loi : toutes les valeurs que l'un ou l'autre touche, dans
   // l'ordre numérique — une valeur attendue 0,3 fois et jamais vue garde sa
@@ -73,8 +74,8 @@
       .filter((r) => r.obs > 0 || r.exp >= 0.5)
   })
   const latestLabel = $derived(stat?.series[0]?.label ?? null)
-  const chart = $derived(view ? null : filterSeries(chartDraws, population, indicator))
-  const table = $derived(view ? null : filterSeries(tableDraws, population, indicator))
+  const chart = $derived(view ? null : filterSeries(chartDraws, population, indicator, base))
+  const table = $derived(view ? null : filterSeries(tableDraws, population, indicator, base))
 
   // Les trois pages du 1등. Deux calculs chacune — l'histogramme et le
   // tableau ont leur propre période, comme partout ailleurs.
@@ -244,9 +245,13 @@
 
     <p class="note dim">
       회색 「기대」는 {pop.size}개 번호를 아무렇게나 고른 조합에서 이 값이 나올
-      비율입니다 — 45개 중 {pop.size}개의 모든 조합을 세어 얻은 법칙이지, 회차와는
-      무관합니다. 관측이 그 위에 얹혀 있으면 추첨은 이 지표에 아무것도 더하지
+      비율입니다 — 45개 중 {pop.size}개의 모든 조합을 세어 얻은 법칙{#if !ind.previous}이지, 회차와는
+      무관합니다{/if}. 관측이 그 위에 얹혀 있으면 추첨은 이 지표에 아무것도 더하지
       않은 것입니다. 표시된 줄은 최근 회차의 값입니다.
+      {#if ind.previous}
+        <br />이월은 각 회차를 <strong>바로 앞 회차의 번호 7개</strong>(보너스 포함)와 비교합니다 —
+        기대도 회차마다 그 7개를 기준으로 계산해 더한 값입니다. 앞 회차가 없는 1회는 빠집니다.
+      {/if}
       {#if population === 'second'}
         <br />2등은 한 회차마다 <strong>일곱 조합</strong>입니다 — 당첨 조합과,
         보너스가 여섯 번호 중 하나를 대신한 여섯 조합.

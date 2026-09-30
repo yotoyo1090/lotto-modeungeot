@@ -27,7 +27,9 @@ import {
 } from '../src/core/analysis.js'
 import { carryover } from '../src/core/metrics.js'
 import { COLUMNS, describeRow, toCells } from '../src/core/row.js'
-import { filterSeries, gridsAt, indicatorLaw, rowCount } from '../src/core/filters.js'
+import {
+  carriedSumLaw, filterSeries, gridsAt, indicatorLaw, indicatorsOf, INDICATORS, rowCount,
+} from '../src/core/filters.js'
 import {
   multipleSeries, paritySeries, recentSeries, RECENT_FLOOR, RECENT_SPAN,
 } from '../src/core/first.js'
@@ -1965,6 +1967,50 @@ test('indicatorLaw : des lois qui somment à 1, aux moyennes connues, sous les �
   assert.ok('3 : 4' in pair.expected, 'les clés de paire sont des étiquettes')
   const second = filterSeries(draws, 'second', 'total')
   assert.ok(Math.abs(Object.values(second.expected).reduce((a, b) => a + b, 0) - second.series.length) < 1e-9)
+})
+
+test('필터 : les indicateurs ajoutés — lois exactes sur une petite urne, 이월 contre le 회차 précédent', () => {
+  // Toutes les lois somment à 1, en six comme en sept numéros.
+  for (const { key } of INDICATORS) {
+    if (key === 'carriedSum') continue
+    for (const size of [6, 7]) {
+      const s = Object.values(indicatorLaw(key, size)).reduce((a, b) => a + b, 0)
+      assert.ok(Math.abs(s - 1) < 1e-9, `${key}/${size} : somme ${s}`)
+    }
+  }
+  // Moyennes connues : 14 소수 et 9 multiples de 5 sur 45.
+  const mean = (law) => Object.entries(law).reduce((a, [v, p]) => a + Number(v) * p, 0)
+  assert.ok(Math.abs(mean(indicatorLaw('primes', 6)) - 6 * 14 / 45) < 1e-9)
+  assert.ok(Math.abs(mean(indicatorLaw('mult5Sum', 6)) - 6 * 225 / 45) < 1e-9)
+  assert.ok(Math.abs(mean(indicatorLaw('carried', 7)) - 7 * 7 / 45) < 1e-9)
+
+  // 앞쌍 écrit à la main : 1 · 10–19 partagent le 앞자리 1, donc 1 10 11 → 3.
+  const m = indicatorsOf([1, 10, 11, 23, 37, 45], [10, 11, 20, 30, 40, 41, 42])
+  assert.equal(m.headRepeat, 3)
+  assert.equal(m.tailRepeat, 2)   // 1 et 11
+  assert.equal(m.primes, 3)       // 11 23 37
+  assert.equal(m.primeSum, 71)
+  assert.equal(m.mult5Sum, 55)    // 10 45
+  assert.equal(m.carried, 2)
+  assert.equal(m.carriedSum, 21)
+
+  // 이월합 : la loi d'un 회차, puis le 기대 cumulé de filterSeries.
+  const law = carriedSumLaw([1, 2, 3, 4, 5, 6, 7], 6)
+  assert.ok(Math.abs(Object.values(law).reduce((a, b) => a + b, 0) - 1) < 1e-12)
+  const draws = fromRows([
+    { rang: 1, date: '2002-12-07', numbers: [10, 23, 29, 33, 37, 40], bonus: 16 },
+    { rang: 2, date: '2002-12-14', numbers: [9, 10, 21, 25, 32, 42], bonus: 2 },
+    { rang: 3, date: '2002-12-21', numbers: [11, 16, 19, 21, 27, 31], bonus: 30 },
+  ])
+  const carried = filterSeries(draws, 'first', 'carried')
+  assert.deepEqual(carried.series.map((s) => [s.rang, s.value]), [[3, 1], [2, 1]], '1회 est écarté')
+  const sum = filterSeries(draws, 'second', 'carriedSum')
+  assert.equal(sum.series.length, 14)
+  assert.ok(Math.abs(Object.values(sum.expected).reduce((a, b) => a + b, 0) - 14) < 1e-9)
+  // Sur une tranche, le précédent se lit dans l'historique complet.
+  const last = fromRows([{ rang: 3, date: '2002-12-21', numbers: [11, 16, 19, 21, 27, 31], bonus: 30 }])
+  assert.equal(filterSeries(last, 'first', 'carriedSum', draws).series[0].value, 21)
+  assert.throws(() => indicatorLaw('carriedSum'), RangeError)
 })
 
 test('sectionLaw : des parts qui somment à 1, la même règle que sectionSeries, mémorisées', () => {
