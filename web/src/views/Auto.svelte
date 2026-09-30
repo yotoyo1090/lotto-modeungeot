@@ -25,7 +25,7 @@
   import { auto as store, grids as gridStore } from '../lib/store.js'
   import {
     activeConds, ENGINE_KEYS, ENGINE_MAX, engineOptions,
-    FILTER_KEYS, gridAt, mergeConds, PAGE, pickIndices, shuffleGrids, wonCounts,
+    FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, shuffleGrids, wonCounts,
   } from '../lib/pick.js'
   import { untrack } from 'svelte'
 
@@ -934,7 +934,7 @@
     {/if}
 
     <RowFilter bind:conds left={order.length} of={drawn} hide={hideWon}
-               local={result.previous ? [] : ['carried']} />
+               local={result.previous ? [] : NEEDS_PREVIOUS} />
     {#if result.impossible}
       <p class="notice tight">결과 필터의 「{result.impossible}」 조건이 위쪽 조건과 겹치지 않아, 통과하는 조합이 없습니다.</p>
     {/if}
