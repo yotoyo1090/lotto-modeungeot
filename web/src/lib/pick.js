@@ -63,6 +63,8 @@ export const gridAt = (grids, i) => grids.slice(i * 6, i * 6 + 6)
 
 export const SORTS = [
   { key: 'none', label: '그대로' },
+  // 일 … 육 : le k-ième plus petit numéro, les six premières colonnes du tableau.
+  ...['일', '이', '삼', '사', '오', '육'].map((label, k) => ({ key: `pos${k + 1}`, label })),
   { key: 'total', label: '총합' },
   { key: 'ac', label: 'AC값' },
   { key: 'odd', label: '홀수 개수' },
@@ -137,6 +139,10 @@ function measure(nums, key, previous, next = null) {
       }
     }
     default: {
+      // 일 … 육 : les grilles du moteur sont déjà triées ; on retrie quand même,
+      // une grille venue d'ailleurs ne l'est pas forcément.
+      const p = POS_KEY.exec(key)
+      if (p) return [...nums].sort((a, b) => a - b)[Number(p[1]) - 1]
       // 2~5의배수 : `mult3` = combien, `mult3Sum` = leur somme.
       const m = MULT_KEY.exec(key)
       if (!m) return 0
@@ -150,6 +156,7 @@ function measure(nums, key, previous, next = null) {
 }
 
 const MULT_KEY = /^mult(\d)(Sum)?$/
+const POS_KEY = /^pos([1-6])$/
 
 /** Combien de numéros partagent le chiffre le plus fréquent — 앞쌍 / 끝쌍. */
 function mostSame(nums, digit) {
@@ -186,6 +193,7 @@ const ENGINE_PATH = {
   ...Object.fromEntries(MULTIPLES.flatMap((m) => [
     [`mult${m}`, ['multiples', m]], [`mult${m}Sum`, ['multSums', m]],
   ])),
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((k) => [`pos${k}`, ['positions', k]])),
 }
 
 export const ENGINE_KEYS = new Set([...Object.keys(ENGINE_PATH), 'sharing', 'popularity'])
@@ -197,11 +205,14 @@ export const NEEDS_PREVIOUS = ['carried', 'carriedSum']
 // Les bornes naturelles de chaque compte, pour une case laissée vide. Les
 // sommes n'ont pas besoin d'une borne serrée : [0, 255] les contient toutes.
 const COUNTS = ['odd', 'low', 'carried', 'won', 'primes', 'composites']
-const spanOf = (key) => (key === 'total' ? [21, 255]
-  : key === 'ac' ? [0, 10]
-    : key === 'headRepeat' || key === 'tailRepeat' ? [1, 6]
-      : COUNTS.includes(key) || /^mult\d$/.test(key) ? [0, 6]
-        : [0, 255])
+function spanOf(key) {
+  if (key === 'total') return [21, 255]
+  if (key === 'ac') return [0, 10]
+  if (key === 'headRepeat' || key === 'tailRepeat') return [1, 6]
+  if (/^pos\d$/.test(key)) return [1, 45]
+  if (COUNTS.includes(key) || /^mult\d$/.test(key)) return [0, 6]
+  return [0, 255]
+}
 
 /**
  * Combine les conditions du 결과 필터 avec les filtres du moteur (les cases

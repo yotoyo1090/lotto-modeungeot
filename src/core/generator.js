@@ -57,6 +57,10 @@ export const CRITERIA = [
   // chaque 이월, et la plus longue répétition d'un 앞자리 / 끝자리.
   'carriedSum', 'carriedPos', 'primeSum', 'compositeSum', 'multSums',
   'headRepeat', 'tailRepeat',
+  // Les colonnes 일 … 육 : le k-ième plus petit numéro de la grille. La
+  // descente pose les numéros dans l'ordre, donc la profondeur d EST la
+  // position d + 1 — le critère coupe des branches entières, il ne coûte rien.
+  'positions',
 ]
 
 export const LABELS = {
@@ -82,6 +86,7 @@ export const LABELS = {
   multSums: '배수합',
   headRepeat: '앞쌍',
   tailRepeat: '끝쌍',
+  positions: '자리(일~육)',
   count: '개수 조건',
 }
 
@@ -188,8 +193,9 @@ export function generate(filters = {}, options = {}) {
 
   const {
     total, low, odd, primes, composites, headSum, tailSum, ac, sharing, match, popularity, hit,
-    carriedSum, carriedPos, primeSum, compositeSum, headRepeat, tailRepeat,
+    carriedSum, carriedPos, primeSum, compositeSum, headRepeat, tailRepeat, positions,
   } = spec
+  const lastPos = positions[PICK - 1]   // 육, vérifié dans la feuille
 
   // Les nouveaux accumulateurs ne sont tenus que si leur critère est actif :
   // une recherche qui ne les demande pas ne paie rien de plus qu'avant.
@@ -230,6 +236,21 @@ export function generate(filters = {}, options = {}) {
 
       const value = pool[i]
       const sum = acc[base + S_SUM] + value
+
+      // Élagage 일 … 육 : ce numéro est la position depth + 1. Passé sa
+      // borne haute, tout i plus grand l'est aussi ; hors de ses valeurs,
+      // c'est seulement ce sous-arbre qui tombe.
+      const pc = positions[depth]
+      if (pc !== null) {
+        if (value > pc.max) {
+          rejected.set('positions', rejected.get('positions') + choose(size - i, remaining))
+          break
+        }
+        if (value < pc.min || !pc.mask[value - pc.min]) {
+          rejected.set('positions', rejected.get('positions') + choose(size - 1 - i, remaining - 1))
+          continue
+        }
+      }
 
       // Élagage 총합 : bornes de ce que la somme peut encore devenir.
       if (total !== null) {
@@ -416,6 +437,14 @@ export function generate(filters = {}, options = {}) {
       if (requiredTotal > 0 && bInclude + spec.required[value] < requiredTotal) {
         miss('include')
         continue
+      }
+
+      if (lastPos !== null) {
+        if (value > lastPos.max) {
+          rejected.set('positions', rejected.get('positions') + (size - i))
+          break
+        }
+        if (value < lastPos.min || !lastPos.mask[value - lastPos.min]) { miss('positions'); continue }
       }
 
       if (total !== null) {
@@ -665,6 +694,12 @@ export function matches(numbers, filters = {}) {
       }
       continue
     }
+    if (key === 'positions') {
+      for (let k = 0; k < PICK; k++) {
+        if (spec.positions[k] !== null && !allows(spec.positions[k], row[k])) return 'positions'
+      }
+      continue
+    }
     const bounds = spec[key]
     if (bounds === null) continue
     if (!allows(bounds, tests[key]())) return key
@@ -685,10 +720,12 @@ function normalize(filters) {
   const spec = {}
   for (const key of CRITERIA) {
     if (key === 'multiples' || key === 'sections' || key === 'sharing' || key === 'popularity' ||
-        key === 'multSums' || key === 'carriedPos') continue
+        key === 'multSums' || key === 'carriedPos' || key === 'positions') continue
     spec[key] = criterion(key, filters[key])
   }
   spec.multSums = MULTIPLES.map((m) => criterion(`multSums.${m}`, filters.multSums?.[m]))
+  // `positions` : { 1: [min, max], … 6: { allow } } — 일 = 1, … 육 = 6.
+  spec.positions = Array.from({ length: PICK }, (_, k) => criterion(`positions.${k + 1}`, filters.positions?.[k + 1]))
   spec.popularity = realBounds('popularity', filters.popularity)
 
   // 분배 n'est pas un compte de numéros mais un réel : pas de masque, pas

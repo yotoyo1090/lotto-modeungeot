@@ -5,7 +5,7 @@
 <p align="center">
   <img alt="무료" src="https://img.shields.io/badge/가격-무료-C9A227?style=for-the-badge">
   <img alt="조합 전수 계산" src="https://img.shields.io/badge/조합-8,145,060개_전수-17150F?style=for-the-badge">
-  <img alt="테스트" src="https://img.shields.io/badge/테스트-355개_통과-4A6D8C?style=for-the-badge">
+  <img alt="테스트" src="https://img.shields.io/badge/테스트-359개_통과-4A6D8C?style=for-the-badge">
   <img alt="Node" src="https://img.shields.io/badge/Node.js-22.5+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
   <img alt="Svelte" src="https://img.shields.io/badge/Svelte-5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white">
 </p>
@@ -127,7 +127,7 @@ npm run web                # http://localhost:5173
 
 | 명령 | 내용 |
 |---|---|
-| `npm test` | 테스트 (355개) |
+| `npm test` | 테스트 (359개) |
 | `npm run bench` | 속도 측정 — 위 그래프를 여러분 PC에서 |
 | `npm run update` | 추첨 · 추첨기 · 공 나온 순서 수집 후 데이터 생성 |
 | `npm run build:data` | 화면용 데이터 생성 |

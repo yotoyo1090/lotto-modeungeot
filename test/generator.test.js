@@ -161,6 +161,8 @@ test('le parcours rapide et `matches` décrivent le même ensemble', async (t) =
       primeSum: [0, 60], compositeSum: [30, 200], multSums: { 3: [0, 60] },
       headRepeat: [1, 2], tailRepeat: [1, 2], total: [90, 170],
     }],
+    ['일~육', { positions: { 1: [2, 7], 3: { allow: [13, 18, 22] }, 6: [33, 44] } }],
+    ['일~육 + 총합 + 고정수', { positions: { 2: [5, 13], 5: [26, 40] }, total: [100, 160], include: [22] }],
   ]
 
   for (const [name, filters] of suites) {
@@ -193,6 +195,7 @@ test('la comptabilité est exacte : retenues + écartées = espace', async (t) =
       reference: [3, 9, 17, 25, 33, 41, 44], carriedSum: [0, 40], carriedPos: [1, 2, 3],
       primeSum: [0, 30], multSums: { 3: [0, 50] }, headRepeat: [1, 2], tailRepeat: [1, 1],
     }],
+    ['일~육', { positions: { 1: [1, 5], 2: { allow: [7, 9, 11] }, 6: [40, 45] }, total: [100, 150] }],
   ]
   for (const [name, filters] of suites) {
     await t.test(name, () => {
@@ -255,6 +258,16 @@ test('les nouvelles colonnes contre un témoin écrit à la main', () => {
     const got = gen.generate({ ...filters, pool }, { limit: 0 }).kept
     assert.equal(got, expected, JSON.stringify(filters))
   }
+})
+
+test('일~육 sur l\'espace entier : les comptes exacts, à la main', () => {
+  // 일 ≤ 3 : toutes les grilles moins celles tirées dans 4..45 → C(45,6) − C(42,6).
+  // 육 = 45 : le 45, plus cinq des 44 autres → C(44,5).
+  // 삼 = 20 : deux numéros sous 20, trois au-dessus → C(19,2) · C(25,3).
+  const at = (positions) => gen.generate({ positions }, { limit: 0 }).kept
+  assert.equal(at({ 1: [1, 3] }), 8_145_060 - 5_245_786)
+  assert.equal(at({ 6: [45, 45] }), 1_086_008)
+  assert.equal(at({ 3: { allow: [20] } }), 171 * 2_300)
 })
 
 test('les nouvelles colonnes demandent leur tirage de référence', () => {
