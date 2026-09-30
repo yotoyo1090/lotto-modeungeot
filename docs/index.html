@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로또 모든것 — 무료 로또 분석 프로그램 · 8,145,060개 조합 전수 계산</title>
+<meta name="description" content="로또 6/45 · 연금복권 720+ 무료 분석 프로그램. 8,145,060개 조합을 0.24초에 전부 계산하고, 당첨금을 나눌 사람 수(분배)까지 따지는 번호 조합기. 광고 없음, 원클릭 설치, 윈도우용.">
+<meta name="keywords" content="로또 분석 프로그램, 로또 번호 조합기, 로또 번호 생성기, 무료 로또 프로그램, 로또 통계, 로또 조합, 연금복권 720, 연금복권 분석, 로또 필터, 로또 분석기">
+<link rel="canonical" href="https://yotoyo1090.github.io/lotto-modeungeot/">
+<meta name="theme-color" content="#17150F">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:site_name" content="로또 모든것">
+<meta property="og:title" content="로또 모든것 — 8,145,060개 조합, 0.24초에 전부">
+<meta property="og:description" content="무료 로또 6/45 · 연금복권 720+ 분석 프로그램. 전수 계산 · 분배 모델 · 원클릭 설치 · 광고 없음.">
+<meta property="og:url" content="https://yotoyo1090.github.io/lotto-modeungeot/">
+<meta property="og:image" content="https://yotoyo1090.github.io/lotto-modeungeot/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23C9A227'/%3E%3Ctext x='16' y='22' font-size='16' font-weight='700' text-anchor='middle' fill='%2317150F' font-family='Georgia'%3E6%3C/text%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "로또 모든것",
+  "alternateName": "lotto-modeungeot",
+  "description": "로또 6/45 · 연금복권 720+ 무료 분석 프로그램. 8,145,060개 조합 전수 계산, 당첨금 분배 모델, 48개 분석 화면.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Windows 10, Windows 11",
+  "inLanguage": "ko",
+  "softwareVersion": "1.0.0",
+  "downloadUrl": "https://github.com/yotoyo1090/lotto-modeungeot/releases/latest/download/lotto-modeungeot.zip",
+  "url": "https://yotoyo1090.github.io/lotto-modeungeot/",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "정말 무료인가요?", "acceptedAnswer": { "@type": "Answer", "text": "네. 가격, 구독, 광고, 회원가입이 모두 없습니다. 소스 코드도 GitHub에 공개되어 있습니다." } },
+    { "@type": "Question", "name": "이 프로그램을 쓰면 당첨 확률이 올라가나요?", "acceptedAnswer": { "@type": "Answer", "text": "아니요. 어떤 조건도 1등 확률(1/8,145,060)을 바꾸지 못합니다. 대신 당첨됐을 때 1등을 나눠 가질 사람 수가 적은 조합을 고르도록 돕습니다(분배 모델)." } },
+    { "@type": "Question", "name": "설치가 어렵나요?", "acceptedAnswer": { "@type": "Answer", "text": "ZIP을 받아 압축을 풀고 설치하기.bat을 두 번 누르면 끝입니다. Node.js가 없으면 자동으로 설치하고, 끝나면 앱이 바로 열립니다." } },
+    { "@type": "Question", "name": "맥이나 리눅스에서도 되나요?", "acceptedAnswer": { "@type": "Answer", "text": "원클릭 설치는 윈도우용입니다. 맥과 리눅스에서는 Node.js 22.5 이상을 설치한 뒤 GitHub의 개발자용 명령어로 실행할 수 있습니다." } },
+    { "@type": "Question", "name": "새 회차 당첨번호는 어떻게 반영되나요?", "acceptedAnswer": { "@type": "Answer", "text": "앱의 업데이트 탭에서 버튼 하나로 동행복권 공개 결과를 가져옵니다." } }
+  ]
+}
+</script>
+<style>
+:root{
+  --ink:#17150F;--ink2:#221E14;--paper:#FBFAF7;--soft:#CFC8B6;--muted:#8E887A;
+  --gold:#C9A227;--gold-hi:#F3DA86;--gold-deep:#7A5C12;--line:rgba(201,162,39,.35);
+  --sans:'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
+  --serif:Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--gold-hi)}
+img{max-width:100%;height:auto;display:block}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header.top{position:sticky;top:0;z-index:5;background:rgba(23,21,15,.86);backdrop-filter:blur(8px);border-bottom:1px solid rgba(201,162,39,.18)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.brand{font-weight:900;font-size:19px;letter-spacing:-.3px;color:var(--gold-hi);text-decoration:none}
+.nav{display:flex;gap:18px;font-size:14px}
+.nav a{color:var(--soft);text-decoration:none}
+.nav a:hover{color:var(--gold-hi)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;font-weight:800;text-decoration:none;white-space:nowrap}
+.btn-gold{background:linear-gradient(180deg,#F3DA86,#C9A227 55%,#A8801E);color:var(--ink);padding:16px 30px;font-size:19px;box-shadow:0 10px 28px rgba(201,162,39,.28)}
+.btn-gold:hover{filter:brightness(1.06)}
+.btn-sm{padding:8px 16px;font-size:14px}
+.btn-line{border:1px solid var(--line);color:var(--gold-hi);padding:15px 26px;font-size:16px}
+.hero{padding:44px 0 26px;text-align:center}
+.hero img{margin:0 auto;border-radius:22px}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 10px}
+.fine{color:var(--muted);font-size:14px;text-align:center}
+section{padding:64px 0;border-top:1px solid rgba(201,162,39,.12)}
+h2{font-size:clamp(26px,4vw,36px);line-height:1.3;margin:0 0 10px;font-weight:900;letter-spacing:-.5px}
+h2 em{font-style:normal;color:var(--gold-hi)}
+.lead{color:var(--soft);font-size:17px;margin:0 0 30px;max-width:760px}
+.eyebrow{color:var(--gold);font-weight:800;font-size:13px;letter-spacing:3px;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:rgba(251,250,247,.04);border:1px solid rgba(201,162,39,.25);border-radius:16px;padding:22px}
+.card h3{margin:6px 0 6px;font-size:18px}
+.card p{margin:0;color:var(--soft);font-size:15px}
+.card .n{font-family:var(--serif);font-size:34px;font-weight:700;color:var(--gold-hi);line-height:1.1}
+.fig{border-radius:18px;overflow:hidden}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:18px}
+.shot{background:var(--paper);border-radius:14px;overflow:hidden;border:1px solid rgba(201,162,39,.3)}
+.shot figcaption{background:var(--ink2);color:var(--soft);font-size:14px;padding:10px 14px}
+.shot figcaption b{color:var(--paper)}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:14px}
+ol.steps li{counter-increment:s;position:relative;padding:18px 20px 18px 74px;background:rgba(251,250,247,.04);border:1px solid rgba(201,162,39,.25);border-radius:16px;color:var(--soft)}
+ol.steps li b{color:var(--paper)}
+ol.steps li::before{content:counter(s);position:absolute;left:20px;top:16px;width:38px;height:38px;border-radius:50%;background:var(--gold);color:var(--ink);font:700 20px/38px var(--serif);text-align:center}
+.note{margin-top:16px;color:var(--muted);font-size:14px}
+details{background:rgba(251,250,247,.04);border:1px solid rgba(201,162,39,.2);border-radius:14px;padding:16px 20px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:700;font-size:16px}
+details p{color:var(--soft);margin:10px 0 0}
+.promise{background:linear-gradient(135deg,rgba(201,162,39,.14),rgba(201,162,39,.03));border:1px solid var(--line);border-radius:20px;padding:30px}
+.promise p{color:var(--soft);margin:10px 0 0}
+footer{padding:40px 0 60px;border-top:1px solid rgba(201,162,39,.12);color:var(--muted);font-size:14px;text-align:center}
+footer b{color:var(--soft)}
+@media (max-width:640px){.nav{display:none}.btn-gold{font-size:17px;padding:14px 22px}section{padding:48px 0}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">로또 모든것</a>
+    <nav class="nav" aria-label="목차">
+      <a href="#why">특징</a><a href="#speed">속도</a><a href="#share">분배</a><a href="#screens">화면</a><a href="#install">설치</a><a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-gold btn-sm" href="https://github.com/yotoyo1090/lotto-modeungeot/releases/latest/download/lotto-modeungeot.zip">⬇ 무료 다운로드</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <img src="img/hero.svg" alt="로또 모든것 — 8,145,060개 조합, 0.24초에 전부." width="1200" height="520">
+    <h1 style="font-size:clamp(20px,3vw,26px);margin:26px 0 0;font-weight:800;color:var(--soft)">무료 <span style="color:var(--gold-hi)">로또 분석 프로그램</span> — 로또 6/45 · 연금복권 720+ 번호 조합기</h1>
+    <div class="cta">
+      <a class="btn btn-gold" href="https://github.com/yotoyo1090/lotto-modeungeot/releases/latest/download/lotto-modeungeot.zip">⬇ 무료 다운로드 <span style="font-weight:600;font-size:14px;opacity:.75">Windows</span></a>
+      <a class="btn btn-line" href="https://github.com/yotoyo1090/lotto-modeungeot">GitHub에서 보기</a>
+    </div>
+    <p class="fine">압축 풀고 <b style="color:var(--soft)">설치하기.bat</b> 두 번 클릭 · 광고 없음 · 회원가입 없음 · 구독 없음</p>
+  </div>
+
+  <section id="why">
+    <div class="wrap">
+      <div class="eyebrow">WHY</div>
+      <h2>번호를 <em>파는</em> 곳과, <em>전부 계산해 보여 주는</em> 도구</h2>
+      <p class="lead">「추천 번호」 뒤에 무엇이 있는지 보여 주지 않는 서비스 대신, 모든 조합을 직접 계산하고 그 근거까지 화면에 적어 두었습니다.</p>
+      <div class="grid">
+        <div class="card"><div class="n">0.24초</div><h3>8,145,060개 전수 계산</h3><p>샘플링 없이 로또의 모든 조합을 훑습니다. 조건 10개를 동시에 걸어도 0.45초.</p></div>
+        <div class="card"><div class="n">분배</div><h3>나눠 가질 사람 수</h3><p>1,238회 실제 1등 당첨자 데이터로 만든 모델. 남들이 덜 고르는 조합을 골라냅니다.</p></div>
+        <div class="card"><div class="n">15가지</div><h3>조건 · 결과 필터</h3><p>총합, AC값, 홀짝, 저고, 구간, 배수, 이월, 고정수, 제외수… 전체 조합에 즉시 적용.</p></div>
+        <div class="card"><div class="n">720+</div><h3>연금복권까지</h3><p>5,000,000장 전부를 0.06초에. 자리별 숫자, 반복 숫자, 전회차 대비.</p></div>
+        <div class="card"><div class="n">48</div><h3>분석 화면 · 보고서</h3><p>흐름·차뜨, 당첨 위치, 친구·중복, 추첨기별, 공 나온 순서, 용지 마킹, CUSUM 감시.</p></div>
+        <div class="card"><div class="n">0원</div><h3>내 PC에서, 무료로</h3><p>분석은 인터넷 없이 내 컴퓨터 안에서. 계정도, 수집되는 개인정보도 없습니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="speed">
+    <div class="wrap">
+      <div class="eyebrow">BENCHMARK</div>
+      <h2>눈 깜빡하는 사이, <em>전부</em> 계산합니다</h2>
+      <p class="lead">실측값입니다. 프로그램에 들어 있는 <code>npm run bench</code> 로 여러분의 PC에서 직접 확인할 수 있습니다.</p>
+      <img class="fig" src="img/speed.svg" alt="속도 벤치마크: 로또 8,145,060개 전체 240ms, 10가지 조건 449ms, 연금 1,000,000개 58ms" width="1200" height="706" loading="lazy">
+    </div>
+  </section>
+
+  <section id="share">
+    <div class="wrap">
+      <div class="eyebrow">분배 모델</div>
+      <h2>확률은 못 바꿉니다. <em>나눠 가질 사람 수</em>는 고를 수 있습니다.</h2>
+      <p class="lead">로또 1등은 정해진 금액이 아니라 당첨자끼리 나누는 몫입니다. 생일 숫자, 붙은 번호, 좁은 간격처럼 사람들이 즐겨 고르는 모양이 나오면 몫이 잘게 쪼개집니다.</p>
+      <img class="fig" src="img/sharing.svg" alt="분배 모델 사후 검증: 적게 팔린다 예측 0.97, 많이 팔린다 예측 1.36" width="1200" height="600" loading="lazy">
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <div class="eyebrow">COMPARE</div>
+      <h2>무엇이 <em>다른가</em></h2>
+      <p class="lead">특정 서비스가 아니라 흔히 볼 수 있는 유형과 비교했습니다.</p>
+      <img class="fig" src="img/compare.svg" alt="유료 번호 추천, 광고형 무료 앱, 엑셀과 로또 모든것 비교표" width="1200" height="750" loading="lazy">
+    </div>
+  </section>
+
+  <section id="screens">
+    <div class="wrap">
+      <div class="eyebrow">SCREENS</div>
+      <h2>실제 <em>화면</em></h2>
+      <figure class="shot" style="margin:18px 0 0"><img src="img/shot-auto.png" alt="자동조합 화면 — 분배 적게 팔린으로 953,540개" loading="lazy"><figcaption><b>자동조합</b> — 「적게 팔린」 한 번에 8,145,060 → 953,540개, 285 ms</figcaption></figure>
+      <div class="shots">
+        <figure class="shot" style="margin:0"><img src="img/shot-slip.png" alt="용지 마킹 화면" loading="lazy"><figcaption><b>용지 마킹</b> — 당첨번호가 용지 위에 그리는 모양</figcaption></figure>
+        <figure class="shot" style="margin:0"><img src="img/shot-hotcold.png" alt="차가운 뜨거운 번호 화면" loading="lazy"><figcaption><b>차가운 · 뜨거운 번호</b> — 45개 번호의 온도 흐름</figcaption></figure>
+        <figure class="shot" style="margin:0"><img src="img/shot-places.png" alt="당첨 위치 화면" loading="lazy"><figcaption><b>당첨 위치</b> — 자리마다 어떤 번호가 오는가</figcaption></figure>
+        <figure class="shot" style="margin:0"><img src="img/shot-watch.png" alt="감시 화면" loading="lazy"><figcaption><b>감시</b> — CUSUM 226개로 추첨기를 매주 점검</figcaption></figure>
+      </div>
+      <img class="fig" style="margin-top:22px" src="img/features.svg" alt="화면 지도: 로또 분석 17, 조합 4, 연금복권 8, 팁·검정 8, R&amp;D 보고서 8" width="1200" height="984" loading="lazy">
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <div class="eyebrow">INSTALL</div>
+      <h2><em>원클릭</em> 설치 — 필요한 것 : 없음</h2>
+      <p class="lead">프로그램을 따로 설치할 필요가 없습니다. 인터넷 연결만 있으면 설치 파일이 전부 알아서 합니다.</p>
+      <ol class="steps">
+        <li><b>다운로드</b> — <a href="https://github.com/yotoyo1090/lotto-modeungeot/releases/latest/download/lotto-modeungeot.zip">lotto-modeungeot.zip</a> (약 1.5MB)</li>
+        <li><b>압축 풀기</b> — ZIP 파일 우클릭 → 압축 풀기</li>
+        <li><b>설치하기.bat 두 번 클릭</b> — Node.js가 없으면 자동 설치(처음 한 번, 1~3분), 패키지 · 데이터 · 바탕화면 아이콘까지 만든 뒤 앱이 바로 열립니다.</li>
+      </ol>
+      <p class="note">처음 한 번 Windows 보안 경고가 뜨면 「실행」(또는 「추가 정보 → 실행」)을 누르세요. 인터넷에서 받은 설치 파일에 붙는 기본 경고입니다.</p>
+      <div class="cta" style="justify-content:flex-start"><a class="btn btn-gold" href="https://github.com/yotoyo1090/lotto-modeungeot/releases/latest/download/lotto-modeungeot.zip">⬇ 무료 다운로드</a></div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="eyebrow">FAQ</div>
+      <h2>자주 묻는 <em>질문</em></h2>
+      <details open><summary>정말 무료인가요?</summary><p>네. 가격, 구독, 광고, 회원가입이 모두 없습니다. 소스 코드도 GitHub에 공개되어 있습니다.</p></details>
+      <details><summary>이 프로그램을 쓰면 당첨 확률이 올라가나요?</summary><p>아니요. 어떤 조건도 1등 확률(1/8,145,060)을 바꾸지 못합니다. 대신 당첨됐을 때 1등을 나눠 가질 사람 수가 적은 조합을 고르도록 돕습니다 — 그것이 「분배 모델」입니다.</p></details>
+      <details><summary>설치가 어렵나요?</summary><p>ZIP을 받아 압축을 풀고 설치하기.bat을 두 번 누르면 끝입니다. Node.js가 없으면 자동으로 설치하고, 끝나면 앱이 바로 열립니다.</p></details>
+      <details><summary>맥이나 리눅스에서도 되나요?</summary><p>원클릭 설치는 윈도우용입니다. 맥과 리눅스에서는 Node.js 22.5 이상을 설치한 뒤 <a href="https://github.com/yotoyo1090/lotto-modeungeot#readme">GitHub의 개발자용 명령어</a>로 실행할 수 있습니다.</p></details>
+      <details><summary>새 회차 당첨번호는 어떻게 반영되나요?</summary><p>앱의 「업데이트」 탭에서 버튼 하나로 동행복권 공개 결과를 가져옵니다.</p></details>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="promise">
+        <h2 style="font-size:26px">우리의 약속 — <em>과장하지 않습니다</em></h2>
+        <p>「당첨 보장」, 「적중률 ○○%」 같은 문구는 없습니다. 화면마다 그 숫자가 무엇을 뜻하는지, 그리고 아무것도 뜻하지 않을 때는 그렇다고 적어 두었습니다. 흔히 도는 규칙들은 과거 전체 데이터로 직접 검정해서 보여 줍니다.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>로또 모든것</b> · <a href="https://github.com/yotoyo1090/lotto-modeungeot">GitHub</a> · 데이터 : <a href="https://www.dhlottery.co.kr">동행복권</a> 공개 결과</p>
+    <p>복권은 즐거움으로, 여유 자금 안에서. 도박 문제로 어려움이 있다면 한국도박문제예방치유원 <b>☎ 1336</b> (24시간 무료 상담).</p>
+  </div>
+</footer>
+</body>
+</html>
