@@ -3,14 +3,15 @@
 </p>
 
 <p align="center">
-  <img alt="무료" src="https://img.shields.io/badge/가격-무료-C9A227?style=for-the-badge">
+  <img alt="개인 무료" src="https://img.shields.io/badge/개인-무료-C9A227?style=for-the-badge">
+  <img alt="라이선스" src="https://img.shields.io/badge/라이선스-PolyForm_Noncommercial-4A6D8C?style=for-the-badge">
   <img alt="조합 전수 계산" src="https://img.shields.io/badge/조합-8,145,060개_전수-17150F?style=for-the-badge">
   <img alt="테스트" src="https://img.shields.io/badge/테스트-359개_통과-4A6D8C?style=for-the-badge">
   <img alt="Node" src="https://img.shields.io/badge/Node.js-22.5+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
   <img alt="Svelte" src="https://img.shields.io/badge/Svelte-5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white">
 </p>
 
-<h3 align="center">번호를 <em>파는</em> 사이트는 많습니다.<br>8,145,060개를 <strong>전부 계산해서, 그 근거까지 보여 주는</strong> 무료 도구 — <b>로또 모든것</b>.</h3>
+<h3 align="center">번호를 <em>파는</em> 사이트는 많습니다.<br>8,145,060개를 <strong>전부 계산해서, 그 근거까지 보여 주는</strong> 개인 무료 도구 — <b>로또 모든것</b>.</h3>
 
 <p align="center">
   로또 6/45 · 연금복권 720+ · 1회부터 최신 회차까지 · 설치 한 번 · 광고 0 · 구독 0 · 서버 0
@@ -171,6 +172,22 @@ MCP 클라이언트 설정에 추가하면, AI가 로또 모든것의 계산 엔
 | `test` | 테스트 |
 
 </details>
+
+---
+
+## 📜 라이선스 — 개인은 무료, 기업은 유료
+
+로또 모든것은 **[PolyForm Noncommercial License 1.0.0](LICENSE)** 으로 배포됩니다.
+
+| 누가 | 조건 |
+|---|---|
+| 👤 **개인** — 내 번호 고르기, 공부, 취미, 연구 | **무료** — 내려받고, 쓰고, 고치고, 나눠도 됩니다 |
+| 🏫 **비영리** — 비영리 단체 · 학교 · 공공 연구기관 · 공공기관 | **무료** |
+| 🏢 **기업 · 상업적 사용** — 회사 업무, 유료 서비스 · 앱 · 사이트에 넣기, 판매 · 재배포로 수익 내기 | **유료 라이선스 필요** |
+
+상업용 라이선스 문의 : **dooga1090@gmail.com** — 회사 이름과 쓰려는 방식을 적어 보내 주세요.
+
+> 배포할 때는 이 라이선스 전문(또는 링크)과 `LICENSE` 맨 위의 `Required Notice:` 줄을 함께 전해야 합니다. 법적 효력은 영어 원문(`LICENSE`)에 있습니다.
 
 ---
 

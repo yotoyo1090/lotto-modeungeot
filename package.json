@@ -21,5 +21,6 @@
     "web:build": "npm --prefix web run build",
     "web:preview": "npm --prefix web run preview",
     "admin": "node --experimental-sqlite tools/admin.js"
-  }
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
 }
