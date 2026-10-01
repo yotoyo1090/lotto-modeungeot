@@ -25,7 +25,7 @@
   import { auto as store, grids as gridStore } from '../lib/store.js'
   import {
     activeConds, ENGINE_KEYS, ENGINE_MAX, engineOptions,
-    FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, shuffleGrids, wonCounts,
+    FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, rankCounts, shuffleGrids,
   } from '../lib/pick.js'
   import { untrack } from 'svelte'
   import { describeRow } from '@core/row.js'
@@ -36,6 +36,8 @@
   import RowFilter from '../components/RowFilter.svelte'
   import CheckSet from '../components/CheckSet.svelte'
   import ComboTable from '../components/ComboTable.svelte'
+  import WinSpectrum from '../components/WinSpectrum.svelte'
+  import { prizes } from '../lib/data.js'
   import NumberCheck from '../components/NumberCheck.svelte'
   import PatternBoard from '../components/PatternBoard.svelte'
   import TempBoard from '../components/TempBoard.svelte'
@@ -565,7 +567,13 @@
     })
     : [])
   // Combien de grilles de la liste ont fait 0 … 6 — le 회차 passé seulement.
-  const wonTally = $derived(result?.next ? wonCounts(result.grids, order, result.next) : null)
+  // 당첨 스펙트럼 : le vrai rang de chaque grille de la liste (회차 passé seulement).
+  const ranks = $derived(result?.next ? rankCounts(result.grids, order, result.next) : null)
+  // Les gains par 회차 : chargés une fois, à la première liste d'un 회차 passé.
+  let prizeTable = $state(null)
+  $effect(() => {
+    if (ranks && prizeTable === null) prizes().then((p) => { prizeTable = p }).catch(() => {})
+  })
   // `filtering` : un filtre qui ne porte que sur les grilles tirées.
   const filtering = $derived(rest.length > 0)
 
@@ -949,6 +957,11 @@
       </div>
     </div>
 
+    {#if ranks}
+      <WinSpectrum counts={ranks} total={order.length} sampled={result.kept > drawn}
+                   prize={prizeTable?.[result.at] ?? null} rang={num(result.at)} />
+    {/if}
+
     {#if result.rejected.length}
       <p class="note dim">
         걸러진 이유 —
@@ -960,17 +973,6 @@
                local={result.previous ? [] : NEEDS_PREVIOUS} />
     {#if result.impossible}
       <p class="notice tight">결과 필터의 「{result.impossible}」 조건이 위쪽 조건과 겹치지 않아, 통과하는 조합이 없습니다.</p>
-    {/if}
-
-    {#if wonTally}
-      <!-- Le 회차 choisi est passé : combien de grilles de la liste ont fait
-           0, 1, … 6 de ses sept numéros. -->
-      <p class="wontally">
-        <b>당첨 개수별</b> ({fmt(result.at)} · 보너스 포함 7개 기준)
-        {#each wonTally as c, k (k)}
-          <span class:hit={k >= 3 && c > 0}>{k}개 <strong>{num(c)}</strong></span>
-        {/each}
-      </p>
     {/if}
 
     {#if drawn === 0}
@@ -1057,10 +1059,6 @@
 
 <style>
   .more { margin: 0.6rem 0 0; padding: 0.3rem 1rem; font-size: 0.8125rem; }
-  .wontally { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; align-items: baseline; font-size: 0.8125rem; margin: 0 0 0.7rem; }
-  .wontally span { color: var(--muted); }
-  .wontally span strong { color: var(--ink); font-family: var(--figure); }
-  .wontally span.hit strong { color: var(--gold-deep); }
   .bar {
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 0.75rem;
