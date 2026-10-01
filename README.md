@@ -194,7 +194,6 @@ MCP 클라이언트 설정에 추가하면, AI가 로또 모든것의 계산 엔
 ## 📚 데이터 출처
 
 - 당첨번호 · 당첨금 · 당첨자 수 : [동행복권](https://www.dhlottery.co.kr) 공개 결과
-- 추첨기 · 공 나온 순서 : [lottotapa.com](https://lottotapa.com) 공개 통계
 
 ---
 
