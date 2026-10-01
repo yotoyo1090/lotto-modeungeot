@@ -356,38 +356,7 @@ export function pickIndices(grids, n, {
   return idx
 }
 
-// ── 당첨 스펙트럼 ─────────────────────────────────────────────────────────
-//
-// Le vrai rang d'une grille face à un tirage : six numéros et le 보너스.
-//   1등 6 bons · 2등 5 bons + 보너스 · 3등 5 bons · 4등 4 · 5등 3 · sinon 낙첨 (0).
-
-/**
- * Sur les 8 145 060 grilles, combien tombent dans chaque rang — la loi du
- * hasard : C(6,6) · C(6,5) · C(6,5)·C(38,1) · C(6,4)·C(39,2) · C(6,3)·C(39,3).
- */
-export const RANK_WAYS = [0, 1, 6, 228, 11_115, 182_780]
-
-/** Le rang d'une grille (six numéros) face à `next` (six numéros + 보너스). */
-export function rankOf(nums, next) {
-  let hit = 0
-  for (let k = 0; k < 6; k++) if (nums.includes(next[k])) hit++
-  if (hit === 6) return 1
-  if (hit === 5) return nums.includes(next[6]) ? 2 : 3
-  if (hit === 4) return 4
-  if (hit === 3) return 5
-  return 0
-}
-
-/**
- * Combien de grilles de la liste dans chaque rang : `[낙첨, 1등, 2등, 3등,
- * 4등, 5등]`. Rend null si le 회차 n'est pas encore tiré.
- */
-export function rankCounts(grids, idx, next) {
-  if (!next) return null
-  const out = [0, 0, 0, 0, 0, 0]
-  for (const i of idx) out[rankOf(gridAt(grids, i), next)]++
-  return out
-}
+// ── 당첨 띠 ──────────────────────────────────────────────────────────────
 
 /**
  * Le spectre : pour chaque grille de la liste, dans l'ordre de `idx`, combien
