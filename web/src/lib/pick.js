@@ -389,6 +389,23 @@ export function rankCounts(grids, idx, next) {
   return out
 }
 
+/**
+ * Le spectre : pour chaque grille de la liste, dans l'ordre de `idx`, combien
+ * de ses six numéros sont parmi les 7 du 회차 (보너스 compris) — 0 … 6, comme
+ * la colonne 「당첨」. Rend null si le 회차 n'est pas encore tiré.
+ */
+export function hitsOf(grids, idx, next) {
+  if (!next) return null
+  const isWin = new Uint8Array(46)
+  for (const v of next) isWin[v] = 1
+  const out = new Uint8Array(idx.length)
+  for (let k = 0; k < idx.length; k++) {
+    const o = idx[k] * 6
+    out[k] = isWin[grids[o]] + isWin[grids[o + 1]] + isWin[grids[o + 2]] + isWin[grids[o + 3]] + isWin[grids[o + 4]] + isWin[grids[o + 5]]
+  }
+  return out
+}
+
 /** Le nombre tapé, ramené entre 1 et `max` ; `DEFAULT_COUNT` s'il est illisible. */
 export function clampCount(value, max) {
   const n = Math.floor(Number(value))

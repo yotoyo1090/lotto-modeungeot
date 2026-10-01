@@ -25,7 +25,7 @@
   import { auto as store, grids as gridStore } from '../lib/store.js'
   import {
     activeConds, ENGINE_KEYS, ENGINE_MAX, engineOptions,
-    FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, rankCounts, shuffleGrids,
+    FILTER_KEYS, gridAt, mergeConds, NEEDS_PREVIOUS, PAGE, pickIndices, rankCounts, hitsOf, shuffleGrids,
   } from '../lib/pick.js'
   import { untrack } from 'svelte'
   import { describeRow } from '@core/row.js'
@@ -37,6 +37,7 @@
   import CheckSet from '../components/CheckSet.svelte'
   import ComboTable from '../components/ComboTable.svelte'
   import WinSpectrum from '../components/WinSpectrum.svelte'
+  import WinStrip from '../components/WinStrip.svelte'
   import { prizes } from '../lib/data.js'
   import NumberCheck from '../components/NumberCheck.svelte'
   import PatternBoard from '../components/PatternBoard.svelte'
@@ -566,9 +567,10 @@
       sortKey, dir: sortDir, previous: result.previous, next: result.next,
     })
     : [])
-  // Combien de grilles de la liste ont fait 0 … 6 — le 회차 passé seulement.
+  // 당첨 띠 : 0 … 6 numéros (보너스 compris) par grille, dans l'ordre de la liste.
   // 당첨 스펙트럼 : le vrai rang de chaque grille de la liste (회차 passé seulement).
   const ranks = $derived(result?.next ? rankCounts(result.grids, order, result.next) : null)
+  const hits = $derived(result?.next ? hitsOf(result.grids, order, result.next) : null)
   // Les gains par 회차 : chargés une fois, à la première liste d'un 회차 passé.
   let prizeTable = $state(null)
   $effect(() => {
@@ -958,6 +960,8 @@
     </div>
 
     {#if ranks}
+      <WinStrip {hits} next={result.next}
+                gridOf={(k) => gridAt(result.grids, order[k])} rang={num(result.at)} />
       <WinSpectrum counts={ranks} total={order.length} sampled={result.kept > drawn}
                    prize={prizeTable?.[result.at] ?? null} rang={num(result.at)} />
     {/if}
