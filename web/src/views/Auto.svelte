@@ -331,7 +331,9 @@
   // enregistrée — ce qu'il n'écrit pas retombe à vide.
   let benchLoaded = $state(false)
   function loadBench() {
-    reopen({ name: '검정 설정 (각 80%)', rang: null, form: BENCH.all['0.8'].form })
+    // `rang` : le 회차 choisi reste celui de l'écran — le bouton ne change
+    // que les cases, pas le 회차 (sinon `reopen` repasse au 다음 회차).
+    reopen({ name: '검정 설정 (각 80%)', rang, form: BENCH.all['0.8'].form })
     benchLoaded = true
   }
 
